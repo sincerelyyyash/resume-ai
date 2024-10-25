@@ -2,18 +2,22 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface Project extends Document {
-  title: string;
-  description: string;
+  name: string;
   technologies: string[];
-  link?: string;
+  url: string;
+  startDate: Date;
+  endDate: Date;
+  achievements: string[];
 }
 
 const ProjectSchema = new Schema<Project>({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  technologies: [{ type: String }],
-  link: { type: String },
+  name: { type: String, required: true },
+  technologies: { type: [String], required: true },
+  url: { type: String, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  achievements: { type: [String], required: true },
 });
 
-export { ProjectSchema };
 export default mongoose.model<Project>('Project', ProjectSchema);
+export { ProjectSchema };
