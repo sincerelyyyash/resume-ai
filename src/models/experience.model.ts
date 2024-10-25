@@ -7,6 +7,7 @@ export interface Experience extends Document {
   startDate: Date;
   endDate?: Date;
   description: string;
+  location: string;
 }
 
 const ExperienceSchema = new Schema<Experience>({
@@ -15,6 +16,7 @@ const ExperienceSchema = new Schema<Experience>({
   startDate: { type: Date, required: true },
   endDate: { type: Date },
   description: { type: String, required: true },
+  location: { type: String, required: true },
 });
 
 export { ExperienceSchema };
