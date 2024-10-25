@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# **Resume-AI**  
+**Tailor-made Resumes based on Job Descriptions**
 
-## Getting Started
+**Resume-AI** is a smart resume builder that customizes resumes to align with specific job descriptions (JDs). Users can upload their professional details (projects, work experience, profiles, etc.), and with each job description, the system leverages AI to parse the requirements and adapt the user’s resume content accordingly. Once completed, resumes can be downloaded or stored online for easy access.
 
-First, run the development server:
+## **Features**
+- **Tailored Resumes**: Enter a job description, and Resume-AI generates a resume optimized to fit the specific requirements.
+- **Professional Details Storage**: Users can add all professional details, including projects, work experiences, and roles.
+- **Online Resume Storage**: All generated resumes are stored securely, accessible anytime.
+- **One-Click Download**: Download updated resumes after customization for immediate use.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## **Tech Stack**
+- **Frontend**: [Next.js](https://nextjs.org/), [TypeScript](https://www.typescriptlang.org/)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/) for secure user authentication
+- **Database**: [MongoDB](https://www.mongodb.com/) for storing user information and resume data
+- **API Integration**: [Gemini API](https://gemini.com/) for parsing job descriptions and managing AI capabilities
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## **Getting Started**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **Prerequisites**
+- [Node.js](https://nodejs.org/) (v14 or higher)
+- [MongoDB](https://www.mongodb.com/)
+- Gemini API Key (required for job description parsing)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **Installation**
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/username/Resume-AI.git
+   cd Resume-AI
+   ```
 
-## Learn More
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Configure Environment Variables**
+   Create a `.env.local` file in the project root and add the following keys:
+   ```plaintext
+   NEXT_PUBLIC_MONGODB_URI=<your_mongodb_uri>
+   NEXT_PUBLIC_GEMINI_API_KEY=<your_gemini_api_key>
+   NEXTAUTH_SECRET=<your_secret>
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Run the Application**
+   ```bash
+   npm run dev
+   ```
+   The app should now be running on `http://localhost:3000`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### **Project Structure**
+- **pages/**: Contains all Next.js pages for user interaction, including profile setup, resume creation, and job description upload.
+- **components/**: UI components used across the app, such as forms, modals, and resume sections.
+- **lib/**: Helper functions for MongoDB and Gemini API integrations.
+- **utils/**: Utility functions for parsing job descriptions and managing resume customization logic.
 
-## Deploy on Vercel
+### **Key Functionalities**
+1. **User Authentication**: Handled through NextAuth, allowing users to securely manage their profiles and stored resumes.
+2. **Job Description Parsing**: Uses the Gemini API to parse user-uploaded job descriptions and customize resume content accordingly.
+3. **Data Storage**: MongoDB stores user details, resumes, and customized data for quick retrieval and updating.
+4. **Resume Download**: After customization, users can download their resumes in PDF format.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## **Usage**
+1. **Create an Account / Sign In**  
+   Authenticate via NextAuth to create and access your profile securely.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. **Upload Professional Details**  
+   Fill in your project experiences, past roles, and other career details.
+
+3. **Upload a Job Description**  
+   Input the JD to have Resume-AI parse and generate a new, customized resume.
+
+4. **Download Your Customized Resume**  
+   Once generated, the resume can be downloaded in PDF format or saved for future use.
+
+## **Contributing**
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a new branch (`feature/your-feature`)
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## **License**
+This project is licensed under the MIT License. See the `LICENSE` file for more information.
+
+---
+
+With **Resume-AI**, ensure your resume always aligns perfectly with the role you’re targeting, all while saving time and effort!
