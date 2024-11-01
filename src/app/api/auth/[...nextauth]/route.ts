@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import dbConnect from '@/lib/mongoDbConnect';
 import User, { UserDocument } from '@/models/user.model';
+import { NextApiHandler } from 'next';
 
 declare module 'next-auth' {
   interface Session {
@@ -94,5 +95,6 @@ const authOptions: AuthOptions = {
   },
 };
 
-export default NextAuth(authOptions);
+const handler: NextApiHandler = NextAuth(authOptions);
 
+export { handler as GET, handler as POST };
