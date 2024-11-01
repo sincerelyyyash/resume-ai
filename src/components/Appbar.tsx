@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { ModeToggle } from "./ui/theme-toggle";
 import { Button } from "./ui/button";
+import { UserMenu } from "./ProfileDropdown";
 
 const Appbar = () => {
   const { data: session } = useSession();
@@ -29,12 +30,7 @@ const Appbar = () => {
             Sign Out
           </Button>
         ) : (
-          <Button
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="px-4 py-2 text-white bg-black dark:bg-white dark:text-black rounded hover:bg-red-700 transition"
-          >
-            Sign In
-          </Button>
+          <UserMenu />
         )}
       </div>
     </nav>
