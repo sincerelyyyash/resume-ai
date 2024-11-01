@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document, Types, Model } from 'mongoose';
 import { Project, ProjectSchema } from './project.model';
 import { Experience, ExperienceSchema } from './experience.model';
 import { Resume, ResumeSchema } from './resume.model';
@@ -40,5 +40,7 @@ const UserSchema = new Schema<UserDocument>({
   education: [EducationSchema],
 });
 
-export default mongoose.model<UserDocument>('User', UserSchema);
+const UserModel: Model<UserDocument> = mongoose.models.User || mongoose.model<UserDocument>('User', UserSchema);
+
+export default UserModel;
 

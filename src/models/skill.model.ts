@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 enum SkillLevel {
   Beginner = 'Beginner',
@@ -22,7 +22,8 @@ const SkillSchema = new Schema<Skill>({
   yearsOfExperience: { type: Number },
 });
 
-export { SkillSchema, SkillLevel };
-export default mongoose.model<Skill>('Skill', SkillSchema);
+const SkillModel: Model<Skill> = mongoose.models.Skill || mongoose.model<Skill>('Skill', SkillSchema);
 
+export { SkillSchema, SkillLevel };
+export default SkillModel;
 

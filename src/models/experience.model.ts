@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface Experience extends Document {
   jobTitle: string;
@@ -19,5 +19,8 @@ const ExperienceSchema = new Schema<Experience>({
   location: { type: String, required: true },
 });
 
+const ExperienceModel: Model<Experience> = mongoose.models.Experience || mongoose.model<Experience>('Experience', ExperienceSchema);
+
+export default ExperienceModel;
 export { ExperienceSchema };
-export default mongoose.model<Experience>('Experience', ExperienceSchema);
+

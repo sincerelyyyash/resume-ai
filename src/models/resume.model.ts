@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface Resume extends Document {
   jobDescriptionId: string;
@@ -13,5 +13,8 @@ const ResumeSchema = new Schema<Resume>({
   createdAt: { type: Date, default: Date.now },
 });
 
+const ResumeModel: Model<Resume> = mongoose.models.Resume || mongoose.model<Resume>('Resume', ResumeSchema);
+
+export default ResumeModel;
 export { ResumeSchema };
-export default mongoose.model<Resume>('Resume', ResumeSchema);
+

@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface Education extends Document {
   institution: string;
@@ -15,5 +15,8 @@ const EducationSchema = new Schema<Education>({
   endDate: { type: Date, required: true },
 });
 
-export default mongoose.model<Education>('Education', EducationSchema);
+const EducationModel: Model<Education> = mongoose.models.Education || mongoose.model<Education>('Education', EducationSchema);
+
+export default EducationModel;
 export { EducationSchema };
+

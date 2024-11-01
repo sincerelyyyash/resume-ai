@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface Project extends Document {
   name: string;
@@ -19,5 +19,8 @@ const ProjectSchema = new Schema<Project>({
   achievements: { type: [String], required: true },
 });
 
-export default mongoose.model<Project>('Project', ProjectSchema);
+const ProjectModel: Model<Project> = mongoose.models.Project || mongoose.model<Project>('Project', ProjectSchema);
+
+export default ProjectModel;
 export { ProjectSchema };
+

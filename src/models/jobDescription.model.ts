@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface JobDescription extends Document {
   title: string;
@@ -15,5 +15,8 @@ const JobDescriptionSchema = new Schema<JobDescription>({
   dateUploaded: { type: Date, default: Date.now },
 });
 
+const JobDescriptionModel: Model<JobDescription> = mongoose.models.JobDescription || mongoose.model<JobDescription>('JobDescription', JobDescriptionSchema);
+
+export default JobDescriptionModel;
 export { JobDescriptionSchema };
-export default mongoose.model<JobDescription>('JobDescription', JobDescriptionSchema);
+
