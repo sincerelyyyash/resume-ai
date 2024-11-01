@@ -1,14 +1,11 @@
 "use client";
 
 import React from "react";
-import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { ModeToggle } from "./ui/theme-toggle";
-import { Button } from "./ui/button";
 import { UserMenu } from "./ProfileDropdown";
 
 const Appbar = () => {
-  const { data: session } = useSession();
 
   return (
     <nav className="flex justify-between items-center p-4 bg-white dark:bg-zinc-900 sticky">
@@ -22,16 +19,7 @@ const Appbar = () => {
       </Link>
       <div className="flex space-x-4 items-center">
         <ModeToggle />
-        {session ? (
-          <Button
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="px-4 py-2 text-white bg-black dark:bg-white dark:text-black rounded hover:bg-red-700 transition"
-          >
-            Sign Out
-          </Button>
-        ) : (
-          <UserMenu />
-        )}
+        <UserMenu />
       </div>
     </nav>
   );

@@ -27,7 +27,7 @@ export function UserMenu() {
               <span className="sr-only">User Menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="flex flex-col">
+          <DropdownMenuContent align="end" className="flex flex-col items-center">
             <DropdownMenuItem onClick={() => router.push("/")}>
               Home
             </DropdownMenuItem>

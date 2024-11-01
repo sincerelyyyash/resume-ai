@@ -40,7 +40,7 @@ export function SignInForm() {
     if (result?.error) {
       setError(result.error);
     } else {
-      router.push("/dashboard");
+      router.push("/");
     }
 
     setLoading(false);
