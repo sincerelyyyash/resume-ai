@@ -18,16 +18,16 @@ export function UserMenu() {
   const router = useRouter();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <User className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">User Menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className=" flex flex-col items-center">
-        {session ? (
-          <>
+    <div className="flex items-center space-x-4">
+      {session ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <User className="h-5 w-5" />
+              <span className="sr-only">User Menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="flex flex-col">
             <DropdownMenuItem onClick={() => router.push("/")}>
               Home
             </DropdownMenuItem>
@@ -37,18 +37,17 @@ export function UserMenu() {
             <DropdownMenuItem onClick={() => signOut()}>
               Logout
             </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem onClick={() => router.push("/signin")}>
-              Sign In
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/signup")}>
-              Sign Up
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button
+          onClick={() => router.push("/signin")}
+          className="px-4 py-2 text-white bg-black dark:bg-white dark:text-black rounded hover:bg-red-700 transition"
+        >
+          Sign In
+        </Button>
+      )}
+    </div>
   );
 }
+
