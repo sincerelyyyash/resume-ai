@@ -14,7 +14,7 @@ interface MultiStepFormData {
   project: ProjectFormData;
   education: EducationFormData;
   experience: ExperienceFormData;
-  jobDescription: JobDescriptionFormData;
+  // jobDescription: JobDescriptionFormData;
   skill: SkillFormData;
 }
 
@@ -31,7 +31,7 @@ export function MultiStepForm() {
       achievements: ""
     }, education: { institution: "", degree: "", startDate: "", endDate: "" },
     experience: { jobTitle: "", company: "", startDate: "", endDate: "", description: "", location: "" },
-    jobDescription: { title: "", responsibilities: "", requirements: "", location: "", jobType: "" },
+    // jobDescription: { title: "", responsibilities: "", requirements: "", location: "", jobType: "" },
     skill: { name: "", category: "", level: "", yearsOfExperience: "" },
   });
   const [loading, setLoading] = useState(false);
@@ -87,15 +87,6 @@ export function MultiStepForm() {
           />
         );
       case 3:
-        return (
-          <JobDescriptionForm
-            data={formData.jobDescription}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            onDataChange={(data) => setFormData((prev) => ({ ...prev, jobDescription: data }))}
-          />
-        );
-      case 4:
         return (
           <SkillForm
             data={formData.skill}
