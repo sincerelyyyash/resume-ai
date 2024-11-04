@@ -25,7 +25,7 @@ export default function EducationForm({ data, onNext, onPrevious, onDataChange }
   };
 
   return (
-    <div>
+    <div className="m-14 gap-2">
       <Label htmlFor="institution">Institution</Label>
       <Input id="institution" name="institution" value={data.institution} onChange={handleChange} />
       <Label htmlFor="degree">Degree</Label>
