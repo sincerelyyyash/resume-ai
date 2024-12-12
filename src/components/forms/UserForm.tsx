@@ -51,10 +51,10 @@ export default function UserForm({ data, onNext, onPrevious, onDataChange }: Use
         <Label htmlFor="github" className="block mt-4 mb-2 text-lg">GitHub</Label>
         <Input id="github" name="github" value={data.github} onChange={handleChange} />
 
-        <div className="flex justify-between mt-8">
-          {onPrevious && <Button onClick={onPrevious}>Previous</Button>}
-          <Button onClick={onNext}>Next</Button>
-        </div>
+        {/* <div className="flex justify-between mt-8"> */}
+        {/*   {onPrevious && <Button onClick={onPrevious}>Previous</Button>} */}
+        {/*   <Button onClick={onNext}>Next</Button> */}
+        {/* </div> */}
       </div>
     </div>
   );

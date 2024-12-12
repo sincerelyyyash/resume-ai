@@ -3,6 +3,7 @@ import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { TextArea } from "../ui/text-area";
 
 export interface ExperienceFormData {
   jobTitle: string;
@@ -14,21 +15,39 @@ export interface ExperienceFormData {
 }
 
 interface ExperienceFormProps {
+  iteration: number;
   data: ExperienceFormData;
   onNext: () => void;
   onPrevious: () => void;
   onDataChange: (data: ExperienceFormData) => void;
 }
 
-export default function ExperienceForm({ data, onNext, onPrevious, onDataChange }: ExperienceFormProps) {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+export default function ExperienceForm({ iteration, data, onNext, onPrevious, onDataChange }: ExperienceFormProps) {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     onDataChange({ ...data, [name]: value });
   };
 
+  const adviceMessages = [
+    "Work experience showcases your practical skills and expertise.",
+    "A detailed job history helps employers understand your capabilities.",
+    "Highlight your achievements to make your experience stand out.",
+    "Employers value hands-on experience more than qualifications alone.",
+    "Every job teaches something new make sure to share those lessons."
+  ];
+
+  const advice = adviceMessages[(iteration - 1) % adviceMessages.length];
+
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-between flex-row min-h-screen">
+      <div className="bg-white dark:bg-zinc-900 p-10 w-full max-w-2xl">
+        <div className="flex flex-col relative z-10 text-lg md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 text-center font-sans font-bold my-2">
+          <p>{iteration}</p>
+          <p>{advice}</p>
+        </div>
+      </div>
       <div className="bg-white dark:bg-zinc-900 p-10 rounded-lg shadow-2xl w-full max-w-2xl">
+
         <Label htmlFor="jobTitle" className="block mb-2 text-lg">Job Title</Label>
         <Input id="jobTitle" name="jobTitle" value={data.jobTitle} onChange={handleChange} />
 
@@ -42,17 +61,19 @@ export default function ExperienceForm({ data, onNext, onPrevious, onDataChange 
         <Input id="endDate" name="endDate" type="date" value={data.endDate} onChange={handleChange} />
 
         <Label htmlFor="description" className="block mt-4 mb-2 text-lg">Description</Label>
-        <Input id="description" name="description" value={data.description} onChange={handleChange} />
+        <TextArea
+          id="description"
+          name="description"
+          value={data.description}
+          onChange={handleChange}
+          placeholder="Describe your experience here"
+          className="resize-none h-40"
+        />
 
         <Label htmlFor="location" className="block mt-4 mb-2 text-lg">Location</Label>
         <Input id="location" name="location" value={data.location} onChange={handleChange} />
-
-        <div className="flex justify-between mt-8">
-          <Button onClick={onPrevious}>Previous</Button>
-          <Button onClick={onNext}>Next</Button>
-        </div>
       </div>
-    </div>
+    </div >
   );
 }
 
