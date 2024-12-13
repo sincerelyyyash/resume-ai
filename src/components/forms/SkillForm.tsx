@@ -3,6 +3,7 @@ import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import MotionDiv from "../motion-div";
 
 export interface SkillFormData {
   name: string;
@@ -58,7 +59,7 @@ export default function SkillForm({ iteration, data, onNext, onPrevious, onDataC
   const skillCategory = skillCategories[(iteration - 1) % skillCategories.length];
 
   return (
-    <div className="flex items-center justify-between flex-row min-h-screen">
+    <MotionDiv className="flex items-center justify-between flex-row min-h-screen">
       <div className="bg-white dark:bg-zinc-900 p-10 w-full max-w-2xl">
         <div className="flex flex-col relative z-10 text-lg md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 text-center font-sans font-bold my-2">
           <p>{iteration}</p>
@@ -108,7 +109,7 @@ export default function SkillForm({ iteration, data, onNext, onPrevious, onDataC
           step="1"
         />
       </div>
-    </div>
+    </MotionDiv>
   );
 }
 

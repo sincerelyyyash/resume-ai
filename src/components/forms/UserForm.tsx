@@ -3,6 +3,7 @@ import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import MotionDiv from "../motion-div";
 
 export interface UserFormData {
   name: string;
@@ -28,7 +29,7 @@ export default function UserForm({ data, onNext, onPrevious, onDataChange }: Use
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <MotionDiv className="flex items-center justify-center min-h-screen">
       <div className="bg-white dark:bg-zinc-900 p-10 rounded-lg shadow-2xl w-full max-w-2xl">
         <Label htmlFor="name" className="block mb-2 text-lg">Name</Label>
         <Input id="name" name="name" value={data.name} onChange={handleChange} />
@@ -56,7 +57,7 @@ export default function UserForm({ data, onNext, onPrevious, onDataChange }: Use
         {/*   <Button onClick={onNext}>Next</Button> */}
         {/* </div> */}
       </div>
-    </div>
+    </MotionDiv>
   );
 }
 

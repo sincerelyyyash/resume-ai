@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TextArea } from "../ui/text-area";
+import MotionDiv from "../motion-div";
 
 export interface ProjectFormData {
   name: string;
@@ -26,7 +27,7 @@ export default function ProjectForm({ iteration, data, onNext, onPrevious, onDat
   const adviceMessages = [
     "Adding projects showcases your practical skills.",
     "Projects demonstrate your problem-solving abilities.",
-    "Employers love to see hands-on experience�keep building!",
+    "Employers love to see hands-on experience keep building!",
     "More projects can help your resume stand out.",
     "Highlight your achievements through detailed project descriptions.",
   ];
@@ -39,7 +40,7 @@ export default function ProjectForm({ iteration, data, onNext, onPrevious, onDat
   };
 
   return (
-    <div className="flex items-center justify-between flex-row min-h-screen">
+    <MotionDiv className="flex items-center justify-between flex-row min-h-screen">
       <div className="bg-white dark:bg-zinc-900 p-10 w-full max-w-2xl">
         <div className="flex flex-col relative z-10 text-lg md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 text-center font-sans font-bold my-2">
           <p>{iteration}</p>
@@ -77,7 +78,7 @@ export default function ProjectForm({ iteration, data, onNext, onPrevious, onDat
         <Input id="endDate" name="endDate" type="date" value={data.endDate} onChange={handleChange} />
 
       </div>
-    </div >
+    </MotionDiv >
   );
 }
 

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TextArea } from "../ui/text-area";
+import MotionDiv from "../motion-div";
 
 export interface ExperienceFormData {
   jobTitle: string;
@@ -39,7 +40,7 @@ export default function ExperienceForm({ iteration, data, onNext, onPrevious, on
   const advice = adviceMessages[(iteration - 1) % adviceMessages.length];
 
   return (
-    <div className="flex items-center justify-between flex-row min-h-screen">
+    <MotionDiv className="flex items-center justify-between flex-row min-h-screen">
       <div className="bg-white dark:bg-zinc-900 p-10 w-full max-w-2xl">
         <div className="flex flex-col relative z-10 text-lg md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 text-center font-sans font-bold my-2">
           <p>{iteration}</p>
@@ -73,7 +74,7 @@ export default function ExperienceForm({ iteration, data, onNext, onPrevious, on
         <Label htmlFor="location" className="block mt-4 mb-2 text-lg">Location</Label>
         <Input id="location" name="location" value={data.location} onChange={handleChange} />
       </div>
-    </div >
+    </MotionDiv >
   );
 }
 
