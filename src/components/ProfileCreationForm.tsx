@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import ProjectForm, { ProjectFormData } from "@/components/forms/ProjectForm";
@@ -13,7 +13,7 @@ interface MultiStepFormData {
   projects: ProjectFormData[];
   educations: EducationFormData[];
   experiences: ExperienceFormData[];
-  skills: SkillFormData[]; // Change from single skill to an array of skills
+  skills: SkillFormData[];
 }
 
 export function MultiStepForm() {
@@ -42,10 +42,12 @@ export function MultiStepForm() {
       description: "",
       location: "",
     }],
-    skills: [{ name: "", category: "", level: "", yearsOfExperience: "" }], // Initial skill entry
+    skills: [{ name: "", category: "", level: "", yearsOfExperience: "" }],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrevious = () => setStep((prev) => prev - 1);
@@ -82,6 +84,10 @@ export function MultiStepForm() {
       ...prev,
       [section]: [...prev[section], newEntry],
     }));
+
+    setTimeout(() => {
+      containerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 0);
   };
 
   const renderFormHeader = (section: "projects" | "educations" | "experiences" | "skills" | null = null) => {
@@ -111,78 +117,87 @@ export function MultiStepForm() {
         return (
           <div>
             {renderFormHeader("projects")}
-            {formData.projects.map((project, index) => (
-              <ProjectForm
-                key={index}
-                data={project}
-                iteration={index + 1}
-                onNext={index === formData.projects.length - 1 ? handleNext : () => { }}
-                onDataChange={(data) => {
-                  const updatedProjects = [...formData.projects];
-                  updatedProjects[index] = data;
-                  setFormData((prev) => ({ ...prev, projects: updatedProjects }));
-                }}
-              />
-            ))}
+            <div ref={containerRef}>
+              {formData.projects.map((project, index) => (
+                <ProjectForm
+                  key={index}
+                  data={project}
+                  iteration={index + 1}
+                  onNext={index === formData.projects.length - 1 ? handleNext : () => { }}
+                  onDataChange={(data) => {
+                    const updatedProjects = [...formData.projects];
+                    updatedProjects[index] = data;
+                    setFormData((prev) => ({ ...prev, projects: updatedProjects }));
+                  }}
+                />
+              ))}
+            </div>
           </div>
         );
       case 1:
         return (
           <div>
             {renderFormHeader("educations")}
-            {formData.educations.map((education, index) => (
-              <EducationForm
-                key={index}
-                data={education}
-                iteration={index + 1}
-                onNext={index === formData.educations.length - 1 ? handleNext : () => { }}
-                onPrevious={handlePrevious}
-                onDataChange={(data) => {
-                  const updatedEducations = [...formData.educations];
-                  updatedEducations[index] = data;
-                  setFormData((prev) => ({ ...prev, educations: updatedEducations }));
-                }}
-              />
-            ))}
+            <div ref={containerRef}>
+              {formData.educations.map((education, index) => (
+                <EducationForm
+                  key={index}
+                  data={education}
+                  iteration={index + 1}
+                  onNext={index === formData.educations.length - 1 ? handleNext : () => { }}
+                  onPrevious={handlePrevious}
+                  onDataChange={(data) => {
+                    const updatedEducations = [...formData.educations];
+                    updatedEducations[index] = data;
+                    setFormData((prev) => ({ ...prev, educations: updatedEducations }));
+                  }}
+                />
+              ))}
+            </div>
           </div>
         );
       case 2:
         return (
           <div>
             {renderFormHeader("experiences")}
-            {formData.experiences.map((experience, index) => (
-              <ExperienceForm
-                key={index}
-                data={experience}
-                iteration={index + 1}
-                onNext={index === formData.experiences.length - 1 ? handleNext : () => { }}
-                onPrevious={handlePrevious}
-                onDataChange={(data) => {
-                  const updatedExperiences = [...formData.experiences];
-                  updatedExperiences[index] = data;
-                  setFormData((prev) => ({ ...prev, experiences: updatedExperiences }));
-                }}
-              />
-            ))}
+            <div ref={containerRef}>
+              {formData.experiences.map((experience, index) => (
+                <ExperienceForm
+                  key={index}
+                  data={experience}
+                  iteration={index + 1}
+                  onNext={index === formData.experiences.length - 1 ? handleNext : () => { }}
+                  onPrevious={handlePrevious}
+                  onDataChange={(data) => {
+                    const updatedExperiences = [...formData.experiences];
+                    updatedExperiences[index] = data;
+                    setFormData((prev) => ({ ...prev, experiences: updatedExperiences }));
+                  }}
+                />
+              ))}
+            </div>
           </div>
         );
       case 3:
         return (
           <div>
             {renderFormHeader("skills")}
-            {formData.skills.map((skill, index) => (
-              <SkillForm
-                key={index}
-                data={skill}
-                iteration={index + 1}
-                onNext={index === formData.skills.length - 1 ? handleNext : () => { }}
-                onDataChange={(data) => {
-                  const updatedSkills = [...formData.skills];
-                  updatedSkills[index] = data;
-                  setFormData((prev) => ({ ...prev, skills: updatedSkills }));
-                }}
-              />
-            ))}
+            <div ref={containerRef}>
+              {formData.skills.map((skill, index) => (
+                <SkillForm
+                  key={index}
+                  data={skill}
+                  iteration={index + 1}
+                  onNext={index === formData.skills.length - 1 ? handleNext : () => { }}
+                  onPrevious={handlePrevious}
+                  onDataChange={(data) => {
+                    const updatedSkills = [...formData.skills];
+                    updatedSkills[index] = data;
+                    setFormData((prev) => ({ ...prev, skills: updatedSkills }));
+                  }}
+                />
+              ))}
+            </div>
           </div>
         );
       default:
