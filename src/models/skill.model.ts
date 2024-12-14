@@ -5,7 +5,6 @@ enum SkillLevel {
   Beginner = 'Beginner',
   Intermediate = 'Intermediate',
   Expert = 'Expert',
-  Master = 'Master',
 }
 
 export interface Skill extends Document {
@@ -18,8 +17,16 @@ export interface Skill extends Document {
 const SkillSchema = new Schema<Skill>({
   name: { type: String, required: true },
   category: { type: String, required: true },
-  level: { type: String, enum: Object.values(SkillLevel) },
-  yearsOfExperience: { type: Number },
+  level: {
+    type: String,
+    enum: Object.values(SkillLevel),
+    default: SkillLevel.Beginner,
+  },
+  yearsOfExperience: {
+    type: Number,
+    min: 0,
+    default: 0,
+  },
 });
 
 const SkillModel: Model<Skill> = mongoose.models.Skill || mongoose.model<Skill>('Skill', SkillSchema);

@@ -7,7 +7,7 @@ export interface Project extends Document {
   url: string;
   startDate: Date;
   endDate: Date;
-  achievements: string[];
+  achievements: string;
 }
 
 const ProjectSchema = new Schema<Project>({
@@ -16,7 +16,7 @@ const ProjectSchema = new Schema<Project>({
   url: { type: String, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  achievements: { type: [String], required: true },
+  achievements: { type: String, required: true },
 });
 
 const ProjectModel: Model<Project> = mongoose.models.Project || mongoose.model<Project>('Project', ProjectSchema);
