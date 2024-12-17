@@ -7,6 +7,8 @@ import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { signIn } from "next-auth/react";
 import { Button } from "./ui/button";
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 
 interface FormData {
   email: string;
@@ -81,6 +83,33 @@ export function SignInForm() {
           {loading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-white dark:bg-zinc-900 px-2 text-gray-500">
+            or
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-col space-y-3 mt-4">
+        <Button
+          className="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+        >
+          <FcGoogle size={20} /> Sign in with Google
+        </Button>
+        <Button
+          className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-md h-10 font-medium flex items-center justify-center gap-2"
+          onClick={() => signIn("github", { callbackUrl: "/" })}
+        >
+          <FaGithub size={20} /> Sign in with GitHub
+        </Button>
+      </div>
+
       <div className="flex justify-center mt-4">
         <p className="text-neutral-700 dark:text-neutral-300">
           Don't have an account?{" "}
@@ -89,7 +118,8 @@ export function SignInForm() {
             className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Sign Up
-          </button>  here
+          </button>{" "}
+          here
         </p>
       </div>
     </div>
