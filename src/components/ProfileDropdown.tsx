@@ -42,7 +42,7 @@ export function UserMenu() {
       ) : (
         <Button
           onClick={() => router.push("/signin")}
-          className="px-4 py-2 text-white bg-black dark:bg-white dark:text-black rounded hover:bg-red-700 transition"
+          className="px-4 py-2 text-white bg-black dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded hover:bg-gray-800 transition"
         >
           Sign In
         </Button>

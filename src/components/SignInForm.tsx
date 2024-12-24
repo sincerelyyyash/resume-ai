@@ -97,7 +97,7 @@ export function SignInForm() {
 
       <div className="flex flex-col space-y-3 mt-4">
         <Button
-          className="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
+          className="w-full bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
           onClick={() => signIn("google", { callbackUrl: "/" })}
         >
           <FcGoogle size={20} /> Sign in with Google
