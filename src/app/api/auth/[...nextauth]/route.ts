@@ -1,9 +1,10 @@
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import NextAuth, { AuthOptions, User as NextAuthUser } from 'next-auth';
+import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongoDbConnect';
 import User, { UserDocument } from '@/models/user.model';
 import { NextApiHandler } from 'next';
@@ -18,7 +19,6 @@ declare module 'next-auth' {
       portfolio?: string;
       linkedin?: string;
       github?: string;
-      role?: string;
     };
   }
 }
@@ -36,8 +36,8 @@ const authOptions: AuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'text', placeholder: 'email@example.com', required: true },
-        password: { label: 'Password', type: 'password', required: true },
+        email: { label: 'Email', type: 'text', placeholder: 'email@example.com' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials) return null;
@@ -45,31 +45,35 @@ const authOptions: AuthOptions = {
         await dbConnect();
 
         const credentialsSchema = z.object({
-          email: z.string().email({ message: 'Invalid email address' }),
-          password: z.string().min(6, { message: 'Password must be at least 6 characters long' }),
+          email: z.string().email(),
+          password: z.string().min(6),
         });
 
         try {
           credentialsSchema.parse(credentials);
         } catch (error) {
-          return null;
+          throw new Error('Invalid credentials format');
         }
 
-        const existingUser = await User.findOne({ email: credentials.email }) as UserDocument;
-        if (!existingUser) return null;
+        const user = await User.findOne({ email: credentials.email }) as UserDocument;
+        if (!user) {
+          throw new Error('User not found');
+        }
 
-        const passwordValidation = await bcrypt.compare(credentials.password, existingUser.password);
-        if (!passwordValidation) return null;
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+        if (!isValidPassword) {
+          throw new Error('Invalid password');
+        }
 
         return {
-          id: existingUser._id.toString(),
-          name: existingUser.name,
-          email: existingUser.email,
-          bio: existingUser.bio,
-          portfolio: existingUser.portfolio,
-          linkedin: existingUser.linkedin,
-          github: existingUser.github,
-        } as NextAuthUser;
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          bio: user.bio,
+          portfolio: user.portfolio,
+          linkedin: user.linkedin,
+          github: user.github,
+        };
       },
     }),
   ],
@@ -80,7 +84,7 @@ const authOptions: AuthOptions = {
   callbacks: {
     async session({ token, session }) {
       if (token?.sub) {
-        const user = await User.findById(token.sub) as UserDocument;
+        const user = await User.findById(new mongoose.Types.ObjectId(token.sub)) as UserDocument;
         if (user) {
           session.user = {
             id: user._id.toString(),

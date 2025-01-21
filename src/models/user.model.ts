@@ -10,12 +10,13 @@ import { Education, EducationSchema } from './education.model';
 export interface UserDocument extends Document {
   _id: Types.ObjectId;
   email: string;
-  password: string;
+  password?: string;
   name: string;
   bio?: string;
-  portfolio: string;
+  portfolio?: string;
   linkedin?: string;
   github?: string;
+  image?: string;
   projects: Project[];
   experiences: Experience[];
   savedResumes: Resume[];
@@ -26,12 +27,13 @@ export interface UserDocument extends Document {
 
 const UserSchema = new Schema<UserDocument>({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String },
   name: { type: String, required: true },
   bio: { type: String },
   portfolio: { type: String },
   linkedin: { type: String },
   github: { type: String },
+  image: { type: String },
   projects: [ProjectSchema],
   experiences: [ExperienceSchema],
   savedResumes: [ResumeSchema],
