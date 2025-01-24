@@ -56,13 +56,13 @@ const authOptions: AuthOptions = {
         }
 
         const user = await User.findOne({ email: credentials.email }) as UserDocument;
-        if (!user) {
-          throw new Error('User not found');
+        if (!user || !user.password) {
+          throw new Error('Invalid email or password');
         }
 
         const isValidPassword = await bcrypt.compare(credentials.password, user.password);
         if (!isValidPassword) {
-          throw new Error('Invalid password');
+          throw new Error('Invalid email or password');
         }
 
         return {
@@ -84,17 +84,22 @@ const authOptions: AuthOptions = {
   callbacks: {
     async session({ token, session }) {
       if (token?.sub) {
-        const user = await User.findById(new mongoose.Types.ObjectId(token.sub)) as UserDocument;
-        if (user) {
-          session.user = {
-            id: user._id.toString(),
-            name: user.name,
-            email: user.email,
-            bio: user.bio,
-            portfolio: user.portfolio,
-            linkedin: user.linkedin,
-            github: user.github,
-          };
+        try {
+          const userId = new mongoose.Types.ObjectId(token.sub);
+          const user = await User.findById(userId) as UserDocument;
+          if (user) {
+            session.user = {
+              id: user._id.toString(),
+              name: user.name,
+              email: user.email,
+              bio: user.bio,
+              portfolio: user.portfolio,
+              linkedin: user.linkedin,
+              github: user.github,
+            };
+          }
+        } catch (error) {
+          console.error("Error finding user by ID:", error);
         }
       }
       return session;
