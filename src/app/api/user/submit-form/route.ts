@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/mongoDbConnect";
 import { ZodError } from "zod";
 import User from "@/models/user.model";
-import { formSchema } from "@/types/profile-form";
+import { formSchema } from "@/types/form.schema";
 
 export async function POST(req: Request) {
   const { userId, projects, educations, experiences, skills } = await req.json();
