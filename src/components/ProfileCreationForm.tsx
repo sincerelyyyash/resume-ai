@@ -8,8 +8,11 @@ import ProjectForm, { ProjectFormData } from "@/components/forms/ProjectForm";
 import EducationForm, { EducationFormData } from "@/components/forms/EducationForm";
 import ExperienceForm, { ExperienceFormData } from "@/components/forms/ExperienceForm";
 import SkillForm, { SkillFormData } from "@/components/forms/SkillForm";
+import { useSession } from "next-auth/react";
+import axios from "axios"
 
 interface MultiStepFormData {
+  userId: string;
   projects: ProjectFormData[];
   educations: EducationFormData[];
   experiences: ExperienceFormData[];
@@ -18,32 +21,41 @@ interface MultiStepFormData {
 
 export function MultiStepForm() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<MultiStepFormData>({
-    projects: [{
-      name: "",
-      technologies: [],
-      url: "",
-      startDate: "",
-      endDate: "",
-      achievements: "",
-    }],
-    educations: [{
-      institution: "",
-      degree: "",
-      startDate: "",
-      endDate: "",
-    }],
-    experiences: [{
-      jobTitle: "",
-      company: "",
-      startDate: "",
-      endDate: "",
-      description: "",
-      location: "",
-    }],
-    skills: [{ name: "", category: "", level: "", yearsOfExperience: "" }],
+    userId: session?.user.id || "",
+    projects: [
+      {
+        name: "",
+        technologies: [],
+        url: "",
+        startDate: "",
+        endDate: "",
+        achievements: "",
+      },
+    ],
+    educations: [
+      {
+        institution: "",
+        degree: "",
+        startDate: "",
+        endDate: "",
+      },
+    ],
+    experiences: [
+      {
+        jobTitle: "",
+        company: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+        location: "",
+      },
+    ],
+    skills: [{ name: "", category: "", level: "Beginner", yearsOfExperience: "" }],
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,21 +64,48 @@ export function MultiStepForm() {
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrevious = () => setStep((prev) => prev - 1);
 
+
+
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const response = await fetch("/api/formSubmit", {
-        method: "POST",
+      const payload = {
+        userId: formData.userId,
+        projects: formData.projects.map((project) => ({
+          ...project,
+          url: validateUrl(project.url),
+        })),
+        educations: formData.educations.map((education) => education),
+        experiences: formData.experiences.map((experience) => experience),
+        skills: formData.skills.map((skill) => skill),
+      };
+
+      await axios.post("/api/user/submit-form", payload, {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
       });
-      if (!response.ok) throw new Error("Failed to submit form data");
+
       router.push("/");
     } catch (err) {
-      setError((err as Error).message);
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "An unexpected error occurred");
+      } else {
+        setError("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+
+
+  const validateUrl = (url: string): string => {
+    try {
+      new URL(url);
+      return url;
+    } catch {
+      return "";
     }
   };
 
@@ -78,7 +117,7 @@ export function MultiStepForm() {
           ? { institution: "", degree: "", startDate: "", endDate: "" }
           : section === "experiences"
             ? { jobTitle: "", company: "", startDate: "", endDate: "", description: "", location: "" }
-            : { name: "", category: "", level: "", yearsOfExperience: "" }; // For skills
+            : { name: "", category: "", level: "", yearsOfExperience: "" };
 
     setFormData((prev) => ({
       ...prev,

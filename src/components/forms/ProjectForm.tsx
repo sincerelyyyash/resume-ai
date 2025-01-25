@@ -36,7 +36,12 @@ export default function ProjectForm({ iteration, data, onNext, onPrevious, onDat
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    onDataChange({ ...data, [name]: value });
+    if (name === "technologies") {
+      const technologiesArray = value.split(",").map((tech) => tech.trim());
+      onDataChange({ ...data, [name]: technologiesArray });
+    } else {
+      onDataChange({ ...data, [name]: value });
+    }
   };
 
   return (
@@ -54,13 +59,13 @@ export default function ProjectForm({ iteration, data, onNext, onPrevious, onDat
         <Label htmlFor="technologies" className="block mt-4 mb-2 text-lg">Technologies</Label>
         <Input
           id="technologies"
-          placeholder="Enter comma-separated values"
+          placeholder="Enter comma-separated values (e.g., React, Node.js, MongoDB)"
           name="technologies"
           value={data.technologies.join(", ")}
           onChange={handleChange}
         />
-        <Label htmlFor="achievements" className="block mt-4 mb-2 text-lg">Project Info</Label>
 
+        <Label htmlFor="achievements" className="block mt-4 mb-2 text-lg">Project Info</Label>
         <TextArea
           name="achievements"
           placeholder="Describe your project here"
@@ -76,9 +81,7 @@ export default function ProjectForm({ iteration, data, onNext, onPrevious, onDat
 
         <Label htmlFor="endDate" className="block mt-4 mb-2 text-lg">End Date</Label>
         <Input id="endDate" name="endDate" type="date" value={data.endDate} onChange={handleChange} />
-
       </div>
-    </MotionDiv >
+    </MotionDiv>
   );
 }
-
