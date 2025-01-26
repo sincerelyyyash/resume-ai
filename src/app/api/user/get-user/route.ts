@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     userId = body.userId;
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: "Invalid JSON format in request body" }),
+      JSON.stringify({ status: "error", message: "Invalid JSON format in request body" }),
       { status: 400 }
     );
   }
@@ -24,40 +24,76 @@ export async function POST(req: Request) {
     if (error instanceof ZodError) {
       return new Response(
         JSON.stringify({
-          message: error.errors.map((err) => err.message),
+          status: "error",
+          message: "Validation failed",
+          errors: error.errors.map((err) => err.message),
         }),
         { status: 400 }
       );
     }
     return new Response(
-      JSON.stringify({ message: "An unexpected error occurred" }),
+      JSON.stringify({ status: "error", message: "An unexpected error occurred" }),
       { status: 500 }
     );
   }
 
-  const user = await User.findById(userId).select("-password");
+  try {
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return new Response(
+        JSON.stringify({ status: "error", message: "User not found" }),
+        { status: 404 }
+      );
+    }
 
-  if (!user) {
+    const structuredResponse = {
+      status: "success",
+      message: "User data fetched successfully",
+      data: {
+        personalInfo: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+        },
+        projects: user.projects.map((project) => ({
+          name: project.name,
+          technologies: project.technologies,
+          url: project.url,
+          startDate: project.startDate,
+          endDate: project.endDate,
+          achievements: project.achievements,
+        })),
+        experiences: user.experiences.map((experience) => ({
+          jobTitle: experience.jobTitle,
+          company: experience.company,
+          startDate: experience.startDate,
+          endDate: experience.endDate,
+          description: experience.description,
+          location: experience.location,
+        })),
+        skills: user.skills.map((skill) => ({
+          name: skill.name,
+          category: skill.category,
+          level: skill.level,
+          yearsOfExperience: skill.yearsOfExperience,
+        })),
+        education: user.education.map((edu) => ({
+          institution: edu.institution,
+          degree: edu.degree,
+          startDate: edu.startDate,
+          endDate: edu.endDate,
+        })),
+        savedResumes: user.savedResumes,
+        jobDescriptions: user.jobDescriptions,
+      },
+    };
+
+    return new Response(JSON.stringify(structuredResponse), { status: 200 });
+  } catch (error) {
     return new Response(
-      JSON.stringify({ message: "User not found" }),
-      { status: 404 }
+      JSON.stringify({ status: "error", message: "An unexpected error occurred" }),
+      { status: 500 }
     );
   }
-
-  const userData = {
-    id: user._id,
-    email: user.email,
-    name: user.name,
-    projects: user.projects,
-    experiences: user.experiences,
-    skills: user.skills,
-    education: user.education,
-    savedResumes: user.savedResumes,
-    jobDescriptions: user.jobDescriptions,
-  };
-
-  return new Response(
-    JSON.stringify({ message: "User data fetched successfully", user: userData }),
-    { status: 200 }
-  );
 }
+
