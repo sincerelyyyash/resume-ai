@@ -1,7 +1,7 @@
 # **Resume-AI**  
 **Tailor-made Resumes based on Job Descriptions**
 
-**Resume-AI** is a smart resume builder that customizes resumes to align with specific job descriptions (JDs). Users can upload their professional details (projects, work experience, profiles, etc.), and with each job description, the system leverages AI to parse the requirements and adapt the user’s resume content accordingly. Once completed, resumes can be downloaded or stored online for easy access.
+**Resume-AI** is a smart resume builder that customizes resumes to align with specific job descriptions (JDs). Users can upload their professional details (projects, work experience, profiles, etc.), and with each job description, the system leverages AI to parse the requirements and adapt the user√ïs resume content accordingly. Once completed, resumes can be downloaded or stored online for easy access.
 
 ## **Features**
 - **Tailored Resumes**: Enter a job description, and Resume-AI generates a resume optimized to fit the specific requirements.
@@ -21,32 +21,6 @@
 - [Node.js](https://nodejs.org/) (v14 or higher)
 - [MongoDB](https://www.mongodb.com/)
 - Gemini API Key (required for job description parsing)
-
-### **Installation**
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/username/Resume-AI.git
-   cd Resume-AI
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**
-   Create a `.env.local` file in the project root and add the following keys:
-   ```plaintext
-   NEXT_PUBLIC_MONGODB_URI=<your_mongodb_uri>
-   NEXT_PUBLIC_GEMINI_API_KEY=<your_gemini_api_key>
-   NEXTAUTH_SECRET=<your_secret>
-   ```
-
-4. **Run the Application**
-   ```bash
-   npm run dev
-   ```
-   The app should now be running on `http://localhost:3000`.
 
 ### **Project Structure**
 - **pages/**: Contains all Next.js pages for user interaction, including profile setup, resume creation, and job description upload.
@@ -86,4 +60,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 
 ---
 
-With **Resume-AI**, ensure your resume always aligns perfectly with the role you’re targeting, all while saving time and effort!
+With **Resume-AI**, ensure your resume always aligns perfectly with the role you√ïre targeting, all while saving time and effort!
