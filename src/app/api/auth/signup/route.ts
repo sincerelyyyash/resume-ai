@@ -1,19 +1,14 @@
 
 import dbConnect from '@/lib/mongoDbConnect';
 import bcrypt from 'bcryptjs';
-import { z, ZodError } from 'zod';
+import { ZodError } from 'zod';
 import User from '@/models/user.model';
+import { userSchema } from '@/types/signup.schema';
 
 export async function POST(req: Request) {
   const { email, password, name } = await req.json();
 
   await dbConnect();
-
-  const userSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
-    name: z.string().min(2, { message: "Name must be at least 2 characters long" }),
-  });
 
   try {
     userSchema.parse({ email, password, name });

@@ -3,11 +3,11 @@ import GitHubProvider from "next-auth/providers/github";
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { z } from 'zod';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongoDbConnect';
 import User, { UserDocument } from '@/models/user.model';
 import { NextApiHandler } from 'next';
+import { credentialsSchema } from "@/types/signin.schema";
 
 declare module 'next-auth' {
   interface Session {
@@ -43,11 +43,6 @@ const authOptions: AuthOptions = {
         if (!credentials) return null;
 
         await dbConnect();
-
-        const credentialsSchema = z.object({
-          email: z.string().email(),
-          password: z.string().min(6),
-        });
 
         try {
           credentialsSchema.parse(credentials);
