@@ -31,9 +31,12 @@ export function UserMenu() {
             <DropdownMenuItem onClick={() => router.push("/")}>
               Home
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/settings")}>
-              Settings
+            <DropdownMenuItem onClick={() => router.push("/user/profile")}>
+              Profile
             </DropdownMenuItem>
+            {/* <DropdownMenuItem onClick={() => router.push("/settings")}> */}
+            {/*   Settings */}
+            {/* </DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => signOut()}>
               Logout
             </DropdownMenuItem>
