@@ -10,7 +10,7 @@ const llm = new ChatGoogleGenerativeAI({
 });
 
 const jdParserPrompt = new PromptTemplate({
-  template: `You're an expert job description analyst. Extract:
+  template: `You're an expert job description analyst. Extract the following from the job description:
 - Job Title
 - Required Skills
 - Preferred Skills
@@ -18,7 +18,7 @@ const jdParserPrompt = new PromptTemplate({
 - Responsibilities
 - Keywords for ATS matching
 
-From the following JD:
+Job Description:
 {job_description}`,
   inputVariables: ["job_description"],
 });
@@ -28,55 +28,29 @@ const jdParsingChain = new LLMChain({
   outputKey: "parsed_jd",
 });
 
-const normalizePrompt = new PromptTemplate({
-  template: `You're a resume parser. Normalize this user data:
-{user_data}
-
-Convert into structured JSON:
-{
-  summary: string,
-  skills: [...],
-  experience: [
-    {
-      jobTitle: string,
-      company: string,
-      startDate: string,
-      endDate: string,
-      description: string
-    }
-  ],
-  education: [...],
-  certifications: [...]
-}`,
-  inputVariables: ["user_data"],
-});
-const normalizeChain = new LLMChain({
-  llm,
-  prompt: normalizePrompt,
-  outputKey: "structured_resume",
-});
-
 const atsPrompt = new PromptTemplate({
-  template: `You're a career coach. Compare this user's resume:
-{structured_resume}
+  template: `You're a career coach. Compare this user's structured resume:
+{user_data}
 
 With this job description insight:
 {parsed_jd}
 
+Perform the following:
 - Identify strong matches
-- Identify skill/experience gaps
-- Rate ATS keyword presence (0Ð100%)
-- Suggest improvements
+- Highlight skill/experience gaps
+- Estimate ATS keyword presence (0Ð100%)
+- Give clear, actionable improvement suggestions
 
-Output in JSON:
+Return JSON:
 {
-  ats_score: 0-100,
+  ats_score: number (0-100),
   matched_keywords: [...],
   missing_keywords: [...],
   recommendations: [...]
 }`,
-  inputVariables: ["structured_resume", "parsed_jd"],
+  inputVariables: ["user_data", "parsed_jd"],
 });
+
 const atsChain = new LLMChain({
   llm,
   prompt: atsPrompt,
@@ -84,22 +58,25 @@ const atsChain = new LLMChain({
 });
 
 const rewritePrompt = new PromptTemplate({
-  template: `You're a resume writing assistant optimizing resumes for ATS.
+  template: `You're a resume optimization expert.
 
-Rewrite the user's experience and skills to:
-- Highlight matching JD terms
-- Use action-result style
-- Include relevant keywords naturally
-- Keep content professional and authentic
+Given:
+- User's resume: {user_data}
+- Job description insights: {parsed_jd}
 
-Original Experience:
-{structured_resume}
+Rewrite the resume's experience and skills sections to:
+- Match the job requirements
+- Use action-result phrasing
+- Naturally include keywords
+- Stay professional and authentic
 
-JD Context:
-{parsed_jd}
-
-Return optimized experience, skills, and summary in JSON.`,
-  inputVariables: ["structured_resume", "parsed_jd"],
+Return optimized resume content in JSON:
+{
+  summary: "...",
+  experience: [...],
+  skills: [...]
+}`,
+  inputVariables: ["user_data", "parsed_jd"],
 });
 const rewriteChain = new LLMChain({
   llm,
@@ -108,11 +85,10 @@ const rewriteChain = new LLMChain({
 });
 
 export const resumeOptimizerChain = new SequentialChain({
-  chains: [jdParsingChain, normalizeChain, atsChain, rewriteChain],
+  chains: [jdParsingChain, atsChain, rewriteChain],
   inputVariables: ["job_description", "user_data"],
   outputVariables: [
     "parsed_jd",
-    "structured_resume",
     "analysis",
     "optimized_resume_sections",
   ],
