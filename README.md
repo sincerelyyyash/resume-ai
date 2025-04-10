@@ -22,12 +22,6 @@
 - [MongoDB](https://www.mongodb.com/)
 - Gemini API Key (required for job description parsing)
 
-### **Project Structure**
-- **pages/**: Contains all Next.js pages for user interaction, including profile setup, resume creation, and job description upload.
-- **components/**: UI components used across the app, such as forms, modals, and resume sections.
-- **lib/**: Helper functions for MongoDB and Gemini API integrations.
-- **utils/**: Utility functions for parsing job descriptions and managing resume customization logic.
-
 ### **Key Functionalities**
 1. **User Authentication**: Handled through NextAuth, allowing users to securely manage their profiles and stored resumes.
 2. **Job Description Parsing**: Uses the Gemini API to parse user-uploaded job descriptions and customize resume content accordingly.
