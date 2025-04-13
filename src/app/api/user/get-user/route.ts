@@ -51,9 +51,13 @@ export async function POST(req: Request) {
       message: "User data fetched successfully",
       data: {
         personalInfo: {
-          id: user._id,
+          // id: user._id,
           email: user.email,
           name: user.name,
+          bio: user.bio,
+          linkedin: user.linkedin,
+          github: user.github,
+          image: user.image,
         },
         projects: user.projects.map((project) => ({
           name: project.name,
