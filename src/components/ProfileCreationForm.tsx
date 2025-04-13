@@ -10,6 +10,7 @@ import ExperienceForm, { ExperienceFormData } from "@/components/forms/Experienc
 import SkillForm, { SkillFormData } from "@/components/forms/SkillForm";
 import { useSession } from "next-auth/react";
 import axios from "axios"
+import { useToast } from "@/hooks/use-toast";
 
 interface MultiStepFormData {
   userId: string;
@@ -20,6 +21,7 @@ interface MultiStepFormData {
 }
 
 export function MultiStepForm() {
+  const { toast } = useToast();
   const router = useRouter();
   const { data: session } = useSession();
   const [step, setStep] = useState(0);
@@ -66,6 +68,7 @@ export function MultiStepForm() {
 
 
 
+
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
@@ -73,10 +76,11 @@ export function MultiStepForm() {
     try {
       const payload = {
         userId: formData.userId,
-        projects: formData.projects.map((project) => ({
-          ...project,
-          url: validateUrl(project.url),
-        })),
+        // projects: formData.projects.map((project) => ({
+        //   ...project,
+        //   url: validateUrl(project.url),
+        // })),
+        projects: formData.projects.map((project) => project),
         educations: formData.educations.map((education) => education),
         experiences: formData.experiences.map((experience) => experience),
         skills: formData.skills.map((skill) => skill),
@@ -86,13 +90,24 @@ export function MultiStepForm() {
         headers: { "Content-Type": "application/json" },
       });
 
+      toast({
+        title: "Profile Submitted",
+        description: "Your profile has been saved successfully.",
+      });
+
       router.push("/");
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "An unexpected error occurred");
-      } else {
-        setError("An unexpected error occurred");
-      }
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message || "An unexpected error occurred"
+        : "An unexpected error occurred";
+
+      setError(message);
+
+      toast({
+        title: "Submission Failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

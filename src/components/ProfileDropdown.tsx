@@ -16,10 +16,10 @@ import {
 export function UserMenu() {
   const { data: session } = useSession();
   const router = useRouter();
-
+  const user = session?.user?.email || "";
   return (
     <div className="flex items-center space-x-4">
-      {session ? (
+      {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">

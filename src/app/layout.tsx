@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import Appbar from "@/components/Appbar";
 import { Play } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
 
 const play = Play({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
             {children}
           </main>
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

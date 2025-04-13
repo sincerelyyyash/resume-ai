@@ -9,6 +9,7 @@ import { Button } from "./ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { signIn } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast"
 
 interface FormData {
   name: string;
@@ -17,6 +18,7 @@ interface FormData {
 }
 
 export function SignupForm() {
+  const { toast } = useToast()
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -39,12 +41,22 @@ export function SignupForm() {
     setPasswordMatchError(formData.password !== value ? "Passwords do not match" : null);
   };
 
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (formData.password !== confirmPassword) {
       setPasswordMatchError("Passwords do not match");
+
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+
       return;
     }
+
     setPasswordMatchError(null);
     setError(null);
     setLoading(true);
@@ -64,12 +76,31 @@ export function SignupForm() {
         const errorMessage = Array.isArray(data.message)
           ? data.message.join(", ")
           : "Signup failed";
+
+        toast({
+          title: "Signup Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+
         throw new Error(errorMessage);
       }
 
+      toast({
+        title: "Account Created",
+        description: "You have successfully signed up!",
+      });
+
       router.push("/");
     } catch (err) {
-      setError((err as Error).message);
+      const errorMsg = (err as Error).message;
+      setError(errorMsg);
+
+      toast({
+        title: "Something went wrong",
+        description: errorMsg,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

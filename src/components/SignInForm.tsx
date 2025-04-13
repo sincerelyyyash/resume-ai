@@ -9,6 +9,7 @@ import { signIn } from "next-auth/react";
 import { Button } from "./ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { useToast } from "@/hooks/use-toast";
 
 interface FormData {
   email: string;
@@ -17,6 +18,7 @@ interface FormData {
 
 export function SignInForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -28,6 +30,7 @@ export function SignInForm() {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
+
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,12 +44,65 @@ export function SignInForm() {
 
     if (result?.error) {
       setError(result.error);
-    } else {
-      router.push("/");
+      toast({
+        title: "Login Failed",
+        description: result.error,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    toast({
+      title: "Login Successful",
+      description: "Checking your profile status...",
+    });
+
+    try {
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+      const userId = sessionData?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: "Session Error",
+          description: "Could not retrieve user ID from session.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const profileRes = await fetch("/api/user/profile-completion-status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const profileData = await profileRes.json();
+
+      if (profileData?.completion < 10) {
+        toast({
+          title: "Incomplete Profile",
+          description: "Please complete your profile to proceed.",
+        });
+        router.push("/user/create-profile");
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "An error occurred while checking profile status.",
+        variant: "destructive",
+      });
+      console.error(err);
     }
 
     setLoading(false);
   };
+
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-zinc-900">
