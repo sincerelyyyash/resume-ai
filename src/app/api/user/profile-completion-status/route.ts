@@ -31,11 +31,14 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
   }
 
-  const totalSections = 6;
+  const totalSections = 9;
   let completedSections = 0;
 
-  if (user.name) completedSections++;
-  if (user.email) completedSections++;
+  if (user.bio) completedSections++
+  if (user.portfolio) completedSections++
+  if (user.linkedin) completedSections++
+  if (user.github) completedSections++
+  if (user.image) completedSections++
   if (user.education?.length > 0) completedSections++;
   if (user.projects?.length > 0) completedSections++;
   if (user.skills?.length > 0) completedSections++;
