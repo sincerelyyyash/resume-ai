@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,6 +7,9 @@ import axios from "axios";
 import ProjectSection from "@/components/profile/ProjectSection";
 import UserProfileHeader from "@/components/profile/UserProfileHeader";
 import { useToast } from "@/hooks/use-toast";
+import ExperienceSection from "@/components/profile/ExperienceSection";
+import SkillsSection from "@/components/profile/SkillsSection";
+import EducationSection from "@/components/profile/EducationSection";
 
 export default function Profile() {
   const { data: session } = useSession();
@@ -49,10 +51,10 @@ export default function Profile() {
     return <p className="text-center text-gray-500 mt-10">Loading...</p>;
   }
 
-  const { personalInfo, projects } = userData;
+  const { personalInfo, projects, experiences, education, skills } = userData;
 
   return (
-    <div className="flex flex-col mt-10 space-y-10">
+    <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl">
       <UserProfileHeader
         name={personalInfo?.name}
         email={personalInfo?.email}
@@ -84,6 +86,80 @@ export default function Profile() {
           toast({
             title: "Project Deleted",
             description: `Project with id ${id} was deleted.`,
+          });
+        }}
+      />
+
+      <ExperienceSection
+        experiences={(experiences || []).map((exp: any, idx: number) => ({
+          id: String(idx),
+          title: exp.jobTitle,
+          company: exp.company,
+          description: exp.description,
+          location: exp.location,
+          start_date: exp.startDate,
+          end_date: exp.endDate,
+        }))}
+        showEdit={false}
+        showAddNew={false}
+        onSave={(experience, isEdit) => {
+          toast({
+            title: isEdit ? "Experience Updated" : "Experience Added",
+            description: `${experience.title} was ${isEdit ? "updated" : "added"} successfully.`,
+          });
+        }}
+        onDelete={(id) => {
+          toast({
+            title: "Experience Deleted",
+            description: `Experience with id ${id} was deleted.`,
+          });
+        }}
+      />
+
+      <SkillsSection
+        skills={(skills || []).map((skill: any, idx: number) => ({
+          id: String(idx),
+          name: skill.name,
+          category: skill.category,
+          level: skill.level,
+          yearsOfExperience: skill.yearsOfExperience,
+        }))}
+        showEdit={false}
+        showAddNew={false}
+        onSave={(skill, isEdit) => {
+          toast({
+            title: isEdit ? "Skill Updated" : "Skill Added",
+            description: `${skill.name} was ${isEdit ? "updated" : "added"} successfully.`,
+          });
+        }}
+        onDelete={(id) => {
+          toast({
+            title: "Skill Deleted",
+            description: `Skill with id ${id} was deleted.`,
+          });
+        }}
+      />
+
+      <EducationSection
+        education={(education || []).map((edu: any, idx: number) => ({
+          id: String(idx),
+          institution: edu.institution,
+          degree: edu.degree,
+          start_date: edu.startDate,
+          end_date: edu.endDate,
+        }))}
+        showEdit={false}
+        showAddNew={false}
+        onSave={(education, isEdit) => {
+          toast({
+            title: isEdit ? "Education Updated" : "Education Added",
+            description: `${education.degree} was ${isEdit ? "updated" : "added"} successfully.`,
+          });
+        }}
+        onDelete={(id) => {
+          toast({
+            title: "Education Deleted",
+            description: `Education with id ${id} was deleted.`,
           });
         }}
       />
