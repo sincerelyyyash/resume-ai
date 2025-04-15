@@ -4,6 +4,7 @@ import { Providers } from "@/components/providers";
 import Appbar from "@/components/Appbar";
 import { Play } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
+import { Footer } from "@/components/Footer";
 
 const play = Play({
   subsets: ["latin"],
@@ -25,12 +26,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased dark:bg-zinc-900 ${play.className}`}>
         <Providers>
-          <header className="flex-none w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Appbar />
-          </header>
-          <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-8 dark:bg-zinc-900 h-screen">
-            {children}
-          </main>
+          <div className="flex flex-col min-h-screen">
+            <header className="flex-none w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <Appbar />
+            </header>
+            <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-8 dark:bg-zinc-900">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </Providers>
         <Toaster />
       </body>

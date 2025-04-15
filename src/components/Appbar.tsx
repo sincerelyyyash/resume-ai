@@ -8,7 +8,7 @@ import { UserMenu } from "./ProfileDropdown";
 const Appbar = () => {
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-white dark:bg-zinc-900 sticky">
+    <nav className="flex justify-between items-center p-4 sticky">
       <Link href="/">
         <div
           className="text-lg md:text-2xl m-4 font-bold text-center bg-clip-text text-transparent
@@ -18,7 +18,7 @@ const Appbar = () => {
         </div>
       </Link>
       <div className="flex space-x-4 items-center">
-        <ModeToggle />
+        {/* <ModeToggle /> */}
         <UserMenu />
       </div>
     </nav>
