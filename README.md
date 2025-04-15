@@ -1,7 +1,7 @@
 # **Resume-AI**  
 **Tailor-made Resumes based on Job Descriptions**
 
-**Resume-AI** is a smart resume builder that customizes resumes to align with specific job descriptions (JDs). Users can upload their professional details (projects, work experience, profiles, etc.), and with each job description, the system leverages AI to parse the requirements and adapt the userÕs resume content accordingly. Once completed, resumes can be downloaded or stored online for easy access.
+**Resume-AI** is a smart resume builder that customizes resumes to align with specific job descriptions (JDs). Users can upload their professional details (projects, work experience, profiles, etc.), and with each job description, the system leverages AI to parse the requirements and adapt the user's resume content accordingly. Once completed, resumes can be downloaded or stored online for easy access.
 
 ## **Features**
 - **Tailored Resumes**: Enter a job description, and Resume-AI generates a resume optimized to fit the specific requirements.
