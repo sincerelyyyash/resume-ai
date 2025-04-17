@@ -4,6 +4,9 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import axios from 'axios';
 
 interface JobDescription {
   id: string;
@@ -15,7 +18,41 @@ interface JobDescription {
 
 export default function SavedJobDescriptions() {
   const { data: session } = useSession();
-  const jobDescriptions: JobDescription[] = []; 
+  const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchJobDescriptions = async () => {
+      if (!session?.user?.email) return;
+  
+      setIsLoading(true); 
+  
+      try {
+        const response = await axios.post("/api/user/get-user", {
+          userId: session.user.id,
+        });
+  
+        const user = response.data?.data || {};
+        setJobDescriptions(user.jobDescriptions || []);
+      } catch (error: any) {
+        console.error("Error fetching job descriptions:", error);
+  
+        toast({
+          title: "Error",
+          description:
+            error?.response?.data?.message ||
+            "Failed to load job descriptions. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false); 
+      }
+    };
+  
+    fetchJobDescriptions();
+  }, [session?.user?.email, toast]);
+  
 
   if (!session) {
     return (
@@ -28,6 +65,21 @@ export default function SavedJobDescriptions() {
             Sign In
           </Button>
         </Link>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="py-8">
+        <h2 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
+          My Saved Job Descriptions
+        </h2>
+        <div className="text-center py-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+          <p className="text-lg text-neutral-600 dark:text-neutral-400">
+            Loading your job descriptions...
+          </p>
+        </div>
       </div>
     );
   }
@@ -70,7 +122,13 @@ export default function SavedJobDescriptions() {
                   variant="ghost"
                   size="icon"
                   className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  onClick={() => navigator.clipboard.writeText(job.description)}
+                  onClick={() => {
+                    navigator.clipboard.writeText(job.description);
+                    toast({
+                      title: "Copied!",
+                      description: "Job description copied to clipboard",
+                    });
+                  }}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>

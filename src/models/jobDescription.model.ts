@@ -11,7 +11,7 @@ export interface JobDescription extends Document {
 const JobDescriptionSchema = new Schema<JobDescription>({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  requirements: [{ type: String, required: true }],
+  // requirements: [{ type: String, required: true }],
   dateUploaded: { type: Date, default: Date.now },
 });
 
