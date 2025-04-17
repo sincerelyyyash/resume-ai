@@ -1,28 +1,84 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  NavbarButton,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
+import { useState } from "react";
 import { ModeToggle } from "./ui/theme-toggle";
 import { UserMenu } from "./ProfileDropdown";
+import { useSession } from "next-auth/react";
 
-const Appbar = () => {
+export default function Appbar() {
+  const { data: session } = useSession();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    {
+      name: "Home",
+      link: "/",
+    },
+    {
+      name: "Dashboard",
+      link: "/dashboard",
+    },
+    {
+      name: "Profile",
+      link: "/user/profile",
+    },
+  ];
 
   return (
-    <nav className="flex justify-between items-center p-4 sticky">
-      <Link href="/">
-        <div
-          className="text-lg md:text-2xl m-4 font-bold text-center bg-clip-text text-transparent
-          bg-gradient-to-b from-neutral-900 to-neutral-600 dark:from-neutral-50 dark:to-neutral-400 bg-opacity-50"
-        >
-          Resume-AI
-        </div>
-      </Link>
-      <div className="flex space-x-4 items-center">
-        {/* <ModeToggle /> */}
-        <UserMenu />
-      </div>
-    </nav>
-  );
-};
+    <div className="relative w-full">
+      <Navbar>
+        {/* Desktop Navigation */}
+        <NavBody>
+          <NavbarLogo />
+          <NavItems items={navItems} />
+          <div className="flex items-center gap-4 z-50">
+            {/* <ModeToggle /> */}
+            <UserMenu />
+          </div>
+        </NavBody>
 
-export default Appbar;
+        {/* Mobile Navigation */}
+        <MobileNav>
+          <MobileNavHeader>
+            <NavbarLogo />
+            <div className="flex items-center gap-4">
+              {/* <ModeToggle /> */}
+              <UserMenu />
+              <MobileNavToggle
+                isOpen={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
+            </div>
+          </MobileNavHeader>
+
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
+            {navItems.map((item, idx) => (
+              <a
+                key={`mobile-link-${idx}`}
+                href={item.link}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="relative text-neutral-600 dark:text-neutral-300"
+              >
+                <span className="block">{item.name}</span>
+              </a>
+            ))}
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
+    </div>
+  );
+}
