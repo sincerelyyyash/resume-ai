@@ -38,10 +38,30 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    if (projects) user.projects = projects;
-    if (educations) user.education = educations;
-    if (experiences) user.experiences = experiences;
-    if (skills) user.skills = skills;
+    if (projects) {
+      user.projects = [...(user.projects || []), ...projects];
+    }
+    if (educations) {
+      user.education = [...(user.education || []), ...educations];
+    }
+    if (experiences) {
+      user.experiences = [...(user.experiences || []), ...experiences];
+    }
+    if (skills) {
+
+      const existingSkills = user.skills || [];
+      const newSkills = skills.reduce((acc: any[], skill: any) => {
+        const existingCategory = acc.find(s => s.category === skill.category);
+        if (existingCategory) {
+
+          existingCategory.items = [...new Set([...existingCategory.items, ...skill.items])];
+        } else {
+          acc.push(skill);
+        }
+        return acc;
+      }, [...existingSkills]);
+      user.skills = newSkills;
+    }
 
     await user.save();
   } catch (error) {
