@@ -61,7 +61,7 @@ export default function SavedJobDescriptions() {
           Login to view your saved job descriptions
         </h2>
         <Link href="/signin">
-          <Button className="bg-gradient-to-br from-black to-zinc-800 hover:from-zinc-900 hover:to-black text-white">
+          <Button>
             Sign In
           </Button>
         </Link>

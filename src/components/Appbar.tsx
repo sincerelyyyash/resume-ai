@@ -6,13 +6,11 @@ import {
   NavItems,
   MobileNav,
   NavbarLogo,
-  NavbarButton,
   MobileNavHeader,
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useState } from "react";
-import { ModeToggle } from "./ui/theme-toggle";
 import { UserMenu } from "./ProfileDropdown";
 import { useSession } from "next-auth/react";
 
@@ -20,20 +18,18 @@ export default function Appbar() {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    {
-      name: "Home",
-      link: "/",
-    },
-    {
-      name: "Dashboard",
-      link: "/dashboard",
-    },
-    {
-      name: "Profile",
-      link: "/user/profile",
-    },
-  ];
+  const navItems = session
+    ? [
+        {
+          name: "Dashboard",
+          link: "/dashboard",
+        },
+        {
+          name: "Profile",
+          link: "/user/profile",
+        },
+      ]
+    : [];
 
   return (
     <div className="relative w-full">
@@ -41,7 +37,7 @@ export default function Appbar() {
         {/* Desktop Navigation */}
         <NavBody>
           <NavbarLogo />
-          <NavItems items={navItems} />
+          {session && <NavItems items={navItems} />}
           <div className="flex items-center gap-4 z-50">
             {/* <ModeToggle /> */}
             <UserMenu />
@@ -66,16 +62,17 @@ export default function Appbar() {
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
           >
-            {navItems.map((item, idx) => (
-              <a
-                key={`mobile-link-${idx}`}
-                href={item.link}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="relative text-neutral-600 dark:text-neutral-300"
-              >
-                <span className="block">{item.name}</span>
-              </a>
-            ))}
+            {session &&
+              navItems.map((item, idx) => (
+                <a
+                  key={`mobile-link-${idx}`}
+                  href={item.link}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="relative text-neutral-600 dark:text-neutral-300"
+                >
+                  <span className="block">{item.name}</span>
+                </a>
+              ))}
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
