@@ -1,17 +1,22 @@
+"use client"
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { MotionDiv } from "./MotionDiv";
 import { Cover } from "@/components/ui/cover";
+import { useSession } from "next-auth/react";
 
 export const Hero = () => {
+  const { data: session } = useSession(); 
+  const isLoggedIn = !!session;
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-900" />
-      
+
       {/* Animated background dots */}
       <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)]" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <MotionDiv
@@ -35,19 +40,28 @@ export const Hero = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link href="/signup">
-              <Button size="lg" 
-              // className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-              >
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/demo">
-              <Button size="lg" variant="outline" className="border-2">
-                Try Demo
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <Button size="lg">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/signup">
+                  <Button size="lg">
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/demo">
+                  <Button size="lg" variant="outline" className="border-2">
+                    Try Demo
+                  </Button>
+                </Link>
+              </>
+            )}
           </MotionDiv>
 
           <MotionDiv
@@ -76,4 +90,4 @@ export const Hero = () => {
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white dark:from-zinc-900 to-transparent" />
     </section>
   );
-}; 
+};
