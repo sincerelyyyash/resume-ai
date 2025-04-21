@@ -131,13 +131,13 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
 
   return (
     <MotionDiv className="mb-12 mx-10">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Projects</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white ">Projects</h2>
 
       <div className="space-y-6">
         {projects.map((proj) => (
           <div
             key={proj.id}
-            className="relative bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-gray-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="relative bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700 p-6"
           >
             <div className="absolute top-16 right-6 text-sm text-gray-500 dark:text-gray-400">
               {new Date(proj.start_date).toLocaleDateString()} - {new Date(proj.end_date).toLocaleDateString()}

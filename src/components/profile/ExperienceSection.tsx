@@ -145,7 +145,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
         {experiences.map((exp) => (
           <div
             key={exp.id}
-            className="relative bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-gray-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
           >
             <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
               {new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}
