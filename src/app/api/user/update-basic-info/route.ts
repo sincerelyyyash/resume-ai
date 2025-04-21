@@ -1,6 +1,5 @@
-import dbConnect from "@/lib/mongoDbConnect";
+import { prisma } from "@/lib/prisma";
 import { ZodError, z } from "zod";
-import User from "@/models/user.model";
 
 const userInfoSchema = z.object({
   userId: z.string(),
@@ -25,12 +24,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    await dbConnect();
-
     const parsedData = userInfoSchema.parse(body);
     const { userId, ...fieldsToUpdate } = parsedData;
 
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
     if (!user) {
       return new Response(
         JSON.stringify({ message: "User not found" }),
@@ -38,13 +38,15 @@ export async function POST(req: Request) {
       );
     }
 
-    for (const key of Object.keys(fieldsToUpdate) as (keyof typeof fieldsToUpdate)[]) {
-      if (fieldsToUpdate[key] !== undefined) {
-        user[key] = fieldsToUpdate[key];
-      }
-    }
+    // Filter out undefined values
+    const updateData = Object.fromEntries(
+      Object.entries(fieldsToUpdate).filter(([_, value]) => value !== undefined)
+    );
 
-    await user.save();
+    await prisma.user.update({
+      where: { id: userId },
+      data: updateData
+    });
 
     return new Response(
       JSON.stringify({ message: "User info updated successfully" }),

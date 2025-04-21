@@ -1,9 +1,10 @@
+import NextAuth, { AuthOptions } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import {prisma} from "@/lib/prisma"
 import GoogleProvider from "next-auth/providers/google";
-import GitHubProvider from "next-auth/providers/github";
-import NextAuth, { AuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
+import GithubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from "bcryptjs";
 import { credentialsSchema } from "@/types/signin.schema";
 
 declare module 'next-auth' {
@@ -20,90 +21,130 @@ declare module 'next-auth' {
   }
 }
 
-const authOptions: AuthOptions = {
+export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID || "",
-      clientSecret: process.env.GITHUB_SECRET || "",
-    }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    GithubProvider({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
     CredentialsProvider({
-      name: 'Credentials',
+      name: "credentials",
       credentials: {
-        email: { label: 'Email', type: 'text', placeholder: 'email@example.com' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
-
-        try {
-          credentialsSchema.parse(credentials);
-        } catch (error) {
-          throw new Error('Invalid credentials format');
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Invalid credentials");
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: {
+            email: credentials.email,
+          },
         });
 
-        if (!user || !user.password) {
-          throw new Error('Invalid email or password');
+        if (!user || !user?.password) {
+          throw new Error("Invalid credentials");
         }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
-        if (!isValidPassword) {
-          throw new Error('Invalid email or password');
+        const isCorrectPassword = await compare(
+          credentials.password,
+          user.password
+        );
+
+        if (!isCorrectPassword) {
+          throw new Error("Invalid credentials");
         }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          bio: user.bio,
-          portfolio: user.portfolio,
-          linkedin: user.linkedin,
-          github: user.github,
-        };
+        return user;
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET || 'secret',
   pages: {
     signIn: '/signin',
+    error: '/signin',
   },
+  session: {
+    strategy: "jwt" as const,
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
-    async session({ token, session }) {
-      if (token?.sub) {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account?.provider === "credentials") {
+        return true;
+      }
+
+      if (account?.provider === "google" || account?.provider === "github") {
         try {
-          const user = await prisma.user.findUnique({
-            where: { id: token.sub }
+          // Check if user exists with this email
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            include: { accounts: true },
           });
 
-          if (user) {
-            session.user = {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              bio: user.bio,
-              portfolio: user.portfolio,
-              linkedin: user.linkedin,
-              github: user.github,
-            };
+          if (existingUser) {
+            // Check if user has an account with this provider
+            const hasProviderAccount = existingUser.accounts.some(
+              (acc) => acc.provider === account.provider
+            );
+
+            if (!hasProviderAccount) {
+              // Link the new OAuth account to the existing user
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+              });
+            }
+            return true;
           }
+
+          // Create new user if doesn't exist
+          await prisma.user.create({
+            data: {
+              email: user.email!,
+              name: user.name!,
+              image: user.image,
+              accounts: {
+                create: {
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+              },
+            },
+          });
+          return true;
         } catch (error) {
-          console.error("Error finding user by ID:", error);
+          console.error("Error in signIn callback:", error);
+          return false;
         }
       }
-      return session;
+      return false;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.sub = user.id;
+    async session({ session, token }: any) {
+      if (session?.user) {
+        session.user.id = token.sub;
       }
-      return token;
+      return session;
     },
   },
 };

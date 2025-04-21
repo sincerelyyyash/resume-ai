@@ -1,11 +1,10 @@
-
-import User from "@/models/user.model";
-import dbConnect from "@/lib/mongoDbConnect";
+import { prisma } from "@/lib/prisma";
 import { userIdSchema } from "@/types/userId.schema";
 import { ZodError } from "zod";
+import { User, UserResponse, Project, Experience, Skill, Education } from "@/types/prisma.types";
 
 export async function POST(req: Request) {
-  let userId;
+  let userId: string;
   try {
     const body = await req.json();
     userId = body.userId;
@@ -15,8 +14,6 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-
-  await dbConnect();
 
   try {
     userIdSchema.parse({ userId });
@@ -38,7 +35,18 @@ export async function POST(req: Request) {
   }
 
   try {
-    const user = await User.findById(userId).select("-password");
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        projects: true,
+        experiences: true,
+        skills: true,
+        education: true,
+        savedResumes: true,
+        jobDescriptions: true,
+      }
+    }) as User | null;
+
     if (!user) {
       return new Response(
         JSON.stringify({ status: "error", message: "User not found" }),
@@ -46,49 +54,49 @@ export async function POST(req: Request) {
       );
     }
 
-    const structuredResponse = {
+    const { password, ...userWithoutPassword } = user;
+
+    const structuredResponse: UserResponse = {
       status: "success",
       message: "User data fetched successfully",
       data: {
         personalInfo: {
-          // id: user._id,
-          email: user.email,
-          name: user.name,
-          bio: user.bio,
-          linkedin: user.linkedin,
-          github: user.github,
-          image: user.image,
+          email: userWithoutPassword.email,
+          name: userWithoutPassword.name,
+          bio: userWithoutPassword.bio,
+          linkedin: userWithoutPassword.linkedin,
+          github: userWithoutPassword.github,
+          image: userWithoutPassword.image,
         },
-        projects: user.projects.map((project) => ({
-          name: project.name,
-          technologies: project.technologies,
+        projects: userWithoutPassword.projects.map((project: Project) => ({
+          title: project.title,
+          description: project.description,
           url: project.url,
           startDate: project.startDate,
           endDate: project.endDate,
-          achievements: project.achievements,
         })),
-        experiences: user.experiences.map((experience) => ({
-          jobTitle: experience.jobTitle,
+        experiences: userWithoutPassword.experiences.map((experience: Experience) => ({
+          title: experience.title,
           company: experience.company,
           startDate: experience.startDate,
           endDate: experience.endDate,
           description: experience.description,
-          location: experience.location,
+          location: experience.company,
         })),
-        skills: user.skills.map((skill) => ({
+        skills: userWithoutPassword.skills.map((skill: Skill) => ({
           name: skill.name,
           category: skill.category,
           level: skill.level,
           yearsOfExperience: skill.yearsOfExperience,
         })),
-        education: user.education.map((edu) => ({
+        education: userWithoutPassword.education.map((edu: Education) => ({
           institution: edu.institution,
           degree: edu.degree,
           startDate: edu.startDate,
           endDate: edu.endDate,
         })),
-        savedResumes: user.savedResumes,
-        jobDescriptions: user.jobDescriptions,
+        savedResumes: userWithoutPassword.savedResumes,
+        jobDescriptions: userWithoutPassword.jobDescriptions,
       },
     };
 

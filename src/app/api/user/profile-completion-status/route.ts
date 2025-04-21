@@ -1,5 +1,4 @@
-import dbConnect from "@/lib/mongoDbConnect";
-import User from "@/models/user.model";
+import { prisma } from "@/lib/prisma";
 import { userIdSchema } from "@/types/userId.schema";
 import { ZodError } from "zod";
 
@@ -11,8 +10,6 @@ export async function POST(req: Request) {
   } catch {
     return new Response(JSON.stringify({ message: "Invalid JSON body" }), { status: 400 });
   }
-
-  await dbConnect();
 
   try {
     userIdSchema.parse({ userId });
@@ -26,7 +23,16 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ message: "Unexpected error" }), { status: 500 });
   }
 
-  const user = await User.findById(userId).select("-password");
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      education: true,
+      projects: true,
+      skills: true,
+      experiences: true,
+    }
+  });
+
   if (!user) {
     return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
   }

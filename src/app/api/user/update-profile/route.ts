@@ -1,6 +1,5 @@
-import dbConnect from "@/lib/mongoDbConnect";
+import { prisma } from "@/lib/prisma";
 import { ZodError, z } from "zod";
-import User from "@/models/user.model";
 
 const partialFormSchema = z.object({
   userId: z.string(),
@@ -30,40 +29,71 @@ export async function PATCH(req: Request) {
 
   const { userId, projects, educations, experiences, skills } = body;
 
-  await dbConnect();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      projects: true,
+      education: true,
+      experiences: true,
+      skills: true,
+    }
+  });
 
-  const user = await User.findById(userId);
   if (!user) {
     return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
   }
 
   try {
     if (projects) {
-      user.projects = [...(user.projects || []), ...projects];
+      await prisma.project.createMany({
+        data: projects.map((project: any) => ({
+          ...project,
+          userId,
+        })),
+      });
     }
-    if (educations) {
-      user.education = [...(user.education || []), ...educations];
-    }
-    if (experiences) {
-      user.experiences = [...(user.experiences || []), ...experiences];
-    }
-    if (skills) {
 
-      const existingSkills = user.skills || [];
+    if (educations) {
+      await prisma.education.createMany({
+        data: educations.map((education: any) => ({
+          ...education,
+          userId,
+        })),
+      });
+    }
+
+    if (experiences) {
+      await prisma.experience.createMany({
+        data: experiences.map((experience: any) => ({
+          ...experience,
+          userId,
+        })),
+      });
+    }
+
+    if (skills) {
+      const existingSkills = user.skills;
       const newSkills = skills.reduce((acc: any[], skill: any) => {
         const existingCategory = acc.find(s => s.category === skill.category);
         if (existingCategory) {
-
           existingCategory.items = [...new Set([...existingCategory.items, ...skill.items])];
         } else {
           acc.push(skill);
         }
         return acc;
       }, [...existingSkills]);
-      user.skills = newSkills;
-    }
 
-    await user.save();
+      // Delete existing skills and create new ones
+      await prisma.$transaction([
+        prisma.skill.deleteMany({ where: { userId } }),
+        prisma.skill.createMany({
+          data: newSkills.map((skill: any) => ({
+            ...skill,
+            userId,
+          })),
+        }),
+      ]);
+    }
   } catch (error) {
     return new Response(
       JSON.stringify({ message: "Error saving user data", error }),

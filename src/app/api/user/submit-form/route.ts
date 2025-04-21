@@ -1,12 +1,10 @@
-import dbConnect from "@/lib/mongoDbConnect";
+import { prisma } from "@/lib/prisma";
 import { ZodError } from "zod";
-import User from "@/models/user.model";
 import { formSchema } from "@/types/form.schema";
 
 export async function POST(req: Request) {
   const { userId, projects, educations, experiences, skills } = await req.json();
 
-  await dbConnect();
   try {
     formSchema.parse({ userId, projects, educations, experiences, skills });
   } catch (error) {
@@ -16,18 +14,50 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ message: "An unexpected error occurred" }), { status: 500 });
   }
 
-  const user = await User.findById(userId);
+  const user = await prisma.user.findUnique({
+    where: { id: userId }
+  });
 
   if (!user) {
     return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
   }
 
   try {
-    user.projects = projects;
-    user.education = educations;
-    user.experiences = experiences;
-    user.skills = skills;
-    await user.save();
+    // Delete existing related records
+    await prisma.$transaction([
+      prisma.project.deleteMany({ where: { userId } }),
+      prisma.education.deleteMany({ where: { userId } }),
+      prisma.experience.deleteMany({ where: { userId } }),
+      prisma.skill.deleteMany({ where: { userId } }),
+    ]);
+
+    // Create new records
+    await prisma.$transaction([
+      prisma.project.createMany({
+        data: projects.map((project: any) => ({
+          ...project,
+          userId,
+        })),
+      }),
+      prisma.education.createMany({
+        data: educations.map((education: any) => ({
+          ...education,
+          userId,
+        })),
+      }),
+      prisma.experience.createMany({
+        data: experiences.map((experience: any) => ({
+          ...experience,
+          userId,
+        })),
+      }),
+      prisma.skill.createMany({
+        data: skills.map((skill: any) => ({
+          ...skill,
+          userId,
+        })),
+      }),
+    ]);
   } catch (error) {
     return new Response(JSON.stringify({ message: "An unexpected error occurred while saving data", error }), { status: 500 });
   }
