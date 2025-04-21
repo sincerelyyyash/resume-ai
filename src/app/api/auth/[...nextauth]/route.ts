@@ -3,10 +3,7 @@ import GitHubProvider from "next-auth/providers/github";
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import mongoose from 'mongoose';
-import dbConnect from '@/lib/mongoDbConnect';
-import User, { UserDocument } from '@/models/user.model';
-import { NextApiHandler } from 'next';
+import { prisma } from '@/lib/prisma';
 import { credentialsSchema } from "@/types/signin.schema";
 
 declare module 'next-auth' {
@@ -42,15 +39,16 @@ const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials) return null;
 
-        await dbConnect();
-
         try {
           credentialsSchema.parse(credentials);
         } catch (error) {
           throw new Error('Invalid credentials format');
         }
 
-        const user = await User.findOne({ email: credentials.email }) as UserDocument;
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        });
+
         if (!user || !user.password) {
           throw new Error('Invalid email or password');
         }
@@ -61,7 +59,7 @@ const authOptions: AuthOptions = {
         }
 
         return {
-          id: user._id.toString(),
+          id: user.id,
           name: user.name,
           email: user.email,
           bio: user.bio,
@@ -80,11 +78,13 @@ const authOptions: AuthOptions = {
     async session({ token, session }) {
       if (token?.sub) {
         try {
-          const userId = new mongoose.Types.ObjectId(token.sub);
-          const user = await User.findById(userId) as UserDocument;
+          const user = await prisma.user.findUnique({
+            where: { id: token.sub }
+          });
+
           if (user) {
             session.user = {
-              id: user._id.toString(),
+              id: user.id,
               name: user.name,
               email: user.email,
               bio: user.bio,
@@ -108,6 +108,6 @@ const authOptions: AuthOptions = {
   },
 };
 
-const handler: NextApiHandler = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
