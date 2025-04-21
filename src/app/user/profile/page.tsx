@@ -74,8 +74,8 @@ export default function Profile() {
           end_date: p.endDate,
           project_url: p.url,
         }))}
-        showEdit={false}
-        showAddNew={false}
+        showEdit={true}
+        showAddNew={true}
         onSave={(project, isEdit) => {
           toast({
             title: isEdit ? "Project Updated" : "Project Added",
@@ -100,8 +100,8 @@ export default function Profile() {
           start_date: exp.startDate,
           end_date: exp.endDate,
         }))}
-        showEdit={false}
-        showAddNew={false}
+        showEdit={true}
+        showAddNew={true}
         onSave={(experience, isEdit) => {
           toast({
             title: isEdit ? "Experience Updated" : "Experience Added",
@@ -124,8 +124,8 @@ export default function Profile() {
           level: skill.level,
           yearsOfExperience: skill.yearsOfExperience,
         }))}
-        showEdit={false}
-        showAddNew={false}
+        showEdit={true}
+        showAddNew={true}
         onSave={(skill, isEdit) => {
           toast({
             title: isEdit ? "Skill Updated" : "Skill Added",
@@ -148,8 +148,8 @@ export default function Profile() {
           start_date: edu.startDate,
           end_date: edu.endDate,
         }))}
-        showEdit={false}
-        showAddNew={false}
+        showEdit={true}
+        showAddNew={true}
         onSave={(education, isEdit) => {
           toast({
             title: isEdit ? "Education Updated" : "Education Added",
