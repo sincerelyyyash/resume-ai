@@ -1,105 +1,89 @@
 import { prisma } from "@/lib/prisma";
-import { ZodError, z } from "zod";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextResponse } from "next/server";
+import { profileSchema } from "@/types/profile.schema";
+import { ZodError } from "zod";
 
-const partialFormSchema = z.object({
-  userId: z.string(),
-  projects: z.optional(z.array(z.any())),
-  educations: z.optional(z.array(z.any())),
-  experiences: z.optional(z.array(z.any())),
-  skills: z.optional(z.array(z.any())),
-});
-
-export async function PATCH(req: Request) {
-  let body;
-
+export async function POST(req: Request) {
   try {
-    body = await req.json();
-  } catch {
-    return new Response(JSON.stringify({ message: "Invalid JSON" }), { status: 400 });
-  }
+    const session = await getServerSession(authOptions);
 
-  try {
-    partialFormSchema.parse(body);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return new Response(JSON.stringify({ message: error.errors.map((err) => err.message) }), { status: 400 });
-    }
-    return new Response(JSON.stringify({ message: "Unexpected validation error" }), { status: 500 });
-  }
-
-  const { userId, projects, educations, experiences, skills } = body;
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      projects: true,
-      education: true,
-      experiences: true,
-      skills: true,
-    }
-  });
-
-  if (!user) {
-    return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
-  }
-
-  try {
-    if (projects) {
-      await prisma.project.createMany({
-        data: projects.map((project: any) => ({
-          ...project,
-          userId,
-        })),
-      });
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Authentication required",
+          details: "You must be logged in to update profile"
+        },
+        { status: 401 }
+      );
     }
 
-    if (educations) {
-      await prisma.education.createMany({
-        data: educations.map((education: any) => ({
-          ...education,
-          userId,
-        })),
-      });
+    const body = await req.json();
+
+    try {
+      profileSchema.parse(body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Validation failed",
+            details: error.errors.map((err) => ({
+              field: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Validation error",
+          details: "An unexpected validation error occurred"
+        },
+        { status: 400 }
+      );
     }
 
-    if (experiences) {
-      await prisma.experience.createMany({
-        data: experiences.map((experience: any) => ({
-          ...experience,
-          userId,
-        })),
-      });
-    }
+    const user = await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        name: body.name,
+        bio: body.bio,
+        portfolio: body.portfolio,
+        linkedin: body.linkedin,
+        github: body.github,
+        image: body.image,
+      },
+    });
 
-    if (skills) {
-      const existingSkills = user.skills;
-      const newSkills = skills.reduce((acc: any[], skill: any) => {
-        const existingCategory = acc.find(s => s.category === skill.category);
-        if (existingCategory) {
-          existingCategory.items = [...new Set([...existingCategory.items, ...skill.items])];
-        } else {
-          acc.push(skill);
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Profile updated successfully",
+        data: {
+          name: user.name,
+          bio: user.bio,
+          portfolio: user.portfolio,
+          linkedin: user.linkedin,
+          github: user.github,
+          image: user.image,
         }
-        return acc;
-      }, [...existingSkills]);
-
-      // Delete existing skills and create new ones
-      await prisma.$transaction([
-        prisma.skill.deleteMany({ where: { userId } }),
-        prisma.skill.createMany({
-          data: newSkills.map((skill: any) => ({
-            ...skill,
-            userId,
-          })),
-        }),
-      ]);
-    }
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    return new Response(
-      JSON.stringify({ message: "Error saving user data", error }),
+    console.error("Error updating profile:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Server error",
+        details: "An unexpected error occurred while updating profile"
+      },
       { status: 500 }
     );
   }
-
-  return new Response(JSON.stringify({ message: "Profile updated successfully" }), { status: 200 });
 }

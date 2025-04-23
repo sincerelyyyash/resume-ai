@@ -1,67 +1,86 @@
 import { prisma } from "@/lib/prisma";
-import { ZodError, z } from "zod";
-
-const userInfoSchema = z.object({
-  userId: z.string(),
-  email: z.string().email().optional(),
-  name: z.string().optional(),
-  bio: z.string().optional(),
-  portfolio: z.string().url().optional(),
-  linkedin: z.string().url().optional(),
-  github: z.string().url().optional(),
-});
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextResponse } from "next/server";
+import { ZodError } from "zod";
+import { basicInfoSchema } from "@/types/basicInfo.schema";
 
 export async function POST(req: Request) {
-  let body: unknown;
-
   try {
-    body = await req.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ message: "Invalid JSON format in request body" }),
-      { status: 400 }
-    );
-  }
+    const session = await getServerSession(authOptions);
 
-  try {
-    const parsedData = userInfoSchema.parse(body);
-    const { userId, ...fieldsToUpdate } = parsedData;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return new Response(
-        JSON.stringify({ message: "User not found" }),
-        { status: 404 }
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Authentication required",
+          details: "You must be logged in to update basic info"
+        },
+        { status: 401 }
       );
     }
 
-    // Filter out undefined values
-    const updateData = Object.fromEntries(
-      Object.entries(fieldsToUpdate).filter(([_, value]) => value !== undefined)
-    );
+    const body = await req.json();
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: updateData
-    });
-
-    return new Response(
-      JSON.stringify({ message: "User info updated successfully" }),
-      { status: 200 }
-    );
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return new Response(
-        JSON.stringify({ message: error.errors.map(err => err.message) }),
+    try {
+      basicInfoSchema.parse(body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Validation failed",
+            details: error.errors.map((err) => ({
+              field: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Validation error",
+          details: "An unexpected validation error occurred"
+        },
         { status: 400 }
       );
     }
 
-    return new Response(
-      JSON.stringify({ message: "An unexpected error occurred", error }),
+    const user = await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        name: body.name,
+        bio: body.bio,
+        portfolio: body.portfolio,
+        linkedin: body.linkedin,
+        github: body.github,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Basic info updated successfully",
+        data: {
+          name: user.name,
+          bio: user.bio,
+          portfolio: user.portfolio,
+          linkedin: user.linkedin,
+          github: user.github,
+        }
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating basic info:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Server error",
+        details: "An unexpected error occurred while updating basic info"
+      },
       { status: 500 }
     );
   }

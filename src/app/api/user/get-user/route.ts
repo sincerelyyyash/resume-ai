@@ -1,109 +1,60 @@
 import { prisma } from "@/lib/prisma";
-import { userIdSchema } from "@/types/userId.schema";
-import { ZodError } from "zod";
-import { User, UserResponse, Project, Experience, Skill, Education } from "@/types/prisma.types";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  let userId: string;
+export async function GET() {
   try {
-    const body = await req.json();
-    userId = body.userId;
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ status: "error", message: "Invalid JSON format in request body" }),
-      { status: 400 }
-    );
-  }
+    const session = await getServerSession(authOptions);
 
-  try {
-    userIdSchema.parse({ userId });
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return new Response(
-        JSON.stringify({
-          status: "error",
-          message: "Validation failed",
-          errors: error.errors.map((err) => err.message),
-        }),
-        { status: 400 }
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Authentication required",
+          details: "You must be logged in to access user data"
+        },
+        { status: 401 }
       );
     }
-    return new Response(
-      JSON.stringify({ status: "error", message: "An unexpected error occurred" }),
-      { status: 500 }
-    );
-  }
 
-  try {
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: session.user.id },
       include: {
         projects: true,
         experiences: true,
         skills: true,
         education: true,
-        savedResumes: true,
-        jobDescriptions: true,
-      }
-    }) as User | null;
+      },
+    });
 
     if (!user) {
-      return new Response(
-        JSON.stringify({ status: "error", message: "User not found" }),
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User not found",
+          details: "The authenticated user could not be found in the database"
+        },
         { status: 404 }
       );
     }
 
-    const { password, ...userWithoutPassword } = user;
-
-    const structuredResponse: UserResponse = {
-      status: "success",
-      message: "User data fetched successfully",
-      data: {
-        personalInfo: {
-          email: userWithoutPassword.email,
-          name: userWithoutPassword.name,
-          bio: userWithoutPassword.bio,
-          linkedin: userWithoutPassword.linkedin,
-          github: userWithoutPassword.github,
-          image: userWithoutPassword.image,
-        },
-        projects: userWithoutPassword.projects.map((project: Project) => ({
-          title: project.title,
-          description: project.description,
-          url: project.url,
-          startDate: project.startDate,
-          endDate: project.endDate,
-        })),
-        experiences: userWithoutPassword.experiences.map((experience: Experience) => ({
-          title: experience.title,
-          company: experience.company,
-          startDate: experience.startDate,
-          endDate: experience.endDate,
-          description: experience.description,
-          location: experience.company,
-        })),
-        skills: userWithoutPassword.skills.map((skill: Skill) => ({
-          name: skill.name,
-          category: skill.category,
-          level: skill.level,
-          yearsOfExperience: skill.yearsOfExperience,
-        })),
-        education: userWithoutPassword.education.map((edu: Education) => ({
-          institution: edu.institution,
-          degree: edu.degree,
-          startDate: edu.startDate,
-          endDate: edu.endDate,
-        })),
-        savedResumes: userWithoutPassword.savedResumes,
-        jobDescriptions: userWithoutPassword.jobDescriptions,
+    return NextResponse.json(
+      {
+        success: true,
+        message: "User data retrieved successfully",
+        data: user
       },
-    };
-
-    return new Response(JSON.stringify(structuredResponse), { status: 200 });
+      { status: 200 }
+    );
   } catch (error) {
-    return new Response(
-      JSON.stringify({ status: "error", message: "An unexpected error occurred" }),
+    console.error("Error fetching user data:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Server error",
+        details: "An unexpected error occurred while fetching user data"
+      },
       { status: 500 }
     );
   }

@@ -1,62 +1,78 @@
 import { prisma } from "@/lib/prisma";
-import { userIdSchema } from "@/types/userId.schema";
-import { ZodError } from "zod";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  let userId;
+export async function GET() {
   try {
-    const body = await req.json();
-    userId = body.userId;
-  } catch {
-    return new Response(JSON.stringify({ message: "Invalid JSON body" }), { status: 400 });
-  }
+    const session = await getServerSession(authOptions);
 
-  try {
-    userIdSchema.parse({ userId });
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return new Response(
-        JSON.stringify({ message: error.errors.map((e) => e.message) }),
-        { status: 400 }
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Authentication required",
+          details: "You must be logged in to check profile completion status"
+        },
+        { status: 401 }
       );
     }
-    return new Response(JSON.stringify({ message: "Unexpected error" }), { status: 500 });
-  }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      education: true,
-      projects: true,
-      skills: true,
-      experiences: true,
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        projects: true,
+        experiences: true,
+        skills: true,
+        education: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User not found",
+          details: "The authenticated user could not be found in the database"
+        },
+        { status: 404 }
+      );
     }
-  });
 
-  if (!user) {
-    return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
+    const completionStatus = {
+      basicInfo: Boolean(user.name && user.email),
+      projects: user.projects.length > 0,
+      experiences: user.experiences.length > 0,
+      skills: user.skills.length > 0,
+      education: user.education.length > 0,
+    };
+
+    const totalSteps = 5;
+    const completedSteps = Object.values(completionStatus).filter(Boolean).length;
+    const completionPercentage = (completedSteps / totalSteps) * 100;
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Profile completion status retrieved successfully",
+        data: {
+          status: completionStatus,
+          completionPercentage,
+          completedSteps,
+          totalSteps
+        }
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error checking profile completion status:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Server error",
+        details: "An unexpected error occurred while checking profile completion status"
+      },
+      { status: 500 }
+    );
   }
-
-  const totalSections = 9;
-  let completedSections = 0;
-
-  if (user.bio) completedSections++
-  if (user.portfolio) completedSections++
-  if (user.linkedin) completedSections++
-  if (user.github) completedSections++
-  if (user.image) completedSections++
-  if (user.education?.length > 0) completedSections++;
-  if (user.projects?.length > 0) completedSections++;
-  if (user.skills?.length > 0) completedSections++;
-  if (user.experiences?.length > 0) completedSections++;
-
-  const completionPercentage = Math.round((completedSections / totalSections) * 100);
-
-  return new Response(
-    JSON.stringify({
-      message: "Profile completion calculated",
-      completion: completionPercentage,
-    }),
-    { status: 200 }
-  );
 }
