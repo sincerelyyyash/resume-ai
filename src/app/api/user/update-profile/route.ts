@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
-import { profileSchema } from "@/types/profile.schema";
+
 import { ZodError } from "zod";
+import { profileSchema } from "@/types/profile.schema";
 
 export async function POST(req: Request) {
   try {
