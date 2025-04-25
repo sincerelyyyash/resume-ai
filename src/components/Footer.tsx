@@ -32,18 +32,51 @@ const footerLinks = {
 
 export const Footer = () => {
   return (
-    <footer className="w-full pt-10">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Product Links */}
+    <footer className="w-full border-t border-zinc-200 dark:border-zinc-800">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Main Contact Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Product</h3>
-            <ul className="space-y-3">
+            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Contact Information</h3>
+            <div className="space-y-2">
+              <p className="text-zinc-600 dark:text-zinc-400">Email: contact@resume-ai.com</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Website: www.resume-ai.com</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Location: Remote</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Connect With Us</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {footerLinks.social.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    <span className="text-sm">{link.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-3">Product</h3>
+            <ul className="space-y-2">
               {footerLinks.product.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -52,15 +85,14 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Company Links */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Company</h3>
-            <ul className="space-y-3">
+            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-3">Company</h3>
+            <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -69,15 +101,14 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal Links */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Legal</h3>
-            <ul className="space-y-3">
+            <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-3">Legal</h3>
+            <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -85,33 +116,10 @@ export const Footer = () => {
               ))}
             </ul>
           </div>
-
-          {/* Social Links */}
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Connect</h3>
-            <ul className="space-y-3">
-              {footerLinks.social.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                    >
-                      <Icon className="w-4 h-4 mr-2" />
-                      {link.name}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
+        {/* Copyright Section */}
+        <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -124,12 +132,12 @@ export const Footer = () => {
                 >
                   <motion.span
                     whileHover={{ scale: 1.05 }}
-                    className="relative z-10 font-semibold text-zinc-900 dark:text-zinc-100"
+                    className="relative z-10 font-semibold text-zinc-800 dark:text-zinc-200"
                   >
                     Yash Thakur
                   </motion.span>
                   <motion.span
-                    className="absolute bottom-0 left-0 h-2 w-full bg-blue-200 dark:bg-blue-800 opacity-50 group-hover:opacity-100 transition-opacity"
+                    className="absolute bottom-0 left-0 h-1 w-full bg-blue-200 dark:bg-blue-800 opacity-50 group-hover:opacity-100 transition-opacity"
                     initial={{ scaleX: 0 }}
                     whileHover={{ scaleX: 1 }}
                     transition={{ duration: 0.2 }}
