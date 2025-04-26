@@ -50,7 +50,7 @@ export const Testimonials = () => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className="w-4 h-4 text-yellow-500 fill-current"
+                  className="w-4 h-4 text-zinc-200 fill-current"
                 />
               ))}
             </div>
