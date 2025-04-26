@@ -1,6 +1,7 @@
-"use client"
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, User } from "lucide-react";
 import Link from "next/link";
 import { MotionDiv } from "./MotionDiv";
 import { Cover } from "@/components/ui/cover";
@@ -38,16 +39,28 @@ export const Hero = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="space-y-2"
         >
-          <p className="text-zinc-600 dark:text-zinc-400">contact@resume-ai.com</p>
-          <p className="text-zinc-600 dark:text-zinc-400">www.resume-ai.com</p>
-          <div className="mt-4 flex justify-end gap-4">
+          {!isLoggedIn && (
+            <>
+              <p className="text-zinc-600 dark:text-zinc-400">contact@resume-ai.com</p>
+              <p className="text-zinc-600 dark:text-zinc-400">www.resume-ai.com</p>
+            </>
+          )}
+          <div className="mt-4 flex flex-col justify-end gap-4">
             {isLoggedIn ? (
-              <Link href="/dashboard">
-                <Button size="lg" variant="outline">
-                  Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              <>
+                <Link href="/user/profile" >
+                  <Button size="sm" className=" hover:text-black">
+                    View Profile
+                    <User className="ml-2 h-2 w-2" />
+                  </Button>
+                </Link>
+                <Link href="/dashboard">
+                  <Button size="sm" className="bg-zinc-900 text-white border-2 hover:text-black">
+                    Dashboard
+                    <ArrowRight className="ml-2 h-2 w-2" />
+                  </Button>
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/signup">
