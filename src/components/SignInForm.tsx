@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
@@ -10,6 +9,7 @@ import { Button } from "./ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 interface FormData {
   email: string;
@@ -30,7 +30,6 @@ export function SignInForm() {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
-
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -72,17 +71,20 @@ export function SignInForm() {
         return;
       }
 
-      const profileRes = await fetch("/api/user/profile-completion-status", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
+      const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
 
-      const profileData = await profileRes.json();
+      if (!profileResponse?.success) {
+        toast({
+          title: "Profile Status Error",
+          description: "Could not check profile completion status.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      if (profileData?.completion < 10) {
+      const completionPercentage = profileResponse.data?.data?.completionPercentage || 0;
+
+      if (completionPercentage < 10) {
         toast({
           title: "Incomplete Profile",
           description: "Please complete your profile to proceed.",
@@ -92,17 +94,16 @@ export function SignInForm() {
         router.push("/");
       }
     } catch (err) {
+      console.error("Profile status check error:", err);
       toast({
         title: "Error",
         description: "An error occurred while checking profile status.",
         variant: "destructive",
       });
-      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
-
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-zinc-900">

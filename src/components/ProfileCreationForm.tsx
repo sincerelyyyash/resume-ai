@@ -80,7 +80,6 @@ export function MultiStepForm() {
 
     try {
       const payload = {
-        userId: user.id,
         projects: formData.projects,
         educations: formData.educations,
         experiences: formData.experiences,

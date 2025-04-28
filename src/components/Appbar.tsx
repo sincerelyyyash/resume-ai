@@ -42,7 +42,7 @@ export default function Appbar() {
 
   if (isLoading) {
     return (
-      <div className="w-full border-b border-zinc-200 dark:border-zinc-800">
+      <div className="w-full ">
         <Navbar>
           <NavBody className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between w-full">
@@ -56,7 +56,7 @@ export default function Appbar() {
   }
 
   return (
-    <div className="w-full border-b border-zinc-200 dark:border-zinc-800">
+    <div className="w-full ">
       <Navbar>
         {/* Desktop Navigation */}
         <NavBody className="max-w-4xl mx-auto px-4 py-4">

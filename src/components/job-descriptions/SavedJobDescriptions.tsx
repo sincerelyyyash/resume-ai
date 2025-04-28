@@ -29,9 +29,7 @@ export default function SavedJobDescriptions() {
       setIsLoading(true); 
   
       try {
-        const response = await axios.post("/api/user/get-user", {
-          userId: user.id,
-        });
+          const response = await axios.get("/api/user/get-user");
   
         const userData = response.data?.data || {};
         setJobDescriptions(userData.jobDescriptions || []);
