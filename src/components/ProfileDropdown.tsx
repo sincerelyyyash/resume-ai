@@ -1,11 +1,11 @@
-
 "use client";
 
 import * as React from "react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import { Button } from "./ui/button";
+import { useAuth } from "@/lib/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +14,18 @@ import {
 } from "./ui/dropdown-menu";
 
 export function UserMenu() {
-  const { data: session } = useSession();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const user = session?.user?.email || "";
+
+  if (isLoading) {
+    return (
+      <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-800" />
+    );
+  }
+
   return (
-    <div className="flex items-center space-x-4">
-      {user ? (
+    <div className="flex items-center space-x-4 z-50">
+      {isAuthenticated ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">

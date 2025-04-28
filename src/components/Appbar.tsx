@@ -12,15 +12,22 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { useState } from "react";
 import { UserMenu } from "./ProfileDropdown";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Appbar() {
-  const { data: session } = useSession();
+  const pathname = usePathname();
+
+  if (pathname === "/") {
+    return null;
+  }
+
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = session
+  const navItems = isAuthenticated
     ? [
         {
           name: "Dashboard",
@@ -33,6 +40,21 @@ export default function Appbar() {
       ]
     : [];
 
+  if (isLoading) {
+    return (
+      <div className="w-full border-b border-zinc-200 dark:border-zinc-800">
+        <Navbar>
+          <NavBody className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between w-full">
+              <NavbarLogo />
+              <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-800" />
+            </div>
+          </NavBody>
+        </Navbar>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full border-b border-zinc-200 dark:border-zinc-800">
       <Navbar>
@@ -41,17 +63,17 @@ export default function Appbar() {
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-8">
               <NavbarLogo />
-              {session && (
+              {isAuthenticated && (
                 <NavItems 
-                  items={navItems} 
-                  className="flex space-x-6"
-                  itemClassName="text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 text-sm font-medium transition-colors"
-                />
+                items={navItems} 
+                className="flex space-x-6 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 text-sm font-medium transition-colors"
+              />
+              
               )}
             </div>
             
             <div className="flex items-center gap-4">
-              {!session && (
+              {!isAuthenticated && (
                 <>
                   <Link href="/signup">
                     <Button variant="outline" size="sm" className="border-zinc-200 dark:border-zinc-800">
@@ -76,7 +98,7 @@ export default function Appbar() {
             <div className="flex items-center justify-between w-full">
               <NavbarLogo />
               <div className="flex items-center gap-4">
-                {!session && (
+                {!isAuthenticated && (
                   <>
                     <Link href="/signup">
                       <Button variant="outline" size="sm" className="border-zinc-200 dark:border-zinc-800">
@@ -94,7 +116,6 @@ export default function Appbar() {
                 <MobileNavToggle
                   isOpen={isMobileMenuOpen}
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="text-zinc-600 dark:text-zinc-400"
                 />
               </div>
             </div>
@@ -105,7 +126,7 @@ export default function Appbar() {
             onClose={() => setIsMobileMenuOpen(false)}
             className="max-w-4xl mx-auto px-4 py-4 border-t border-zinc-200 dark:border-zinc-800"
           >
-            {session &&
+            {isAuthenticated &&
               navItems.map((item, idx) => (
                 <a
                   key={`mobile-link-${idx}`}

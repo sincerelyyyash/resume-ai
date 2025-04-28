@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useState } from "react";
@@ -8,7 +7,7 @@ import ProjectForm, { ProjectFormData } from "@/components/forms/ProjectForm";
 import EducationForm, { EducationFormData } from "@/components/forms/EducationForm";
 import ExperienceForm, { ExperienceFormData } from "@/components/forms/ExperienceForm";
 import SkillForm, { SkillFormData } from "@/components/forms/SkillForm";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth";
 import axios from "axios"
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,10 +22,10 @@ interface MultiStepFormData {
 export function MultiStepForm() {
   const { toast } = useToast();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<MultiStepFormData>({
-    userId: session?.user.id || "",
+    userId: user?.id || "",
     projects: [
       {
         name: "",
@@ -66,24 +65,26 @@ export function MultiStepForm() {
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrevious = () => setStep((prev) => prev - 1);
 
-
-
-
   const handleSubmit = async () => {
+    if (!isAuthenticated || !user?.id) {
+      toast({
+        title: "Authentication Error",
+        description: "Please sign in to submit your profile.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const payload = {
-        userId: formData.userId,
-        // projects: formData.projects.map((project) => ({
-        //   ...project,
-        //   url: validateUrl(project.url),
-        // })),
-        projects: formData.projects.map((project) => project),
-        educations: formData.educations.map((education) => education),
-        experiences: formData.experiences.map((experience) => experience),
-        skills: formData.skills.map((skill) => skill),
+        userId: user.id,
+        projects: formData.projects,
+        educations: formData.educations,
+        experiences: formData.experiences,
+        skills: formData.skills,
       };
 
       await axios.post("/api/user/submit-form", payload, {
@@ -113,7 +114,28 @@ export function MultiStepForm() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="modal">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-800 mx-auto" />
+      </div>
+    );
+  }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="modal">
+        <div className="text-center py-8">
+          <h2 className="text-2xl font-semibold mb-4 text-neutral-800 dark:text-neutral-200">
+            Please sign in to create your profile
+          </h2>
+          <Button onClick={() => router.push("/signin")}>
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const validateUrl = (url: string): string => {
     try {

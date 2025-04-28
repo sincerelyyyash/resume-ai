@@ -1,12 +1,12 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Copy, ExternalLink } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
+import { useAuth } from '@/lib/auth';
 
 interface JobDescription {
   id: string;
@@ -17,24 +17,24 @@ interface JobDescription {
 }
 
 export default function SavedJobDescriptions() {
-  const { data: session } = useSession();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchJobDescriptions = async () => {
-      if (!session?.user?.email) return;
+      if (!isAuthenticated || !user?.id) return;
   
       setIsLoading(true); 
   
       try {
         const response = await axios.post("/api/user/get-user", {
-          userId: session.user.id,
+          userId: user.id,
         });
   
-        const user = response.data?.data || {};
-        setJobDescriptions(user.jobDescriptions || []);
+        const userData = response.data?.data || {};
+        setJobDescriptions(userData.jobDescriptions || []);
       } catch (error: any) {
         console.error("Error fetching job descriptions:", error);
   
@@ -51,10 +51,22 @@ export default function SavedJobDescriptions() {
     };
   
     fetchJobDescriptions();
-  }, [session?.user?.email, toast]);
-  
+  }, [isAuthenticated, user?.id, toast]);
 
-  if (!session) {
+  if (authLoading) {
+    return (
+      <div className="py-8">
+        <h2 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
+          My Saved Job Descriptions
+        </h2>
+        <div className="text-center py-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+          <div className="h-6 w-48 animate-pulse bg-zinc-200 dark:bg-zinc-800 rounded mx-auto" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return (
       <div className="text-center py-8">
         <h2 className="text-2xl font-semibold mb-4 text-neutral-800 dark:text-neutral-200">

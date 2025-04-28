@@ -5,11 +5,32 @@ import { ArrowRight, User } from "lucide-react";
 import Link from "next/link";
 import { MotionDiv } from "./MotionDiv";
 import { Cover } from "@/components/ui/cover";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth";
 
 export const Hero = () => {
-  const { data: session } = useSession(); 
-  const isLoggedIn = !!session;
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div className="flex-1">
+          <MotionDiv
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <Cover>
+              <div className="h-12 w-48 animate-pulse bg-zinc-200 dark:bg-zinc-800 rounded" />
+            </Cover>
+            <div className="h-6 w-64 animate-pulse bg-zinc-200 dark:bg-zinc-800 rounded mt-4" />
+          </MotionDiv>
+        </div>
+        <div className="flex-1 text-right">
+          <div className="h-8 w-32 animate-pulse bg-zinc-200 dark:bg-zinc-800 rounded mt-4 ml-auto" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -39,17 +60,17 @@ export const Hero = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="space-y-2"
         >
-          {!isLoggedIn && (
+          {!isAuthenticated && (
             <>
               <p className="text-zinc-600 dark:text-zinc-400">contact@resume-ai.com</p>
               <p className="text-zinc-600 dark:text-zinc-400">www.resume-ai.com</p>
             </>
           )}
           <div className="mt-4 flex flex-col justify-end gap-4">
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <>
                 <Link href="/user/profile" >
-                  <Button size="sm" className=" hover:text-black">
+                  <Button size="sm" className="hover:text-black">
                     View Profile
                     <User className="ml-2 h-2 w-2" />
                   </Button>
