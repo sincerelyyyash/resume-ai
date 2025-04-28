@@ -3,23 +3,26 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import MotionDiv from "../motion-div";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Trash2, Edit2 } from "lucide-react";
 
 interface Project {
   id?: string;
   title: string;
   description: string;
-  start_date: string;
-  end_date: string;
-  project_url: string;
-  technologies?: string[];
+  startDate: string;
+  endDate: string;
+  url?: string;
+  technologies: string[];
 }
 
 interface Props {
   projects: Project[];
   showEdit: boolean;
   showAddNew: boolean;
-  onSave: (project: Project, isEdit: boolean) => void;
-  onDelete: (id: string) => void;
+  onSave: () => Promise<void>;
+  onDelete: () => Promise<void>;
 }
 
 const ProjectForm: React.FC<{
@@ -27,62 +30,100 @@ const ProjectForm: React.FC<{
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSave: () => void;
   onCancel: () => void;
-}> = ({ data, onChange, onSave, onCancel }) => {
+  setFormData: React.Dispatch<React.SetStateAction<Partial<Project>>>;
+}> = ({ data, onChange, onSave, onCancel, setFormData }) => {
   return (
     <div className="space-y-4 p-6 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-zinc-800">
-      <input
-        name="title"
-        placeholder="Project Title"
-        value={data.title || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
-      <textarea
-        name="description"
-        placeholder="Project Description"
-        value={data.description || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200 min-h-[100px]"
-      />
-      <input
-        name="technologies"
-        placeholder="Technologies (comma separated)"
-        value={Array.isArray(data.technologies) ? data.technologies.join(", ") : ""}
-        onChange={(e) =>
-          onChange({
-            ...e,
-            target: {
-              ...e.target,
-              name: "technologies",
-              value: e.target.value,
-            },
-          })
-        }
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
-      <div className="grid grid-cols-2 gap-4">
-        <input
-          name="start_date"
-          type="date"
-          value={data.start_date || ""}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Project Title
+          </label>
+          <input
+            name="title"
+            placeholder="e.g., E-commerce Website"
+            value={data.title || ""}
+            onChange={onChange}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Technologies
+          </label>
+          <input
+            name="technologies"
+            placeholder="e.g., React, Node.js, MongoDB"
+            value={data.technologies?.join(", ") || ""}
+            onChange={(e) => {
+              const technologies = e.target.value.split(",").map(tech => tech.trim());
+              onChange({
+                ...e,
+                target: {
+                  ...e.target,
+                  name: "technologies",
+                  value: e.target.value,
+                },
+              });
+              setFormData(prev => ({
+                ...prev,
+                technologies: technologies
+              }));
+            }}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Description
+        </label>
+        <textarea
+          name="description"
+          placeholder="Project description..."
+          value={data.description || ""}
           onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
-        <input
-          name="end_date"
-          type="date"
-          value={data.end_date || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200 min-h-[100px]"
         />
       </div>
-      <input
-        name="project_url"
-        placeholder="Project URL"
-        value={data.project_url || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Start Date
+          </label>
+          <input
+            name="startDate"
+            type="date"
+            value={data.startDate || ""}
+            onChange={onChange}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            End Date
+          </label>
+          <input
+            name="endDate"
+            type="date"
+            value={data.endDate || ""}
+            onChange={onChange}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Project URL
+        </label>
+        <input
+          name="url"
+          placeholder="https://example.com"
+          value={data.url || ""}
+          onChange={onChange}
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+        />
+      </div>
       <div className="flex space-x-3 pt-4">
         <Button 
           onClick={onSave} 
@@ -106,15 +147,11 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [formData, setFormData] = useState<Partial<Project>>({});
+  const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-
-    if (name === "technologies") {
-      setFormData((prev) => ({ ...prev, technologies: value.split(",").map((t) => t.trim()) }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {
@@ -123,95 +160,161 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
     setAddingNew(false);
   };
 
-  const handleSave = () => {
-    if (!formData.title || !formData.description || !formData.start_date || !formData.end_date) return;
-    onSave(formData as Project, Boolean(editingId));
-    resetForm();
+  const handleSave = async () => {
+    if (!formData.title || !formData.description || !formData.startDate) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const projectData = {
+        title: formData.title,
+        description: formData.description,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
+        url: formData.url,
+        technologies: formData.technologies || [],
+      };
+
+      if (editingId) {
+        await axios.put(`/api/user/projects`, {
+          id: editingId,
+          ...projectData,
+        });
+        toast({
+          title: "Success",
+          description: "Project updated successfully.",
+        });
+      } else {
+        await axios.post(`/api/user/projects`, projectData);
+        toast({
+          title: "Success",
+          description: "Project added successfully.",
+        });
+      }
+      await onSave();
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete(`/api/user/projects?id=${id}`);
+      toast({
+        title: "Success",
+        description: "Project deleted successfully.",
+      });
+      await onDelete();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete project. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <MotionDiv className="mb-12 mx-10">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white ">Projects</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Projects</h2>
+        {showAddNew && !addingNew && (
+          <Button
+            onClick={() => { setAddingNew(true); setFormData({}); }}
+            className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Project
+          </Button>
+        )}
+      </div>
 
       <div className="space-y-6">
-        {projects.map((proj) => (
+        {projects.map((project) => (
           <div
-            key={proj.id}
-            className="relative bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700 p-6"
+            key={project.id}
+            className="relative p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-200"
           >
-            <div className="absolute top-16 right-6 text-sm text-gray-500 dark:text-gray-400">
-              {new Date(proj.start_date).toLocaleDateString()} - {new Date(proj.end_date).toLocaleDateString()}
-            </div>
-
-            {editingId === proj.id ? (
-              <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+            {editingId === project.id ? (
+              <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} setFormData={setFormData} />
             ) : (
               <>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{proj.title}</h3>
-                  {proj.project_url && (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.title}</h3>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {project.technologies?.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 rounded-full text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {showEdit && (
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => {
+                          if (project.id) {
+                            setEditingId(project.id);
+                            setFormData(project);
+                          }
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => project.id && handleDelete(project.id)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-gray-600 dark:text-gray-400 mb-4">{project.description}</p>
+
+                <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                  <span className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 rounded-full">
+                    {new Date(project.startDate).toLocaleDateString()} - {project.endDate ? new Date(project.endDate).toLocaleDateString() : "Present"}
+                  </span>
+                  {project.url && (
                     <a
-                      href={proj.project_url}
+                      href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-lg px-4 py-1.5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200"
+                      className="text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       View Project
                     </a>
                   )}
                 </div>
-
-                {proj.technologies && proj.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {proj.technologies.map((tech, index) => (
-                      <span
-                        key={index}
-                        className="bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 text-sm px-3 py-1 rounded-lg"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{proj.description}</p>
-
-                {showEdit && (
-                  <div className="flex space-x-3">
-                    <Button
-                      onClick={() => {
-                        setEditingId(proj.id || null);
-                        setFormData(proj);
-                      }}
-                      className="bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 px-4 py-2 rounded-lg"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => proj.id && onDelete(proj.id)}
-                      className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200 px-4 py-2 rounded-lg"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
               </>
             )}
           </div>
         ))}
 
-        {showAddNew && (
-          <div className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-dashed border-gray-300 dark:border-zinc-700 rounded-xl p-6 hover:border-gray-400 dark:hover:border-zinc-600 transition-colors duration-200">
-            {!addingNew ? (
-              <Button 
-                onClick={() => { setAddingNew(true); setFormData({}); }} 
-                className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
-              >
-                Add New Project
-              </Button>
-            ) : (
-              <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            )}
+        {showAddNew && addingNew && (
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+            <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} setFormData={setFormData} />
           </div>
         )}
       </div>

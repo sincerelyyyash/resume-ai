@@ -88,7 +88,7 @@ export function SignInForm() {
         toast({
           title: "Incomplete Profile",
           description: "Please complete your profile to proceed.",
-        });
+      });
         router.push("/user/create-profile");
       } else {
         router.push("/");

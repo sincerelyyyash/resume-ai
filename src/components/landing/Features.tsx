@@ -4,31 +4,32 @@ import { MotionDiv } from "./MotionDiv";
 const features = [
   {
     icon: <Sparkles className="w-5 h-5" />,
-    title: "AI-Powered Optimization",
-    description: "Our advanced AI analyzes job descriptions and optimizes your resume for maximum impact.",
+    title: "AI-Powered Personalization",
+    description: "Our AI analyzes each job description and customizes your resume to highlight the most relevant skills and achievements.",
   },
   {
     icon: <Zap className="w-5 h-5" />,
-    title: "ATS-Friendly Formatting",
-    description: "Automatically format your resume to pass Applicant Tracking Systems with flying colors.",
+    title: "ATS-Optimized Resumes",
+    description: "We ensure your resumes are formatted to easily pass through Applicant Tracking Systems, maximizing your interview chances.",
   },
   {
     icon: <Shield className="w-5 h-5" />,
-    title: "Privacy First",
-    description: "Your data is encrypted and secure. We never share your information with third parties.",
+    title: "Secure and Private",
+    description: "Your resume data stays private. We never share your personal information.",
   },
   {
     icon: <Brain className="w-5 h-5" />,
-    title: "Smart Suggestions",
-    description: "Get intelligent recommendations to improve your resume based on industry standards.",
+    title: "Smart Resume Insights",
+    description: "Receive actionable AI suggestions to refine and strengthen your resume based on the latest hiring trends and best practices.",
   },
+  
 ];
 
 export const Features = () => {
   return (
     <div className="space-y-6">
       <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        Resume-AI is a cutting-edge platform that leverages artificial intelligence to transform your resume into a powerful career tool. Our platform combines advanced algorithms with industry best practices to help you stand out in today's competitive job market.
+      Resume-AI is a platform that uses artificial intelligence to craft tailored resumes for every job opportunity. By aligning your experience with each job description, we help you stand out and maximize your chances in today's competitive job market.
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

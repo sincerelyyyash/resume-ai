@@ -22,7 +22,16 @@ interface UserData {
   image: string | null;
   projects: any[];
   experiences: any[];
-  education: any[];
+  education: {
+    id: string;
+    institution: string;
+    degree: string;
+    field: string;
+    start_date: string;
+    end_date: string;
+    description?: string;
+    gpa?: string;
+  }[];
   skills: any[];
 }
 
@@ -32,37 +41,37 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!isAuthenticated || !user?.id) {
-        setIsLoading(false);
-        return;
-      }
+  const fetchUserData = async () => {
+    if (!isAuthenticated || !user?.id) {
+      setIsLoading(false);
+      return;
+    }
 
-      try {
-        const res = await axios.get("/api/user/get-user");
-        
-        if (res.data?.success && res.data.data) {
-          setUserData(res.data.data);
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to fetch user data.",
-            variant: "destructive",
-          });
-        }
-      } catch (err) {
+    try {
+      const res = await axios.get("/api/user/get-user");
+      
+      if (res.data?.success && res.data.data) {
+        setUserData(res.data.data);
+      } else {
         toast({
           title: "Error",
-          description: "An unexpected error occurred while fetching user data.",
+          description: "Failed to fetch user data.",
           variant: "destructive",
         });
-        console.error("Failed to fetch user data:", err);
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while fetching user data.",
+        variant: "destructive",
+      });
+      console.error("Failed to fetch user data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserData();
   }, [isAuthenticated, user?.id, toast]);
 
@@ -97,129 +106,45 @@ export default function Profile() {
     );
   }
 
-  if (!userData) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-10 space-y-4">
-        <h2 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-200">
-          No profile data found
-        </h2>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          Please complete your profile to see your information here.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl">
-      <UserProfileHeader
-        name={userData.name}
-        email={userData.email}
-        bio={userData.bio}
-        linkedin={userData.linkedin}
-        github={userData.github}
-        portfolio={userData.portfolio}
-        image={userData.image}
-      />
+      {userData && (
+        <UserProfileHeader
+          userData={userData}
+          onSave={fetchUserData}
+        />
+      )}
 
       <ProjectSection
-        projects={(userData.projects || []).map((p: any, idx: number) => ({
-          id: String(idx),
-          title: p.name,
-          technologies: p.technologies,
-          description: p.achievements,
-          start_date: p.startDate,
-          end_date: p.endDate,
-          project_url: p.url,
-        }))}
+        projects={userData?.projects || []}
         showEdit={true}
         showAddNew={true}
-        onSave={(project, isEdit) => {
-          toast({
-            title: isEdit ? "Project Updated" : "Project Added",
-            description: `${project.title} was ${isEdit ? "updated" : "added"} successfully.`,
-          });
-        }}
-        onDelete={(id) => {
-          toast({
-            title: "Project Deleted",
-            description: `Project with id ${id} was deleted.`,
-          });
-        }}
+        onSave={fetchUserData}
+        onDelete={fetchUserData}
       />
 
       <ExperienceSection
-        experiences={(userData.experiences || []).map((exp: any, idx: number) => ({
-          id: String(idx),
-          title: exp.jobTitle,
-          company: exp.company,
-          description: exp.description,
-          location: exp.location,
-          start_date: exp.startDate,
-          end_date: exp.endDate,
-        }))}
+        experiences={userData?.experiences || []}
         showEdit={true}
         showAddNew={true}
-        onSave={(experience, isEdit) => {
-          toast({
-            title: isEdit ? "Experience Updated" : "Experience Added",
-            description: `${experience.title} was ${isEdit ? "updated" : "added"} successfully.`,
-          });
-        }}
-        onDelete={(id) => {
-          toast({
-            title: "Experience Deleted",
-            description: `Experience with id ${id} was deleted.`,
-          });
-        }}
-      />
-
-      <SkillsSection
-        skills={(userData.skills || []).map((skill: any, idx: number) => ({
-          id: String(idx),
-          name: skill.name,
-          category: skill.category,
-          level: skill.level,
-          yearsOfExperience: skill.yearsOfExperience,
-        }))}
-        showEdit={true}
-        showAddNew={true}
-        onSave={(skill, isEdit) => {
-          toast({
-            title: isEdit ? "Skill Updated" : "Skill Added",
-            description: `${skill.name} was ${isEdit ? "updated" : "added"} successfully.`,
-          });
-        }}
-        onDelete={(id) => {
-          toast({
-            title: "Skill Deleted",
-            description: `Skill with id ${id} was deleted.`,
-          });
-        }}
+        onSave={fetchUserData}
+        onDelete={fetchUserData}
       />
 
       <EducationSection
-        education={(userData.education || []).map((edu: any, idx: number) => ({
-          id: String(idx),
-          institution: edu.institution,
-          degree: edu.degree,
-          start_date: edu.startDate,
-          end_date: edu.endDate,
-        }))}
+        education={userData?.education || []}
         showEdit={true}
         showAddNew={true}
-        onSave={(education, isEdit) => {
-          toast({
-            title: isEdit ? "Education Updated" : "Education Added",
-            description: `${education.degree} was ${isEdit ? "updated" : "added"} successfully.`,
-          });
-        }}
-        onDelete={(id) => {
-          toast({
-            title: "Education Deleted",
-            description: `Education with id ${id} was deleted.`,
-          });
-        }}
+        onSave={fetchUserData}
+        onDelete={fetchUserData}
+      />
+
+      <SkillsSection
+        skills={userData?.skills || []}
+        showEdit={true}
+        showAddNew={true}
+        onSave={fetchUserData}
+        onDelete={fetchUserData}
       />
     </div>
   );

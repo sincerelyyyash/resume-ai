@@ -4,19 +4,20 @@ import { MotionDiv } from "./MotionDiv";
 const steps = [
   {
     icon: <Upload className="w-5 h-5" />,
-    title: "Add your Data",
-    description: "Start by Adding your data onto our platform. Keep it up-to-date for better results.",
+    title: "Upload Your Resume",
+    description: "Start by adding your current resume and personal details. Keep your profile updated for the best AI-driven results.",
   },
   {
     icon: <FileText className="w-5 h-5" />,
-    title: "Add Job Description",
-    description: "Paste the job description you're applying for to get targeted optimization.",
+    title: "Input Job Description",
+    description: "Paste the job description you’re targeting, so our AI can tailor your resume for maximum relevance.",
   },
   {
     icon: <CheckCircle className="w-5 h-5" />,
-    title: "Get AI-Optimized Resume",
-    description: "Receive a professionally optimized resume tailored to the job requirements.",
+    title: "Get a Tailored Resume",
+    description: "Receive a professionally enhanced, job-specific resume optimized to land more interviews.",
   },
+  
 ];
 
 export const HowItWorks = () => {

@@ -47,7 +47,7 @@ export const Hero = () => {
             </h1>
           </Cover>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-4">
-            AI-Powered Resume Optimization Platform
+          Create job-specific resumes that stand out, powered by AI.
           </p>
         </MotionDiv>
       </div>

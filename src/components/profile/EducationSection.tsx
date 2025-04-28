@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import MotionDiv from "../motion-div";
-
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { Plus } from "lucide-react";
 interface Education {
   id?: string;
   institution: string;
   degree: string;
+  field: string;
   start_date: string;
   end_date: string;
 }
@@ -22,7 +25,7 @@ interface Props {
 
 const EducationForm: React.FC<{
   data: Partial<Education>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSave: () => void;
   onCancel: () => void;
 }> = ({ data, onChange, onSave, onCancel }) => {
@@ -35,13 +38,23 @@ const EducationForm: React.FC<{
         onChange={onChange}
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
       />
-      <input
-        name="degree"
-        placeholder="Degree"
-        value={data.degree || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <input
+          name="degree"
+          placeholder="Degree (e.g., Bachelor's)"
+          value={data.degree || ""}
+          onChange={onChange}
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+        />
+        <input
+          name="field"
+          placeholder="Field of Study (e.g., Computer Science)"
+          value={data.field || ""}
+          onChange={onChange}
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+        />
+      </div>
+      
       <div className="grid grid-cols-2 gap-4">
         <input
           name="start_date"
@@ -81,10 +94,17 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [formData, setFormData] = useState<Partial<Education>>({});
+  const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "start_date" || name === "end_date") {
+      // Ensure the date is in YYYY-MM-DD format
+      const dateValue = value ? new Date(value).toISOString().split('T')[0] : value;
+      setFormData((prev) => ({ ...prev, [name]: dateValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const resetForm = () => {
@@ -93,75 +113,138 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
     setAddingNew(false);
   };
 
-  const handleSave = () => {
-    if (!formData.institution || !formData.degree || !formData.start_date || !formData.end_date) return;
-    onSave(formData as Education, Boolean(editingId));
-    resetForm();
+  const handleSave = async () => {
+    if (!formData.institution || !formData.degree || !formData.field || !formData.start_date) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const educationData = {
+        institution: formData.institution,
+        degree: formData.degree,
+        field: formData.field,
+        startDate: formData.start_date,
+        endDate: formData.end_date || null,
+        current: !formData.end_date,
+      };
+
+      const isEdit = Boolean(editingId);
+      if (isEdit) {
+        await axios.put("/api/user/education", { ...educationData, id: editingId });
+      } else {
+        await axios.post("/api/user/education", educationData);
+      }
+      
+      onSave(formData as Education, isEdit);
+      resetForm();
+      toast({
+        title: isEdit ? "Education Updated" : "Education Added",
+        description: `${formData.degree} at ${formData.institution} was ${isEdit ? "updated" : "added"} successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${editingId ? "update" : "add"} education.`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete(`/api/user/education?id=${id}`);
+      onDelete(id);
+      toast({
+        title: "Education Deleted",
+        description: "Education was deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete education.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <MotionDiv className="mb-12 mx-10">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Education</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Education</h2>
+        {showAddNew && (
+          <Button
+            onClick={() => setAddingNew(true)}
+            className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
+          >
+            <Plus className="h-4 w-4" />
+            Add Education
+          </Button>
+        )}
+      </div>
 
       <div className="space-y-6">
+        {addingNew && (
+          <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+        )}
+
         {education.map((edu) => (
           <div
             key={edu.id}
             className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
           >
-            <div className="absolute top-16 right-6 text-sm text-gray-500 dark:text-gray-400">
-              {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
-            </div>
-
-            {editingId === edu.id ? (
-              <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
-                  <span className="text-sm bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-1">
+            <div className="flex flex-col space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {edu.degree}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {edu.field}
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400">
                     {edu.institution}
-                  </span>
+                  </p>
                 </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
+                </div>
+              </div>
 
-                {showEdit && (
-                  <div className="flex space-x-3">
+              {editingId === edu.id ? (
+                <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+              ) : (
+                showEdit && (
+                  <div className="flex justify-end space-x-3 mt-4">
                     <Button
                       onClick={() => {
-                        setEditingId(edu.id || null);
-                        setFormData(edu);
+                        if (edu.id) {
+                          setEditingId(edu.id);
+                          setFormData(edu);
+                        }
                       }}
-                      className="bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 px-4 py-2 rounded-lg"
+                      variant="outline"
+                      className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
                     >
                       Edit
                     </Button>
                     <Button
-                      onClick={() => edu.id && onDelete(edu.id)}
-                      className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200 px-4 py-2 rounded-lg"
+                      onClick={() => edu.id && handleDelete(edu.id)}
+                      variant="outline"
+                      className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
                     >
                       Delete
                     </Button>
                   </div>
-                )}
-              </>
-            )}
+                )
+              )}
+            </div>
           </div>
         ))}
-
-        {showAddNew && (
-          <div className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-dashed border-gray-300 dark:border-zinc-700 rounded-xl p-6 hover:border-gray-400 dark:hover:border-zinc-600 transition-colors duration-200">
-            {!addingNew ? (
-              <Button 
-                onClick={() => { setAddingNew(true); setFormData({}); }} 
-                className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
-              >
-                Add New Education
-              </Button>
-            ) : (
-              <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            )}
-          </div>
-        )}
       </div>
     </MotionDiv>
   );

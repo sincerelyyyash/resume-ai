@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import MotionDiv from "../motion-div";
-
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { Plus } from "lucide-react";
 interface Experience {
   id?: string;
   company: string;
@@ -11,7 +13,7 @@ interface Experience {
   description: string;
   location: string;
   start_date: string;
-  end_date: string;
+  end_date?: string;
   technologies?: string[];
 }
 
@@ -114,12 +116,17 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [formData, setFormData] = useState<Partial<Experience>>({});
+  const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
     if (name === "technologies") {
       setFormData((prev) => ({ ...prev, technologies: value.split(",").map((t) => t.trim()) }));
+    } else if (name === "start_date" || name === "end_date") {
+      // Ensure the date is in YYYY-MM-DD format
+      const dateValue = value ? new Date(value).toISOString().split('T')[0] : value;
+      setFormData((prev) => ({ ...prev, [name]: dateValue }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -131,65 +138,132 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
     setAddingNew(false);
   };
 
-  const handleSave = () => {
-    if (!formData.title || !formData.company || !formData.start_date || !formData.end_date) return;
-    onSave(formData as Experience, Boolean(editingId));
-    resetForm();
+  const handleSave = async () => {
+    if (!formData.title || !formData.company || !formData.start_date) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const experienceData = {
+        title: formData.title,
+        company: formData.company,
+        description: formData.description,
+        startDate: formData.start_date,
+        endDate: formData.end_date || null,
+        location: formData.location,
+        technologies: formData.technologies,
+      };
+
+      const isEdit = Boolean(editingId);
+      if (isEdit) {
+        await axios.put("/api/user/experiences", { ...experienceData, id: editingId });
+      } else {
+        await axios.post("/api/user/experiences", experienceData);
+      }
+      
+      onSave(formData as Experience, isEdit);
+      resetForm();
+      toast({
+        title: isEdit ? "Experience Updated" : "Experience Added",
+        description: `${formData.title} was ${isEdit ? "updated" : "added"} successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${editingId ? "update" : "add"} experience.`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete(`/api/user/experiences?id=${id}`);
+      onDelete(id);
+      toast({
+        title: "Experience Deleted",
+        description: "Experience was deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete experience.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <MotionDiv className="mb-12 mx-10">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Experience</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Experience</h2>
+        {showAddNew && (
+          <Button
+            onClick={() => setAddingNew(true)}
+            className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
+          >
+            <Plus className="h-4 w-4" />
+            Add Experience
+          </Button>
+        )}
+      </div>
 
       <div className="space-y-6">
+        {addingNew && (
+          <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+        )}
+
         {experiences.map((exp) => (
           <div
             key={exp.id}
             className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
           >
             <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
-              {new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}
+              {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : "Present"}
             </div>
 
             {editingId === exp.id ? (
               <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.title} @ {exp.company}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{exp.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">{exp.description}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {exp.technologies?.map((tech) => (
+                    <span
+                      key={tech}
+                      className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                    >
+                      {tech}
+                    </span>
+                  ))}
                 </div>
-
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{exp.location}</p>
-
-                {exp.technologies && exp.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {exp.technologies.map((tech, index) => (
-                      <span
-                        key={index}
-                        className="bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 text-sm px-3 py-1 rounded-lg"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{exp.description}</p>
-
+                <p className="text-gray-600 dark:text-gray-300">
+                  {exp.company} - {exp.location}
+                </p>
                 {showEdit && (
-                  <div className="flex space-x-3">
+                  <div className="absolute bottom-6 right-6 flex space-x-3">
                     <Button
                       onClick={() => {
-                        setEditingId(exp.id || null);
-                        setFormData(exp);
+                        if (exp.id) {
+                          setEditingId(exp.id);
+                          setFormData(exp);
+                        }
                       }}
-                      className="bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 px-4 py-2 rounded-lg"
+                      variant="outline"
+                      className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
                     >
                       Edit
                     </Button>
                     <Button
-                      onClick={() => exp.id && onDelete(exp.id)}
-                      className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200 px-4 py-2 rounded-lg"
+                      onClick={() => exp.id && handleDelete(exp.id)}
+                      variant="outline"
+                      className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
                     >
                       Delete
                     </Button>
@@ -199,21 +273,6 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
             )}
           </div>
         ))}
-
-        {showAddNew && (
-          <div className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border border-dashed border-gray-300 dark:border-zinc-700 rounded-xl p-6 hover:border-gray-400 dark:hover:border-zinc-600 transition-colors duration-200">
-            {!addingNew ? (
-              <Button 
-                onClick={() => { setAddingNew(true); setFormData({}); }} 
-                className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
-              >
-                Add New Experience
-              </Button>
-            ) : (
-              <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            )}
-          </div>
-        )}
       </div>
     </MotionDiv>
   );
