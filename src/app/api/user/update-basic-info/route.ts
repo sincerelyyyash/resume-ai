@@ -86,3 +86,46 @@ export async function POST(req: Request) {
   }
 }
 
+export async function PUT(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { name, bio, linkedin, github, portfolio, image } = body;
+
+    const updateData: any = {};
+
+    if (name !== undefined) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
+    if (linkedin !== undefined) updateData.linkedin = linkedin;
+    if (github !== undefined) updateData.github = github;
+    if (portfolio !== undefined) updateData.portfolio = portfolio;
+    if (image !== undefined) updateData.image = image;
+
+    const user = await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: updateData,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "User information updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error updating user information:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update user information" },
+      { status: 500 }
+    );
+  }
+}
+
