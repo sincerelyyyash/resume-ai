@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased dark:bg-zinc-900 ${play.className}`}>
+      <body className={`antialiased dark:bg-zinc-900 ${play.className} ` }>
         <Providers>
           <div className="flex flex-col min-h-screen">
             <header className="flex-none w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

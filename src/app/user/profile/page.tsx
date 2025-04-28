@@ -1,31 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 import ProjectSection from "@/components/profile/ProjectSection";
 import UserProfileHeader from "@/components/profile/UserProfileHeader";
-import { useToast } from "@/hooks/use-toast";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import EducationSection from "@/components/profile/EducationSection";
 
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  bio: string | null;
+  linkedin: string | null;
+  github: string | null;
+  portfolio: string | null;
+  image: string | null;
+  projects: any[];
+  experiences: any[];
+  education: any[];
+  skills: any[];
+}
+
 export default function Profile() {
-  const { data: session } = useSession();
-  const [userData, setUserData] = useState<any>(null);
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!session?.user?.id) return;
+      if (!isAuthenticated || !user?.id) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
-        const res = await axios.post("/api/user/get-user", {
-          userId: session.user.id,
-        });
-
-        if (res.data?.status === "success") {
+        const res = await axios.get("/api/user/get-user");
+        
+        if (res.data?.success && res.data.data) {
           setUserData(res.data.data);
         } else {
           toast({
@@ -41,31 +58,72 @@ export default function Profile() {
           variant: "destructive",
         });
         console.error("Failed to fetch user data:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserData();
-  }, [session?.user?.id, toast]);
+  }, [isAuthenticated, user?.id, toast]);
 
-  if (!userData) {
-    return <p className="text-center text-gray-500 mt-10">Loading...</p>;
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl">
+        <div className="animate-pulse space-y-4">
+          <div className="h-32 w-32 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+          <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          <div className="h-4 w-64 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        </div>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="animate-pulse space-y-4">
+            <div className="h-8 w-32 bg-zinc-200 dark:bg-zinc-800 rounded" />
+            <div className="h-24 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
-  const { personalInfo, projects, experiences, education, skills } = userData;
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+        <h2 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-200">
+          Please sign in to view your profile
+        </h2>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          You need to be logged in to access this page.
+        </p>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+        <h2 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-200">
+          No profile data found
+        </h2>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          Please complete your profile to see your information here.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl">
       <UserProfileHeader
-        name={personalInfo?.name}
-        email={personalInfo?.email}
-        bio={personalInfo?.bio}
-        linkedin={personalInfo?.linkedin}
-        github={personalInfo?.github}
-        portfolio={personalInfo?.portfolio}
+        name={userData.name}
+        email={userData.email}
+        bio={userData.bio}
+        linkedin={userData.linkedin}
+        github={userData.github}
+        portfolio={userData.portfolio}
+        image={userData.image}
       />
 
       <ProjectSection
-        projects={(projects || []).map((p: any, idx: number) => ({
+        projects={(userData.projects || []).map((p: any, idx: number) => ({
           id: String(idx),
           title: p.name,
           technologies: p.technologies,
@@ -91,7 +149,7 @@ export default function Profile() {
       />
 
       <ExperienceSection
-        experiences={(experiences || []).map((exp: any, idx: number) => ({
+        experiences={(userData.experiences || []).map((exp: any, idx: number) => ({
           id: String(idx),
           title: exp.jobTitle,
           company: exp.company,
@@ -117,7 +175,7 @@ export default function Profile() {
       />
 
       <SkillsSection
-        skills={(skills || []).map((skill: any, idx: number) => ({
+        skills={(userData.skills || []).map((skill: any, idx: number) => ({
           id: String(idx),
           name: skill.name,
           category: skill.category,
@@ -141,7 +199,7 @@ export default function Profile() {
       />
 
       <EducationSection
-        education={(education || []).map((edu: any, idx: number) => ({
+        education={(userData.education || []).map((edu: any, idx: number) => ({
           id: String(idx),
           institution: edu.institution,
           degree: edu.degree,
