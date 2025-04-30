@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import MotionDiv from "../motion-div";
-import Image from "next/image";
 import { Linkedin, Github, Globe, User, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
@@ -46,7 +45,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
         github: formData.github,
         portfolio: formData.portfolio,
       });
-      
+
       await onSave();
       setIsEditing(false);
       toast({
@@ -68,65 +67,49 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   };
 
   return (
-    <MotionDiv className="flex flex-col max-w-5xl sm:flex-row-reverse items-center sm:items-start gap-6 bg-white dark:bg-zinc-900 px-16 py-6 rounded-lg">
-      {/* <div className="relative w-32 h-32">
-        {formData.image ? (
-          <Image
-            src={formData.image}
-            alt={formData.name}
-            fill
-            className="rounded-full object-cover border-4 border-gray-200 dark:border-zinc-700"
-            sizes="(max-width: 128px) 100vw, 128px"
-            priority
-          />
+    <MotionDiv className="relative flex flex-col max-w-5xl sm:flex-row-reverse items-center sm:items-start gap-6 bg-white dark:bg-zinc-900 px-16 py-6 rounded-lg">
+      
+      {/* Edit / Save / Cancel Button Positioned Absolutely */}
+      <div className="absolute top-4 right-4 flex space-x-2">
+        {isEditing ? (
+          <>
+            <Button
+              onClick={handleSave}
+              className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg"
+            >
+              <Save className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </>
         ) : (
-          <div className="w-full h-full rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center border-4 border-gray-200 dark:border-zinc-700">
-            <User className="h-16 w-16 text-zinc-400 dark:text-zinc-600" />
-          </div>
+          <Button
+            onClick={() => setIsEditing(true)}
+            className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg"
+          >
+            <Edit2 className="h-5 w-5" />
+          </Button>
         )}
-      </div> */}
+      </div>
 
       <div className="text-center sm:text-left flex-1">
-        <div className="flex justify-between items-center">
-          {isEditing ? (
-            <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="text-3xl font-bold text-gray-900 dark:text-neutral-100 bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white"
-            />
-          ) : (
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-100">
-              {formData.name}
-            </h1>
-          )}
-          <div className="flex space-x-2">
-            {isEditing ? (
-              <>
-                <Button
-                  onClick={handleSave}
-                  className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg"
-                >
-                  <Save className="h-5 w-5" />
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  variant="outline"
-                  className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </>
-            ) : (
-              <Button
-                onClick={() => setIsEditing(true)}
-                className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg"
-              >
-                <Edit2 className="h-5 w-5" />
-              </Button>
-            )}
-          </div>
-        </div>
+        {isEditing ? (
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="text-3xl font-bold text-gray-900 dark:text-neutral-100 bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white"
+          />
+        ) : (
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-100">
+            {formData.name}
+          </h1>
+        )}
 
         {isEditing ? (
           <textarea
