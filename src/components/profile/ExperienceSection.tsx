@@ -167,7 +167,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
       }
       
       onSave(formData as Experience, isEdit);
-      resetForm();
+    resetForm();
       toast({
         title: isEdit ? "Experience Updated" : "Experience Added",
         description: `${formData.title} was ${isEdit ? "updated" : "added"} successfully.`,
@@ -233,16 +233,16 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
               <>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{exp.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">{exp.description}</p>
-                <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4">
                   {exp.technologies?.map((tech) => (
-                    <span
+                      <span
                       key={tech}
                       className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                 <p className="text-gray-600 dark:text-gray-300">
                   {exp.company} - {exp.location}
                 </p>
@@ -252,7 +252,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
                       onClick={() => {
                         if (exp.id) {
                           setEditingId(exp.id);
-                          setFormData(exp);
+                        setFormData(exp);
                         }
                       }}
                       variant="outline"

@@ -39,13 +39,13 @@ const EducationForm: React.FC<{
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
       />
       <div className="grid grid-cols-2 gap-4">
-        <input
-          name="degree"
+      <input
+        name="degree"
           placeholder="Degree (e.g., Bachelor's)"
-          value={data.degree || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
+        value={data.degree || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
         <input
           name="field"
           placeholder="Field of Study (e.g., Computer Science)"
@@ -103,7 +103,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
       const dateValue = value ? new Date(value).toISOString().split('T')[0] : value;
       setFormData((prev) => ({ ...prev, [name]: dateValue }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -141,7 +141,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
       }
       
       onSave(formData as Education, isEdit);
-      resetForm();
+    resetForm();
       toast({
         title: isEdit ? "Education Updated" : "Education Added",
         description: `${formData.degree} at ${formData.institution} was ${isEdit ? "updated" : "added"} successfully.`,
@@ -211,20 +211,20 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
                   </p>
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
+              {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
                 </div>
-              </div>
+            </div>
 
-              {editingId === edu.id ? (
-                <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-              ) : (
+            {editingId === edu.id ? (
+              <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+            ) : (
                 showEdit && (
                   <div className="flex justify-end space-x-3 mt-4">
                     <Button
                       onClick={() => {
                         if (edu.id) {
                           setEditingId(edu.id);
-                          setFormData(edu);
+                        setFormData(edu);
                         }
                       }}
                       variant="outline"
@@ -241,7 +241,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
                     </Button>
                   </div>
                 )
-              )}
+                )}
             </div>
           </div>
         ))}

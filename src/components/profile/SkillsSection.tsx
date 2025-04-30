@@ -36,55 +36,55 @@ const SkillForm: React.FC<{
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Skill Name
           </label>
-          <input
-            name="name"
+      <input
+        name="name"
             placeholder="e.g., React, Python"
-            value={data.name || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
+        value={data.name || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Category
           </label>
-          <input
-            name="category"
+      <input
+        name="category"
             placeholder="e.g., Frontend, Backend"
-            value={data.category || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
+        value={data.category || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Skill Level
           </label>
-          <select
-            name="level"
-            value={data.level || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          >
-            <option value="">Select Level</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-            <option value="Expert">Expert</option>
-          </select>
+      <select
+        name="level"
+        value={data.level || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      >
+        <option value="">Select Level</option>
+        <option value="Beginner">Beginner</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
+        <option value="Expert">Expert</option>
+      </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Years of Experience
           </label>
-          <input
-            name="yearsOfExperience"
-            type="number"
+      <input
+        name="yearsOfExperience"
+        type="number"
             placeholder="e.g., 2"
-            value={data.yearsOfExperience || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
+        value={data.yearsOfExperience || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
         </div>
       </div>
       <div className="flex space-x-3 pt-4">
@@ -159,7 +159,7 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
         });
       }
       await onSave();
-      resetForm();
+    resetForm();
     } catch (error) {
       toast({
         title: "Error",
@@ -213,7 +213,7 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{skill.name}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{skill.name}</h3>
                     <span className="text-sm text-gray-600 dark:text-gray-400">{skill.category}</span>
                   </div>
                   {showEdit && (
@@ -258,7 +258,7 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
 
         {showAddNew && addingNew && (
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
-            <SkillForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+              <SkillForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
           </div>
         )}
       </div>

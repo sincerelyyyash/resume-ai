@@ -39,39 +39,39 @@ const ProjectForm: React.FC<{
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Project Title
           </label>
-          <input
-            name="title"
+      <input
+        name="title"
             placeholder="e.g., E-commerce Website"
-            value={data.title || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
+        value={data.title || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Technologies
           </label>
-          <input
-            name="technologies"
+      <input
+        name="technologies"
             placeholder="e.g., React, Node.js, MongoDB"
             value={data.technologies?.join(", ") || ""}
             onChange={(e) => {
               const technologies = e.target.value.split(",").map(tech => tech.trim());
-              onChange({
-                ...e,
-                target: {
-                  ...e.target,
-                  name: "technologies",
-                  value: e.target.value,
-                },
+          onChange({
+            ...e,
+            target: {
+              ...e.target,
+              name: "technologies",
+              value: e.target.value,
+            },
               });
               setFormData(prev => ({
                 ...prev,
                 technologies: technologies
               }));
             }}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
         </div>
       </div>
       <div>
@@ -103,26 +103,26 @@ const ProjectForm: React.FC<{
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             End Date
           </label>
-          <input
+        <input
             name="endDate"
-            type="date"
+          type="date"
             value={data.endDate || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
-        </div>
+          onChange={onChange}
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+        />
+      </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Project URL
         </label>
-        <input
+      <input
           name="url"
           placeholder="https://example.com"
           value={data.url || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+      />
       </div>
       <div className="flex space-x-3 pt-4">
         <Button 
@@ -151,7 +151,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {
@@ -197,7 +197,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
         });
       }
       await onSave();
-      resetForm();
+    resetForm();
     } catch (error) {
       toast({
         title: "Error",
@@ -243,7 +243,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
         {projects.map((project) => (
           <div
             key={project.id}
-            className="relative p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
           >
             {editingId === project.id ? (
               <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} setFormData={setFormData} />
@@ -264,7 +264,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
                     </div>
                   </div>
                   {showEdit && (
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3">
                       <Button
                         onClick={() => {
                           if (project.id) {
@@ -272,19 +272,17 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
                             setFormData(project);
                           }
                         }}
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                        variant="outline"
+                        className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
                       >
-                        <Edit2 className="h-4 w-4" />
+                        Edit
                       </Button>
                       <Button
                         onClick={() => project.id && handleDelete(project.id)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                        variant="outline"
+                        className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Delete
                       </Button>
                     </div>
                   )}
