@@ -65,6 +65,7 @@ model User {
   jobDescriptions JobDescription[]
   skills          Skill[]
   education       Education[]
+  certifications  Certification[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   accounts        Account[]
@@ -143,6 +144,20 @@ model Education {
   startDate   DateTime
   endDate     DateTime?
   current     Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certification {
+  id          String   @id @default(cuid())
+  title       String
+  issuer      String
+  description String?
+  issueDate   DateTime
+  expiryDate  DateTime?
+  credentialUrl String?
   user        User     @relation(fields: [userId], references: [id])
   userId      String
   createdAt   DateTime @default(now())
