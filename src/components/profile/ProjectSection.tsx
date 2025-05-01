@@ -240,75 +240,81 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
       </div>
 
       <div className="space-y-6">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
-          >
-            {editingId === project.id ? (
-              <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} setFormData={setFormData} />
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.title}</h3>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {project.technologies?.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 rounded-full text-sm"
+        {projects && projects.length > 0 ? (
+          projects.map((project) => (
+            <div
+              key={project.id}
+              className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
+            >
+              {editingId === project.id ? (
+                <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} setFormData={setFormData} />
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.title}</h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {project.technologies?.map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 rounded-full text-sm"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {showEdit && (
+                      <div className="flex space-x-3">
+                        <Button
+                          onClick={() => {
+                            if (project.id) {
+                              setEditingId(project.id);
+                              setFormData(project);
+                            }
+                          }}
+                          variant="outline"
+                          className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
                         >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => project.id && handleDelete(project.id)}
+                          variant="outline"
+                          className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  {showEdit && (
-                    <div className="flex space-x-3">
-                      <Button
-                        onClick={() => {
-                          if (project.id) {
-                            setEditingId(project.id);
-                            setFormData(project);
-                          }
-                        }}
-                        variant="outline"
-                        className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={() => project.id && handleDelete(project.id)}
-                        variant="outline"
-                        className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  )}
-                </div>
 
-                <p className="text-gray-600 dark:text-gray-400 mb-4">{project.description}</p>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">{project.description}</p>
 
-                <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                  <span className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 rounded-full">
-                    {new Date(project.startDate).toLocaleDateString()} - {project.endDate ? new Date(project.endDate).toLocaleDateString() : "Present"}
-                  </span>
-                  {project.url && (
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      View Project
-                    </a>
-                  )}
-                </div>
-              </>
-            )}
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 rounded-full">
+                      {new Date(project.startDate).toLocaleDateString()} - {project.endDate ? new Date(project.endDate).toLocaleDateString() : "Present"}
+                    </span>
+                    {project.url && (
+                      <a
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        View Project
+                      </a>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            No projects added yet. Click the button above to add your first project.
           </div>
-        ))}
+        )}
 
         {showAddNew && addingNew && (
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">

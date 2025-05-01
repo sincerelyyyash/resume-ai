@@ -214,65 +214,71 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
       </div>
 
       <div className="space-y-6">
-        {addingNew && (
-          <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+        {experiences && experiences.length > 0 ? (
+          experiences.map((exp) => (
+            <div
+              key={exp.id}
+              className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
+            >
+              <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
+                {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : "Present"}
+              </div>
+
+              {editingId === exp.id ? (
+                <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{exp.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">{exp.description}</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                    {exp.technologies?.map((tech) => (
+                        <span
+                        key={tech}
+                        className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {exp.company} - {exp.location}
+                  </p>
+                  {showEdit && (
+                    <div className="absolute bottom-6 right-6 flex space-x-3">
+                      <Button
+                        onClick={() => {
+                          if (exp.id) {
+                            setEditingId(exp.id);
+                          setFormData(exp);
+                          }
+                        }}
+                        variant="outline"
+                        className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => exp.id && handleDelete(exp.id)}
+                        variant="outline"
+                        className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            No experiences added yet. Click the button above to add your first experience.
+          </div>
         )}
 
-        {experiences.map((exp) => (
-          <div
-            key={exp.id}
-            className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
-          >
-            <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
-              {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : "Present"}
-            </div>
-
-            {editingId === exp.id ? (
-              <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            ) : (
-              <>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{exp.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">{exp.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                  {exp.technologies?.map((tech) => (
-                      <span
-                      key={tech}
-                      className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {exp.company} - {exp.location}
-                </p>
-                {showEdit && (
-                  <div className="absolute bottom-6 right-6 flex space-x-3">
-                    <Button
-                      onClick={() => {
-                        if (exp.id) {
-                          setEditingId(exp.id);
-                        setFormData(exp);
-                        }
-                      }}
-                      variant="outline"
-                      className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => exp.id && handleDelete(exp.id)}
-                      variant="outline"
-                      className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+        {showAddNew && addingNew && (
+          <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+        )}
       </div>
     </MotionDiv>
   );

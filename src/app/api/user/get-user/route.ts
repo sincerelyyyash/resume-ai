@@ -26,6 +26,7 @@ export async function GET() {
         skills: true,
         education: true,
         jobDescriptions: true,
+        certifications: true,
       },
     });
 

@@ -102,6 +102,8 @@ const CertificationSection: React.FC<Props> = ({ certifications, showEdit, showA
   const [formData, setFormData] = useState<Partial<Certification>>({});
   const { toast } = useToast();
 
+  console.log('Certifications:', certifications);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -134,22 +136,30 @@ const CertificationSection: React.FC<Props> = ({ certifications, showEdit, showA
       };
 
       const isEdit = Boolean(editingId);
-      if (isEdit) {
-        await axios.put("/api/user/certifications", { ...certificationData, id: editingId });
-      } else {
-        await axios.post("/api/user/certifications", certificationData);
-      }
+      let response;
       
-      onSave(formData as Certification, isEdit);
-      resetForm();
-      toast({
-        title: isEdit ? "Certification Updated" : "Certification Added",
-        description: `${formData.title} was ${isEdit ? "updated" : "added"} successfully.`,
-      });
-    } catch (error) {
+      if (isEdit) {
+        response = await axios.put("/api/user/certifications", { ...certificationData, id: editingId });
+      } else {
+        response = await axios.post("/api/user/certifications", certificationData);
+      }
+
+      if (response.data?.success) {
+        console.log('Save response:', response.data);
+        onSave(response.data.data, isEdit);
+        resetForm();
+        toast({
+          title: isEdit ? "Certification Updated" : "Certification Added",
+          description: `${formData.title} was ${isEdit ? "updated" : "added"} successfully.`,
+        });
+      } else {
+        throw new Error(response.data?.error || "Failed to save certification");
+      }
+    } catch (error: any) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
-        description: `Failed to ${editingId ? "update" : "add"} certification.`,
+        description: error.response?.data?.error || `Failed to ${editingId ? "update" : "add"} certification.`,
         variant: "destructive",
       });
     }
@@ -157,16 +167,22 @@ const CertificationSection: React.FC<Props> = ({ certifications, showEdit, showA
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/user/certifications?id=${id}`);
-      onDelete(id);
-      toast({
-        title: "Certification Deleted",
-        description: "Certification was deleted successfully.",
-      });
-    } catch (error) {
+      const response = await axios.delete(`/api/user/certifications?id=${id}`);
+      
+      if (response.data?.success) {
+        onDelete(id);
+        toast({
+          title: "Certification Deleted",
+          description: "Certification was deleted successfully.",
+        });
+      } else {
+        throw new Error(response.data?.error || "Failed to delete certification");
+      }
+    } catch (error: any) {
+      console.error('Delete error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete certification.",
+        description: error.response?.data?.error || "Failed to delete certification.",
         variant: "destructive",
       });
     }
@@ -192,61 +208,67 @@ const CertificationSection: React.FC<Props> = ({ certifications, showEdit, showA
           <CertificationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
         )}
 
-        {certifications.map((cert) => (
-          <div
-            key={cert.id}
-            className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
-          >
-            <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
-              {new Date(cert.issueDate).toLocaleDateString()} - {cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString() : "No Expiry"}
-            </div>
+        {certifications && certifications.length > 0 ? (
+          certifications.map((cert) => (
+            <div
+              key={cert.id}
+              className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
+            >
+              <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
+                {new Date(cert.issueDate).toLocaleDateString()} - {cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString() : "No Expiry"}
+              </div>
 
-            {editingId === cert.id ? (
-              <CertificationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            ) : (
-              <>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{cert.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">{cert.description}</p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Issued by {cert.issuer}
-                </p>
-                {cert.credentialUrl && (
-                  <a
-                    href={cert.credentialUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block"
-                  >
-                    View Credential
-                  </a>
-                )}
-                {showEdit && (
-                  <div className="absolute bottom-6 right-6 flex space-x-3">
-                    <Button
-                      onClick={() => {
-                        if (cert.id) {
-                          setEditingId(cert.id);
-                          setFormData(cert);
-                        }
-                      }}
-                      variant="outline"
-                      className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
+              {editingId === cert.id ? (
+                <CertificationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{cert.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">{cert.description}</p>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Issued by {cert.issuer}
+                  </p>
+                  {cert.credentialUrl && (
+                    <a
+                      href={cert.credentialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block"
                     >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => cert.id && handleDelete(cert.id)}
-                      variant="outline"
-                      className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
+                      View Credential
+                    </a>
+                  )}
+                  {showEdit && (
+                    <div className="absolute bottom-6 right-6 flex space-x-3">
+                      <Button
+                        onClick={() => {
+                          if (cert.id) {
+                            setEditingId(cert.id);
+                            setFormData(cert);
+                          }
+                        }}
+                        variant="outline"
+                        className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => cert.id && handleDelete(cert.id)}
+                        variant="outline"
+                        className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            No certifications added yet. Click the button above to add your first certification.
           </div>
-        ))}
+        )}
       </div>
     </MotionDiv>
   );

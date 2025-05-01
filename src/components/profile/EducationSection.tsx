@@ -6,6 +6,7 @@ import MotionDiv from "../motion-div";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+
 interface Education {
   id?: string;
   institution: string;
@@ -39,13 +40,13 @@ const EducationForm: React.FC<{
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
       />
       <div className="grid grid-cols-2 gap-4">
-      <input
-        name="degree"
+        <input
+          name="degree"
           placeholder="Degree (e.g., Bachelor's)"
-        value={data.degree || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+          value={data.degree || ""}
+          onChange={onChange}
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+        />
         <input
           name="field"
           placeholder="Field of Study (e.g., Computer Science)"
@@ -103,7 +104,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
       const dateValue = value ? new Date(value).toISOString().split('T')[0] : value;
       setFormData((prev) => ({ ...prev, [name]: dateValue }));
     } else {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -141,7 +142,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
       }
       
       onSave(formData as Education, isEdit);
-    resetForm();
+      resetForm();
       toast({
         title: isEdit ? "Education Updated" : "Education Added",
         description: `${formData.degree} at ${formData.institution} was ${isEdit ? "updated" : "added"} successfully.`,
@@ -192,59 +193,65 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
           <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
         )}
 
-        {education.map((edu) => (
-          <div
-            key={edu.id}
-            className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
-          >
-            <div className="flex flex-col space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {edu.degree}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {edu.field}
-                  </p>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    {edu.institution}
-                  </p>
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
-                </div>
-            </div>
-
-            {editingId === edu.id ? (
-              <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
-            ) : (
-                showEdit && (
-                  <div className="flex justify-end space-x-3 mt-4">
-                    <Button
-                      onClick={() => {
-                        if (edu.id) {
-                          setEditingId(edu.id);
-                        setFormData(edu);
-                        }
-                      }}
-                      variant="outline"
-                      className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => edu.id && handleDelete(edu.id)}
-                      variant="outline"
-                      className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
-                    >
-                      Delete
-                    </Button>
+        {education && education.length > 0 ? (
+          education.map((edu) => (
+            <div
+              key={edu.id}
+              className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
+            >
+              <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      {edu.degree}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {edu.field}
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {edu.institution}
+                    </p>
                   </div>
-                )
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
+                  </div>
+                </div>
+
+                {editingId === edu.id ? (
+                  <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+                ) : (
+                  showEdit && (
+                    <div className="flex justify-end space-x-3 mt-4">
+                      <Button
+                        onClick={() => {
+                          if (edu.id) {
+                            setEditingId(edu.id);
+                            setFormData(edu);
+                          }
+                        }}
+                        variant="outline"
+                        className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => edu.id && handleDelete(edu.id)}
+                        variant="outline"
+                        className="border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )
                 )}
+              </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            No education added yet. Click the button above to add your first education.
           </div>
-        ))}
+        )}
       </div>
     </MotionDiv>
   );

@@ -47,19 +47,28 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, issuer, description, issueDate, expiryDate, credentialUrl } = body;
 
-    const certification = await prisma.certification.create({
-      data: {
-        title,
-        issuer,
-        description,
-        issueDate: new Date(issueDate),
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
-        credentialUrl,
-        userId: user.id,
-      },
-    });
+    if (!title || !issuer || !issueDate) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
 
-    return NextResponse.json(certification);
+    try {
+      const certification = await prisma.certification.create({
+        data: {
+          title,
+          issuer,
+          description,
+          issueDate: new Date(issueDate),
+          expiryDate: expiryDate ? new Date(expiryDate) : null,
+          credentialUrl,
+          userId: user.id,
+        },
+      });
+
+      return NextResponse.json({ success: true, data: certification });
+    } catch (dbError) {
+      console.error("Database error creating certification:", dbError);
+      return NextResponse.json({ error: "Failed to create certification" }, { status: 500 });
+    }
   } catch (error) {
     console.error("Error creating certification:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -76,19 +85,28 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, title, issuer, description, issueDate, expiryDate, credentialUrl } = body;
 
-    const certification = await prisma.certification.update({
-      where: { id },
-      data: {
-        title,
-        issuer,
-        description,
-        issueDate: new Date(issueDate),
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
-        credentialUrl,
-      },
-    });
+    if (!id || !title || !issuer || !issueDate) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
 
-    return NextResponse.json(certification);
+    try {
+      const certification = await prisma.certification.update({
+        where: { id },
+        data: {
+          title,
+          issuer,
+          description,
+          issueDate: new Date(issueDate),
+          expiryDate: expiryDate ? new Date(expiryDate) : null,
+          credentialUrl,
+        },
+      });
+
+      return NextResponse.json({ success: true, data: certification });
+    } catch (dbError) {
+      console.error("Database error updating certification:", dbError);
+      return NextResponse.json({ error: "Failed to update certification" }, { status: 500 });
+    }
   } catch (error) {
     console.error("Error updating certification:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -109,11 +127,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Certification ID is required" }, { status: 400 });
     }
 
-    await prisma.certification.delete({
-      where: { id },
-    });
+    try {
+      await prisma.certification.delete({
+        where: { id },
+      });
 
-    return NextResponse.json({ message: "Certification deleted successfully" });
+      return NextResponse.json({ success: true, message: "Certification deleted successfully" });
+    } catch (dbError) {
+      console.error("Database error deleting certification:", dbError);
+      return NextResponse.json({ error: "Failed to delete certification" }, { status: 500 });
+    }
   } catch (error) {
     console.error("Error deleting certification:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
