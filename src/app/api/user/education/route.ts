@@ -104,7 +104,7 @@ export async function PUT(req: Request) {
 
     if (endDate !== undefined) {
       const endDateObj = endDate ? new Date(endDate) : null;
-      if (endDate && isNaN(endDateObj.getTime())) {
+      if (endDateObj && isNaN(endDateObj.getTime())) {
         return NextResponse.json(
           { success: false, message: "Invalid end date" },
           { status: 400 }

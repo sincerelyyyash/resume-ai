@@ -10,6 +10,7 @@ import UserProfileHeader from "@/components/profile/UserProfileHeader";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import EducationSection from "@/components/profile/EducationSection";
+import CertificationSection from "@/components/profile/CertificationSection";
 
 interface UserData {
   id: string;
@@ -33,6 +34,15 @@ interface UserData {
     gpa?: string;
   }[];
   skills: any[];
+  certifications: {
+    id: string;
+    title: string;
+    issuer: string;
+    description?: string;
+    issueDate: string;
+    expiryDate?: string;
+    credentialUrl?: string;
+  }[];
 }
 
 export default function Profile() {
@@ -141,6 +151,14 @@ export default function Profile() {
 
       <SkillsSection
         skills={userData?.skills || []}
+        showEdit={true}
+        showAddNew={true}
+        onSave={fetchUserData}
+        onDelete={fetchUserData}
+      />
+
+      <CertificationSection
+        certifications={userData?.certifications || []}
         showEdit={true}
         showAddNew={true}
         onSave={fetchUserData}
