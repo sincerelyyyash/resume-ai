@@ -105,7 +105,7 @@ export default function Profile() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+      <div className="flex flex-col items-center justify-center mt-10 space-y-4 h-screen">
         <h2 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-200">
           Please sign in to view your profile
         </h2>
