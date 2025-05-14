@@ -4,7 +4,7 @@ import { SignInForm } from "@/components/SignInForm";
 
 export default function SigninPage() {
   return (
-    <div className="flex flex-col lg:flex-row mt-10 lg:mt-20">
+    <div className="flex flex-col lg:flex-row mt-10 lg:mt-20 mb-10">
       <motion.div
         className="w-full lg:w-1/2 flex flex-col justify-center items-center px-4 lg:px-0"
         initial={{ opacity: 0, y: 50 }}
