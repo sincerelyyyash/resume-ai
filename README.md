@@ -1,5 +1,4 @@
 # **Resume-AI**  
-**Tailor-made Resumes based on Job Descriptions**
 
 **Resume-AI** is a smart resume builder that customizes resumes to align with specific job descriptions (JDs). Users can upload their professional details (projects, work experience, profiles, etc.), and with each job description, the system leverages AI to parse the requirements and adapt the user's resume content accordingly. Once completed, resumes can be downloaded or stored online for easy access.
 
@@ -10,22 +9,22 @@
 - **One-Click Download**: Download updated resumes after customization for immediate use.
 
 ## **Tech Stack**
-- **Frontend**: [Next.js](https://nextjs.org/), [TypeScript](https://www.typescriptlang.org/)
-- **Authentication**: [NextAuth.js](https://next-auth.js.org/) for secure user authentication
-- **Database**: [MongoDB](https://www.mongodb.com/) for storing user information and resume data
-- **API Integration**: [Gemini API](https://gemini.com/) for parsing job descriptions and managing AI capabilities
+- **Frontend**: Next.js,
+- **Authentication**: NextAuth.js
+- **Database**: PostgreSQL
+- **API Integration**: Gemini API
 
 ## **Getting Started**
 
 ### **Prerequisites**
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- [MongoDB](https://www.mongodb.com/)
+- Node.js
+- PostgreSQL
 - Gemini API Key (required for job description parsing)
 
 ### **Key Functionalities**
 1. **User Authentication**: Handled through NextAuth, allowing users to securely manage their profiles and stored resumes.
 2. **Job Description Parsing**: Uses the Gemini API to parse user-uploaded job descriptions and customize resume content accordingly.
-3. **Data Storage**: MongoDB stores user details, resumes, and customized data for quick retrieval and updating.
+3. **Data Storage**: PostgreSQL stores user details, resumes, and customized data for quick retrieval and updating.
 4. **Resume Download**: After customization, users can download their resumes in PDF format.
 
 ## **Usage**
