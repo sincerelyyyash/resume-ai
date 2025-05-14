@@ -4,13 +4,104 @@ import { useState } from 'react';
 import { TextArea } from "@/components/ui/text-area";
 import { Button } from "@/components/ui/button";
 import MotionDiv from "@/components/motion-div";
+import { useToast } from "@/hooks/use-toast";
+import { optimizeResume } from '@/lib/resumeOptimiser';
+import { useRouter } from 'next/navigation';
 
 export default function JobDescriptionForm() {
   const [jobDescription, setJobDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Generating resume with job description:', jobDescription);
+    if (!jobDescription.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a job description",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Get user data
+      const userResponse = await fetch('/api/user/get-user');
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const userData = await userResponse.text();
+
+      // Optimize resume
+      const optimizedResume = await optimizeResume(jobDescription, userData);
+      
+      // Store in localStorage
+      localStorage.setItem('optimizedResume', JSON.stringify({
+        ...optimizedResume,
+        ats_score: optimizedResume.analysis.ats_score,
+        matched_keywords: optimizedResume.analysis.matched_keywords,
+        missing_keywords: optimizedResume.analysis.missing_keywords,
+      }));
+
+      // Generate PDF
+      const response = await fetch('/api/resume/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(optimizedResume.optimized_resume),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle LaTeX-specific errors
+        if (errorData.type === 'LATEX_MISSING') {
+          toast({
+            title: "LaTeX Not Installed",
+            description: errorData.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (errorData.type === 'LATEX_COMPILATION_ERROR') {
+          toast({
+            title: "PDF Generation Failed",
+            description: errorData.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        throw new Error(errorData.message || 'Failed to generate PDF');
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'optimized_resume.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Navigate to preview
+      router.push('/resume-preview');
+    } catch (error: any) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate resume",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -24,16 +115,18 @@ export default function JobDescriptionForm() {
             id="jobDescription"
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
-            placeholder=" Paste the job description here & leave the rest to us"
+            placeholder="Paste the job description here & leave the rest to us"
             className="min-h-[200px] text-base resize-none bg-transparent focus:outline-none focus:ring-0 border-none shadow-none"
+            disabled={isLoading}
           />
 
           <div className="flex justify-center">
             <Button
               type="submit"
-            //   className="bg-gradient-to-br from-black to-zinc-800 hover:from-zinc-900 hover:to-black text-white text-sm sm:text-base px-6 py-3 rounded-lg transition-all shadow-md hover:shadow-lg"
+              disabled={isLoading}
+              className=" "
             >
-              Generate Resume with AI
+              {isLoading ? 'Generating...' : 'Generate Resume with AI'}
             </Button>
           </div>
         </form>

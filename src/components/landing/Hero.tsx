@@ -62,8 +62,8 @@ export const Hero = () => {
         >
           {!isAuthenticated && (
             <>
-              <p className="text-zinc-600 dark:text-zinc-400">contact@resume-ai.com</p>
-              <p className="text-zinc-600 dark:text-zinc-400">www.resume-ai.com</p>
+              {/* <p className="text-zinc-600 dark:text-zinc-400">contact@resume-ai.com</p>
+              <p className="text-zinc-600 dark:text-zinc-400">www.resume-ai.com</p> */}
             </>
           )}
           <div className="mt-4 flex flex-col justify-end gap-4">
