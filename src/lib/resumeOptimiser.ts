@@ -3,7 +3,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { LLMChain, SequentialChain } from "langchain/chains";
 import { Education, Experience, Project, Skills } from './utils/resumeGenerator';
-import { ChatOpenAI } from '@langchain/openai';
+
 
 const apiKey = process.env.GOOGLE_API_KEY;
 
@@ -27,18 +27,19 @@ const jdParserPrompt = new PromptTemplate({
 - Company culture indicators and values
 - Team structure and reporting relationships (if mentioned)
 
-Format your response as structured JSON:
+Format your response as structured JSON with the following fields:
+
 {{
-  "job_title": "",
-  "required_skills": [],
-  "preferred_skills": [],
-  "tools_technologies": [],
-  "responsibilities": [],
-  "ats_keywords": [],
-  "industry_terminology": [],
-  "required_qualifications": [],
-  "culture_indicators": [],
-  "team_structure": ""
+  "job_title": "string",
+  "required_skills": ["string"],
+  "preferred_skills": ["string"],
+  "tools_technologies": ["string"],
+  "responsibilities": ["string"],
+  "ats_keywords": ["string"],
+  "industry_terminology": ["string"],
+  "required_qualifications": ["string"],
+  "culture_indicators": ["string"],
+  "team_structure": "string"
 }}
 
 Job Description: {job_description}`,
@@ -83,24 +84,42 @@ Perform the following detailed analysis:
    - Summary/profile statement optimization
    - Format and structure recommendations
 
-Return detailed JSON: {{
-  "ats_score": number,
-  "matched_keywords": [{"keyword": string, "context": string, "frequency": number}],
-  "missing_keywords": [{"keyword": string, "importance": "high|medium|low"}],
-  "alternative_keywords": [{"missing": string, "alternatives": string[]}],
-  "recommendations": {
-    "experience": string[],
-    "skills": string[],
-    "education": string[],
-    "summary": string,
-    "format": string[]
-  },
-  "content_analysis": {
-    "experience_alignment": number,
-    "skills_alignment": number,
-    "project_relevance": number,
-    "education_relevance": number
-  }
+Return detailed JSON with the following structure:
+
+{{
+  "ats_score": 0,
+  "matched_keywords": [
+    {{
+      "keyword": "string",
+      "context": "string",
+      "frequency": 0
+    }}
+  ],
+  "missing_keywords": [
+    {{
+      "keyword": "string",
+      "importance": "high|medium|low"
+    }}
+  ],
+  "alternative_keywords": [
+    {{
+      "missing": "string",
+      "alternatives": ["string"]
+    }}
+  ],
+  "recommendations": {{
+    "experience": ["string"],
+    "skills": ["string"],
+    "education": ["string"],
+    "summary": "string",
+    "format": ["string"]
+  }},
+  "content_analysis": {{
+    "experience_alignment": 0,
+    "skills_alignment": 0,
+    "project_relevance": 0,
+    "education_relevance": 0
+  }}
 }}`,
   inputVariables: ["user_data", "parsed_jd"],
 });
@@ -149,39 +168,40 @@ Job Description Analysis: {parsed_jd}
 ATS Analysis: {analysis}
 
 Return the optimized resume in this JSON format:
+
 {{
-  "summary": string (compelling, job-targeted professional summary),
+  "summary": "string",
   "education": [
-    {
-      "degree": string,
-      "institution": string,
-      "duration": string,
-      "gpa": string (optional),
-      "highlights": string[] (optimized bullet points highlighting relevant coursework/achievements)
-    }
+    {{
+      "degree": "string",
+      "institution": "string",
+      "duration": "string",
+      "gpa": "string",
+      "highlights": ["string"]
+    }}
   ],
   "experience": [
-    {
-      "title": string,
-      "company": string,
-      "duration": string,
-      "achievements": string[] (completely rewritten, optimized bullet points)
-    }
+    {{
+      "title": "string",
+      "company": "string",
+      "duration": "string",
+      "achievements": ["string"]
+    }}
   ],
   "projects": [
-    {
-      "name": string,
-      "description": string (optimized),
-      "technologies": string[],
-      "achievements": string[] (optimized bullet points)
-    }
+    {{
+      "name": "string",
+      "description": "string",
+      "technologies": ["string"],
+      "achievements": ["string"]
+    }}
   ],
-  "skills": {
-    "technical": string[],
-    "soft": string[],
-    "tools": string[],
-    "certifications": string[]
-  }
+  "skills": {{
+    "technical": ["string"],
+    "soft": ["string"],
+    "tools": ["string"],
+    "certifications": ["string"]
+  }}
 }}`,
   inputVariables: ["user_data", "parsed_jd", "analysis"],
 });
@@ -195,11 +215,7 @@ const rewriteChain = new LLMChain({
 const resumeOptimizerChain = new SequentialChain({
   chains: [jdParsingChain, atsChain, rewriteChain],
   inputVariables: ["job_description", "user_data"],
-  outputVariables: [
-    "parsed_jd",
-    "analysis",
-    "optimized_resume",
-  ],
+  outputVariables: ["parsed_jd", "analysis", "optimized_resume"],
 });
 
 interface Analysis {
@@ -233,6 +249,11 @@ interface Analysis {
 }
 
 interface OptimizedResume {
+  name: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  github: string;
   summary?: string;
   education: Education[];
   experience: Experience[];
@@ -243,114 +264,107 @@ interface OptimizedResume {
 function parseLLMResponse(response: string): any {
   try {
     // Remove markdown code block syntax if present
-    const cleanedResponse = response.replace(/```json\n?|\n?```/g, '').trim();
+    let cleanedResponse = response.replace(/```json\n?|\n?```/g, '').trim();
+    
+    // Find the first occurrence of a valid JSON object
+    const jsonStart = cleanedResponse.indexOf('{');
+    const jsonEnd = cleanedResponse.lastIndexOf('}') + 1;
+    
+    if (jsonStart === -1 || jsonEnd === 0) {
+      throw new Error('No valid JSON object found in response');
+    }
+    
+    // Extract just the JSON portion
+    cleanedResponse = cleanedResponse.slice(jsonStart, jsonEnd);
+    
     return JSON.parse(cleanedResponse);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error('Error parsing LLM response:', e);
-    return {};
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error occurred';
+    throw new Error(`Failed to parse LLM response: ${errorMessage}`);
   }
 }
 
-interface OptimizationAnalysis {
-  ats_score: number;
-  matched_keywords: string[];
-  missing_keywords: string[];
-  recommendations: string[];
-}
-
-interface OptimizationResult {
+export async function optimizeResume(jobDescription: string, userData: string): Promise<{
+  parsed_jd: any;
+  analysis: Analysis;
   optimized_resume: OptimizedResume;
-  analysis: OptimizationAnalysis;
-}
-
-const RESUME_OPTIMIZATION_PROMPT = `You are an expert resume optimizer. Your task is to optimize the given resume content for the provided job description.
-
-Job Description:
-{jobDescription}
-
-Resume Content:
-{resumeContent}
-
-Please analyze and optimize the resume content to better match the job requirements. Consider:
-1. Highlighting relevant skills and experiences
-2. Rewording achievements to match job requirements
-3. Adding missing keywords naturally
-4. Improving the overall impact of the content
-
-Return the optimized content in the same JSON structure as the input, with any necessary modifications.`;
-
-export async function optimizeResume(jobDescription: string, resumeContent: string): Promise<OptimizationResult> {
+}> {
   try {
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-4-turbo-preview',
-      temperature: 0.7,
+    const result = await resumeOptimizerChain.call({
+      job_description: jobDescription,
+      user_data: userData
     });
 
-    const prompt = PromptTemplate.fromTemplate(RESUME_OPTIMIZATION_PROMPT);
+    // Parse the analysis JSON string if it exists
+    let analysis: Partial<Analysis> = {};
+    try {
+      if (typeof result.analysis === 'string') {
+        analysis = parseLLMResponse(result.analysis);
+      } else {
+        analysis = result.analysis;
+      }
+    } catch (e) {
+      console.error('Error parsing analysis:', e);
+    }
 
-    const chain = prompt.pipe(llm);
+    // Parse the optimized resume sections JSON string if it exists
+    let optimizedResume: Partial<OptimizedResume> = {};
+    try {
+      if (typeof result.optimized_resume === 'string') {
+        optimizedResume = parseLLMResponse(result.optimized_resume);
+      } else {
+        optimizedResume = result.optimized_resume;
+      }
+    } catch (e) {
+      console.error('Error parsing optimized resume:', e);
+    }
 
-    const result = await chain.invoke({
-      jobDescription,
-      resumeContent
-    });
+    // Parse user data to get contact information
+    const userInfo = JSON.parse(userData);
 
-    // Parse the LLM response
-    const optimizedContent = JSON.parse(result.content.toString());
-    
-    // Calculate ATS score and analysis
-    const analysis = await analyzeResume(jobDescription, optimizedContent);
-
+    // Return a plain object with all necessary data
     return {
-      optimized_resume: optimizedContent,
-      analysis
+      parsed_jd: result.parsed_jd,
+      analysis: {
+        ats_score: analysis.ats_score || 0,
+        matched_keywords: analysis.matched_keywords || [],
+        missing_keywords: analysis.missing_keywords || [],
+        alternative_keywords: analysis.alternative_keywords || [],
+        recommendations: analysis.recommendations || {
+          experience: [],
+          skills: [],
+          education: [],
+          summary: "",
+          format: []
+        },
+        content_analysis: analysis.content_analysis || {
+          experience_alignment: 0,
+          skills_alignment: 0,
+          project_relevance: 0,
+          education_relevance: 0
+        }
+      },
+      optimized_resume: {
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        phone: userInfo.phone || '',
+        linkedin: userInfo.linkedin || '',
+        github: userInfo.github || '',
+        summary: optimizedResume.summary || '',
+        education: optimizedResume.education || [],
+        experience: optimizedResume.experience || [],
+        projects: optimizedResume.projects || [],
+        skills: optimizedResume.skills || {
+          technical: [],
+          soft: [],
+          tools: [],
+          certifications: []
+        }
+      }
     };
   } catch (error) {
     console.error('Error optimizing resume:', error);
-    throw new Error('Failed to optimize resume content');
-  }
-}
-
-async function analyzeResume(jobDescription: string, resumeContent: any): Promise<OptimizationAnalysis> {
-  try {
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-4-turbo-preview',
-      temperature: 0.3,
-    });
-
-    const analysisPrompt = PromptTemplate.fromTemplate(`
-      Analyze how well the resume matches the job description.
-      
-      Job Description:
-      {jobDescription}
-      
-      Resume Content:
-      {resumeContent}
-      
-      Provide analysis in the following JSON format:
-      {
-        "ats_score": number (0-100),
-        "matched_keywords": string[],
-        "missing_keywords": string[],
-        "recommendations": string[]
-      }
-    `);
-
-    const chain = analysisPrompt.pipe(llm);
-
-    const result = await chain.invoke({
-      jobDescription,
-      resumeContent: JSON.stringify(resumeContent)
-    });
-
-    return JSON.parse(result.content.toString());
-  } catch (error) {
-    console.error('Error analyzing resume:', error);
-    return {
-      ats_score: 0,
-      matched_keywords: [],
-      missing_keywords: [],
-      recommendations: ['Failed to analyze resume']
-    };
+    throw new Error('Failed to optimize resume. Please try again.');
   }
 }

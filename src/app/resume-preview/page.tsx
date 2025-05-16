@@ -24,6 +24,19 @@ interface ResumeData {
   atsScore: number;
   matchedKeywords: string[];
   missingKeywords: string[];
+  recommendations?: {
+    experience: string[];
+    skills: string[];
+    education: string[];
+    summary: string;
+    format: string[];
+  };
+  contentAnalysis?: {
+    experience_alignment: number;
+    skills_alignment: number;
+    project_relevance: number;
+    education_relevance: number;
+  };
 }
 
 export default function ResumePreviewPage() {
@@ -68,6 +81,8 @@ export default function ResumePreviewPage() {
         atsScore={resumeData.atsScore}
         matchedKeywords={resumeData.matchedKeywords}
         missingKeywords={resumeData.missingKeywords}
+        recommendations={resumeData.recommendations}
+        contentAnalysis={resumeData.contentAnalysis}
       />
     </div>
   );

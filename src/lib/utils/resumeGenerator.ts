@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { marked } from 'marked';
-import puppeteer from 'puppeteer';
+import PDFDocument from 'pdfkit';
 
 export interface Education {
   degree: string;
@@ -256,7 +256,7 @@ function generateHTMLContent(data: ResumeData): string {
             margin: 0.5in;
           }
           body {
-            font-family: 'Calibri', 'Helvetica', 'Arial', sans-serif;
+            font-family: 'Calibri', 'Roboto', 'Arial', sans-serif;
             line-height: 1.2;
             margin: 0;
             padding: 0;
@@ -392,44 +392,192 @@ function generateHTMLContent(data: ResumeData): string {
   `;
 }
 
-export async function generateResumePDF(data: ResumeData): Promise<Buffer> {
-  try {
-    // Generate HTML content
-    const htmlContent = generateHTMLContent(data);
+// Register fonts with absolute paths
+const fonts = {
+  regular: path.join(process.cwd(), 'src', 'lib', 'fonts', 'Roboto-Regular.ttf'),
+  bold: path.join(process.cwd(), 'src', 'lib', 'fonts', 'Roboto-Bold.ttf'),
+  italic: path.join(process.cwd(), 'src', 'lib', 'fonts', 'Roboto-Italic.ttf')
+};
 
-    // Launch Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    
-    const page = await browser.newPage();
-    
-    // Set content and wait for network idle
-    await page.setContent(htmlContent, {
-      waitUntil: 'networkidle0'
-    });
-
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: 'Letter',
-      printBackground: true,
-      margin: {
-        top: '0.5in',
-        right: '0.5in',
-        bottom: '0.5in',
-        left: '0.5in'
-      }
-    });
-
-    // Close browser
-    await browser.close();
-
-    return Buffer.from(pdfBuffer);
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error('Failed to generate PDF resume');
+// Verify font files exist
+Object.entries(fonts).forEach(([name, fontPath]) => {
+  if (!fs.existsSync(fontPath)) {
+    throw new Error(`Font file not found: ${fontPath}`);
   }
+});
+
+export async function generateResumePDF(data: ResumeData): Promise<{ buffer: Buffer; filename: string }> {
+  return new Promise((resolve, reject) => {
+    try {
+      // Create a unique filename using timestamp and sanitized name
+      const timestamp = new Date().getTime();
+      const sanitizedName = data.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const filename = `${sanitizedName}-${timestamp}.pdf`;
+      const filepath = path.join(process.cwd(), 'public', 'pdfs', filename);
+
+      // Ensure the pdfs directory exists
+      const pdfsDir = path.join(process.cwd(), 'public', 'pdfs');
+      if (!fs.existsSync(pdfsDir)) {
+        fs.mkdirSync(pdfsDir, { recursive: true });
+      }
+
+      // Create PDF document
+      const doc = new PDFDocument({ 
+        margin: 50,
+        size: 'A4',
+        info: {
+          Title: `${data.name}'s Resume`,
+          Author: data.name,
+          Subject: 'Professional Resume',
+          Keywords: 'resume, professional, career',
+          CreationDate: new Date()
+        }
+      });
+
+      // Register fonts with error handling
+      try {
+        // Register fonts with their full paths
+        doc.registerFont('Roboto', fonts.regular);
+        doc.registerFont('Roboto-Bold', fonts.bold);
+        doc.registerFont('Roboto-Italic', fonts.italic);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        throw new Error(`Failed to register fonts: ${errorMessage}`);
+      }
+
+      // Set default font after registration
+      doc.font('Roboto');
+
+      const chunks: Buffer[] = [];
+
+      // Create write stream
+      const stream = fs.createWriteStream(filepath);
+      doc.pipe(stream);
+
+      // Collect PDF chunks
+      doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+      doc.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve({ buffer, filename });
+      });
+      doc.on('error', reject);
+
+      // Header
+      doc.font('Roboto-Bold').fontSize(24).text(data.name, { align: 'center' });
+      doc.moveDown(0.5);
+
+      // Contact Information
+      const contactInfo = [
+        data.email,
+        data.phone,
+        data.linkedin,
+        data.github
+      ].filter(Boolean).join(' • ');
+      
+      doc.font('Roboto').fontSize(10).text(contactInfo, { align: 'center' });
+      doc.moveDown(1);
+
+      // Summary
+      if (data.summary) {
+        doc.font('Roboto-Bold').fontSize(14).text('Professional Summary', { underline: true });
+        doc.font('Roboto').fontSize(10).text(data.summary);
+        doc.moveDown(1);
+      }
+
+      // Experience
+      if (data.experience?.length) {
+        doc.font('Roboto-Bold').fontSize(14).text('Professional Experience', { underline: true });
+        doc.moveDown(0.5);
+
+        data.experience.forEach((exp: Experience) => {
+          doc.font('Roboto-Bold').fontSize(12).text(`${exp.title} at ${exp.company}`);
+          doc.font('Roboto').fontSize(10).text(exp.duration);
+          doc.moveDown(0.5);
+
+          exp.achievements.forEach((achievement: string) => {
+            doc.font('Roboto').fontSize(10).text(`• ${achievement}`, { indent: 20 });
+          });
+          doc.moveDown(1);
+        });
+      }
+
+      // Education
+      if (data.education?.length) {
+        doc.font('Roboto-Bold').fontSize(14).text('Education', { underline: true });
+        doc.moveDown(0.5);
+
+        data.education.forEach((edu: Education) => {
+          doc.font('Roboto-Bold').fontSize(12).text(`${edu.degree} - ${edu.institution}`);
+          doc.font('Roboto').fontSize(10).text(edu.duration);
+          if (edu.gpa) {
+            doc.font('Roboto').fontSize(10).text(`GPA: ${edu.gpa}`);
+          }
+          if (edu.highlights?.length) {
+            edu.highlights.forEach((highlight: string) => {
+              doc.font('Roboto').fontSize(10).text(`• ${highlight}`, { indent: 20 });
+            });
+          }
+          doc.moveDown(1);
+        });
+      }
+
+      // Projects
+      if (data.projects?.length) {
+        doc.font('Roboto-Bold').fontSize(14).text('Projects', { underline: true });
+        doc.moveDown(0.5);
+
+        data.projects.forEach((project: Project) => {
+          doc.font('Roboto-Bold').fontSize(12).text(project.name);
+          if (project.description) {
+            doc.font('Roboto').fontSize(10).text(project.description);
+          }
+          if (project.technologies?.length) {
+            doc.font('Roboto').fontSize(10).text(`Technologies: ${project.technologies.join(', ')}`);
+          }
+          if (project.achievements?.length) {
+            project.achievements.forEach((achievement: string) => {
+              doc.font('Roboto').fontSize(10).text(`• ${achievement}`, { indent: 20 });
+            });
+          }
+          doc.moveDown(1);
+        });
+      }
+
+      // Skills
+      if (data.skills) {
+        doc.font('Roboto-Bold').fontSize(14).text('Skills', { underline: true });
+        doc.moveDown(0.5);
+
+        if (data.skills.technical?.length) {
+          doc.font('Roboto-Bold').fontSize(12).text('Technical Skills');
+          doc.font('Roboto').fontSize(10).text(data.skills.technical.join(', '));
+          doc.moveDown(0.5);
+        }
+
+        if (data.skills.soft?.length) {
+          doc.font('Roboto-Bold').fontSize(12).text('Soft Skills');
+          doc.font('Roboto').fontSize(10).text(data.skills.soft.join(', '));
+          doc.moveDown(0.5);
+        }
+
+        if (data.skills.tools?.length) {
+          doc.font('Roboto-Bold').fontSize(12).text('Tools & Technologies');
+          doc.font('Roboto').fontSize(10).text(data.skills.tools.join(', '));
+          doc.moveDown(0.5);
+        }
+
+        if (data.skills.certifications?.length) {
+          doc.font('Roboto-Bold').fontSize(12).text('Certifications');
+          doc.font('Roboto').fontSize(10).text(data.skills.certifications.join(', '));
+        }
+      }
+
+      // Finalize PDF
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 export async function optimizeAndGenerateResume(
@@ -448,7 +596,7 @@ export async function optimizeAndGenerateResume(
     github: string;
     website?: string;
   }
-): Promise<Buffer> {
+): Promise<{ buffer: Buffer; filename: string }> {
   // Combine the optimized content with personal data that wasn't sent to the LLM
   const completeResumeData: ResumeData = {
     ...userData,

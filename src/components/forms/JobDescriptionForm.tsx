@@ -37,12 +37,14 @@ export default function JobDescriptionForm() {
       // Optimize resume
       const optimizedResume = await optimizeResume(jobDescription, userData);
       
-      // Store in localStorage
+      // Store in localStorage with the correct structure
       localStorage.setItem('optimizedResume', JSON.stringify({
-        ...optimizedResume,
-        ats_score: optimizedResume.analysis.ats_score,
-        matched_keywords: optimizedResume.analysis.matched_keywords,
-        missing_keywords: optimizedResume.analysis.missing_keywords,
+        data: optimizedResume.optimized_resume,
+        atsScore: optimizedResume.analysis.ats_score,
+        matchedKeywords: optimizedResume.analysis.matched_keywords.map(k => k.keyword),
+        missingKeywords: optimizedResume.analysis.missing_keywords.map(k => k.keyword),
+        recommendations: optimizedResume.analysis.recommendations,
+        contentAnalysis: optimizedResume.analysis.content_analysis
       }));
 
       // Generate PDF
@@ -51,44 +53,24 @@ export default function JobDescriptionForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(optimizedResume.optimized_resume),
+        body: JSON.stringify({
+          jobDescription,
+          userData: optimizedResume.optimized_resume
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        
-        // Handle LaTeX-specific errors
-        if (errorData.type === 'LATEX_MISSING') {
-          toast({
-            title: "LaTeX Not Installed",
-            description: errorData.message,
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        if (errorData.type === 'LATEX_COMPILATION_ERROR') {
-          toast({
-            title: "PDF Generation Failed",
-            description: errorData.message,
-            variant: "destructive",
-          });
-          return;
-        }
-
         throw new Error(errorData.message || 'Failed to generate PDF');
       }
 
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'optimized_resume.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const responseData = await response.json();
+      
+      // Store PDF info in localStorage
+      localStorage.setItem('resumePdf', JSON.stringify({
+        filename: responseData.data.pdf.filename,
+        url: responseData.data.pdf.url
+      }));
 
       // Navigate to preview
       router.push('/resume-preview');

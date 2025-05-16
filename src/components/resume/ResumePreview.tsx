@@ -21,18 +21,37 @@ interface ResumeData {
   skills: string[];
 }
 
+interface Recommendations {
+  experience: string[];
+  skills: string[];
+  education: string[];
+  summary: string;
+  format: string[];
+}
+
+interface ContentAnalysis {
+  experience_alignment: number;
+  skills_alignment: number;
+  project_relevance: number;
+  education_relevance: number;
+}
+
 interface ResumePreviewProps {
   data: ResumeData;
   atsScore: number;
   matchedKeywords: string[];
   missingKeywords: string[];
+  recommendations?: Recommendations;
+  contentAnalysis?: ContentAnalysis;
 }
 
 export default function ResumePreview({ 
   data, 
   atsScore = 0, 
   matchedKeywords = [], 
-  missingKeywords = [] 
+  missingKeywords = [],
+  recommendations,
+  contentAnalysis
 }: ResumePreviewProps) {
   // Ensure data has all required fields with default values
   const safeData = {
@@ -51,6 +70,33 @@ export default function ResumePreview({
       {/* ATS Score and Analysis */}
       <div className="mb-8 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">ATS Optimization Score: {atsScore}%</h2>
+        
+        {/* Content Alignment Scores */}
+        {contentAnalysis && (
+          <div className="mb-6">
+            <h3 className="font-medium mb-2">Content Alignment</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-2 bg-zinc-100 dark:bg-zinc-700 rounded">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Experience</p>
+                <p className="text-lg font-semibold">{contentAnalysis.experience_alignment}%</p>
+              </div>
+              <div className="p-2 bg-zinc-100 dark:bg-zinc-700 rounded">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Skills</p>
+                <p className="text-lg font-semibold">{contentAnalysis.skills_alignment}%</p>
+              </div>
+              <div className="p-2 bg-zinc-100 dark:bg-zinc-700 rounded">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Projects</p>
+                <p className="text-lg font-semibold">{contentAnalysis.project_relevance}%</p>
+              </div>
+              <div className="p-2 bg-zinc-100 dark:bg-zinc-700 rounded">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Education</p>
+                <p className="text-lg font-semibold">{contentAnalysis.education_relevance}%</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Keywords Analysis */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h3 className="font-medium mb-2">Matched Keywords</h3>
@@ -79,6 +125,61 @@ export default function ResumePreview({
             </div>
           </div>
         </div>
+
+        {/* Recommendations */}
+        {recommendations && (
+          <div className="mt-6">
+            <h3 className="font-medium mb-2">Recommendations</h3>
+            <div className="space-y-4">
+              {recommendations.experience.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Experience</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {recommendations.experience.map((rec, index) => (
+                      <li key={index} className="text-sm">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {recommendations.skills.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Skills</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {recommendations.skills.map((rec, index) => (
+                      <li key={index} className="text-sm">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {recommendations.education.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Education</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {recommendations.education.map((rec, index) => (
+                      <li key={index} className="text-sm">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {recommendations.summary && (
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Summary</h4>
+                  <p className="text-sm">{recommendations.summary}</p>
+                </div>
+              )}
+              {recommendations.format.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Format</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {recommendations.format.map((rec, index) => (
+                      <li key={index} className="text-sm">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Resume Content */}
