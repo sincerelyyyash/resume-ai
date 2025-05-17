@@ -1,32 +1,28 @@
-
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { signIn } from "next-auth/react";
 import { Button } from "./ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { signIn } from "next-auth/react";
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 interface FormData {
-  name: string;
   email: string;
   password: string;
 }
 
-export function SignupForm() {
-  const { toast } = useToast()
+export function SignInForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
-    name: "",
     email: "",
     password: "",
   });
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [passwordMatchError, setPasswordMatchError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,70 +31,73 @@ export function SignupForm() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setConfirmPassword(value);
-    setPasswordMatchError(formData.password !== value ? "Passwords do not match" : null);
-  };
-
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (formData.password !== confirmPassword) {
-      setPasswordMatchError("Passwords do not match");
-
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-
-      return;
-    }
-
-    setPasswordMatchError(null);
     setError(null);
     setLoading(true);
 
-    try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+    const result = await signIn("credentials", {
+      ...formData,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError(result.error);
+      toast({
+        title: "Login Failed",
+        description: result.error,
+        variant: "destructive",
       });
+      setLoading(false);
+      return;
+    }
 
-      const data = await response.json();
+    toast({
+      title: "Login Successful",
+      description: "Checking your profile status...",
+    });
 
-      if (!response.ok) {
-        const errorMessage = Array.isArray(data.message)
-          ? data.message.join(", ")
-          : "Signup failed";
+    try {
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+      const userId = sessionData?.user?.id;
 
+      if (!userId) {
         toast({
-          title: "Signup Failed",
-          description: errorMessage,
+          title: "Session Error",
+          description: "Could not retrieve user ID from session.",
           variant: "destructive",
         });
-
-        throw new Error(errorMessage);
+        return;
       }
 
-      toast({
-        title: "Account Created",
-        description: "You have successfully signed up!",
+      const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
+
+      if (!profileResponse?.success) {
+        toast({
+          title: "Profile Status Error",
+          description: "Could not check profile completion status.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const completionPercentage = profileResponse.data?.data?.completionPercentage || 0;
+
+      if (completionPercentage < 10) {
+        toast({
+          title: "Incomplete Profile",
+          description: "Please complete your profile to proceed.",
       });
-
-      router.push("/");
+        router.push("/user/create-profile");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
-      const errorMsg = (err as Error).message;
-      setError(errorMsg);
-
+      console.error("Profile status check error:", err);
       toast({
-        title: "Something went wrong",
-        description: errorMsg,
+        title: "Error",
+        description: "An error occurred while checking profile status.",
         variant: "destructive",
       });
     } finally {
@@ -110,16 +109,6 @@ export function SignupForm() {
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-zinc-900">
       <form className="my-8" onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-4 mb-4">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            name="name"
-            placeholder="Enter your name"
-            type="text"
-            value={formData.name}
-            onChange={handleChange}
-          />
-
           <Label htmlFor="email">Email Address</Label>
           <Input
             id="email"
@@ -139,18 +128,8 @@ export function SignupForm() {
             value={formData.password}
             onChange={handleChange}
           />
-
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input
-            id="confirmPassword"
-            placeholder="********"
-            type="password"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-          />
         </div>
 
-        {passwordMatchError && <p className="text-red-500 m-2">{passwordMatchError}</p>}
         {error && <p className="text-red-500 m-2">{error}</p>}
 
         <Button
@@ -158,9 +137,10 @@ export function SignupForm() {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Signing up..." : "Sign up"}
+          {loading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
+
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
@@ -174,7 +154,7 @@ export function SignupForm() {
 
       <div className="flex flex-col space-y-3 mt-4">
         <Button
-          className="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
+          className="w-full bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
           onClick={() => signIn("google", { callbackUrl: "/" })}
         >
           <FcGoogle size={20} /> Sign in with Google
@@ -189,13 +169,14 @@ export function SignupForm() {
 
       <div className="flex justify-center mt-4">
         <p className="text-neutral-700 dark:text-neutral-300">
-          Already have an account?{" "}
+          Don't have an account?{" "}
           <button
-            onClick={() => router.push("/signin")}
+            onClick={() => router.push("/signup")}
             className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
           >
-            Sign In
-          </button> here
+            Sign Up
+          </button>{" "}
+          here
         </p>
       </div>
     </div>

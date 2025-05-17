@@ -1,28 +1,32 @@
+
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
-import { signIn } from "next-auth/react";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import { signIn } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast"
 
 interface FormData {
+  name: string;
   email: string;
   password: string;
 }
 
-export function SignInForm() {
+export function SignupForm() {
+  const { toast } = useToast()
   const router = useRouter();
-  const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
+    name: "",
     email: "",
     password: "",
   });
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [passwordMatchError, setPasswordMatchError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,73 +35,70 @@ export function SignInForm() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setConfirmPassword(value);
+    setPasswordMatchError(formData.password !== value ? "Passwords do not match" : null);
+  };
+
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
 
-    const result = await signIn("credentials", {
-      ...formData,
-      redirect: false,
-    });
+    if (formData.password !== confirmPassword) {
+      setPasswordMatchError("Passwords do not match");
 
-    if (result?.error) {
-      setError(result.error);
       toast({
-        title: "Login Failed",
-        description: result.error,
+        title: "Error",
+        description: "Passwords do not match",
         variant: "destructive",
       });
-      setLoading(false);
+
       return;
     }
 
-    toast({
-      title: "Login Successful",
-      description: "Checking your profile status...",
-    });
+    setPasswordMatchError(null);
+    setError(null);
+    setLoading(true);
 
     try {
-      const sessionRes = await fetch("/api/auth/session");
-      const sessionData = await sessionRes.json();
-      const userId = sessionData?.user?.id;
-
-      if (!userId) {
-        toast({
-          title: "Session Error",
-          description: "Could not retrieve user ID from session.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
-
-      if (!profileResponse?.success) {
-        toast({
-          title: "Profile Status Error",
-          description: "Could not check profile completion status.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const completionPercentage = profileResponse.data?.data?.completionPercentage || 0;
-
-      if (completionPercentage < 10) {
-        toast({
-          title: "Incomplete Profile",
-          description: "Please complete your profile to proceed.",
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
-        router.push("/user/create-profile");
-      } else {
-        router.push("/");
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = Array.isArray(data.message)
+          ? data.message.join(", ")
+          : "Signup failed";
+
+        toast({
+          title: "Signup Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+
+        throw new Error(errorMessage);
       }
-    } catch (err) {
-      console.error("Profile status check error:", err);
+
       toast({
-        title: "Error",
-        description: "An error occurred while checking profile status.",
+        title: "Account Created",
+        description: "You have successfully signed up!",
+      });
+
+      router.push("/");
+    } catch (err) {
+      const errorMsg = (err as Error).message;
+      setError(errorMsg);
+
+      toast({
+        title: "Something went wrong",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
@@ -109,6 +110,16 @@ export function SignInForm() {
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-zinc-900">
       <form className="my-8" onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-4 mb-4">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            placeholder="Enter your name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+          />
+
           <Label htmlFor="email">Email Address</Label>
           <Input
             id="email"
@@ -128,8 +139,18 @@ export function SignInForm() {
             value={formData.password}
             onChange={handleChange}
           />
+
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            placeholder="********"
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+          />
         </div>
 
+        {passwordMatchError && <p className="text-red-500 m-2">{passwordMatchError}</p>}
         {error && <p className="text-red-500 m-2">{error}</p>}
 
         <Button
@@ -137,10 +158,9 @@ export function SignInForm() {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? "Signing up..." : "Sign up"}
         </Button>
       </form>
-
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
@@ -154,7 +174,7 @@ export function SignInForm() {
 
       <div className="flex flex-col space-y-3 mt-4">
         <Button
-          className="w-full bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
+          className="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
           onClick={() => signIn("google", { callbackUrl: "/" })}
         >
           <FcGoogle size={20} /> Sign in with Google
@@ -169,14 +189,13 @@ export function SignInForm() {
 
       <div className="flex justify-center mt-4">
         <p className="text-neutral-700 dark:text-neutral-300">
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <button
-            onClick={() => router.push("/signup")}
+            onClick={() => router.push("/signin")}
             className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
           >
-            Sign Up
-          </button>{" "}
-          here
+            Sign In
+          </button> here
         </p>
       </div>
     </div>
