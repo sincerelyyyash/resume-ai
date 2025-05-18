@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.utils.pdf_generator import generate_resume_pdf
 from app.schema.pdf_schema import ResumeRequest
-from app.utils.cloudinary import upload_pdf
+from app.utils.r2_storage import upload_pdf, delete_pdf
 import os
 import logging
 
@@ -39,8 +39,8 @@ async def generate_resume(request: ResumeRequest):
             output_filename=request.output_filename
         )
         
-        logger.info("PDF generated successfully, uploading to Cloudinary")
-        # Upload the PDF to Cloudinary
+        logger.info("PDF generated successfully, uploading to R2")
+        # Upload the PDF to R2
         pdf_url = await upload_pdf(pdf_path)
         
         logger.info("Cleaning up local PDF file")

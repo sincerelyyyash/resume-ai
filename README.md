@@ -5,40 +5,114 @@
 ## **Features**
 - **Tailored Resumes**: Enter a job description, and Resume-AI generates a resume optimized to fit the specific requirements.
 - **Professional Details Storage**: Users can add all professional details, including projects, work experiences, and roles.
-- **Online Resume Storage**: All generated resumes are stored securely, accessible anytime.
+- **Online Resume Storage**: All generated resumes are stored securely in Cloudflare R2, accessible anytime.
 - **One-Click Download**: Download updated resumes after customization for immediate use.
+- **Job Description Management**: Save and manage multiple job descriptions with their corresponding resumes.
+- **AI-Powered Analysis**: Get detailed analysis of your resume's match with job requirements.
 
 ## **Tech Stack**
-- **Frontend**: Next.js,
+### **Frontend**
+- **Framework**: Next.js 14 with App Router
+- **UI Components**: 
+  - TailwindCSS for styling
+  - Shadcn/ui for component library
+  - Aceternity UI for animations
+- **State Management**: React Context + Hooks
 - **Authentication**: NextAuth.js
-- **Database**: PostgreSQL
-- **API Integration**: Gemini API
+
+### **Backend Services**
+- **PDF Generation Service**: FastAPI-based microservice
+  - LaTeX-based PDF generation
+  - Cloudflare R2 for PDF storage
+- **AI Service**: FastAPI-based microservice
+  - Gemini API integration for job analysis
+  - Custom prompt engineering for better results
+
+### **Database**
+- **Primary**: PostgreSQL with Prisma ORM
+- **Storage**: Cloudflare R2 for PDF storage
+
+## **Project Structure**
+```
+resume-ai/
+├── nextjs-app/                 # Frontend application
+│   ├── src/
+│   │   ├── app/               # Next.js app router pages
+│   │   ├── components/        # React components
+│   │   ├── lib/              # Utility functions
+│   │   └── types/            # TypeScript types
+│   └── prisma/               # Database schema and migrations
+│
+├── pdf-service/              # PDF generation microservice
+    ├── app/
+    │   ├── routes/          # API endpoints
+    │   ├── utils/           # Utility functions
+    │   └── main.py          # FastAPI application
+    └── generated_pdfs/      # Temporary PDF storage
+```
 
 ## **Getting Started**
 
 ### **Prerequisites**
-- Node.js
-- PostgreSQL
-- Gemini API Key (required for job description parsing)
+- Node.js 18+
+- Python 3.9+
+- PostgreSQL 14+
+- Cloudflare R2 Account
+- Gemini API Key
 
-### **Key Functionalities**
-1. **User Authentication**: Handled through NextAuth, allowing users to securely manage their profiles and stored resumes.
-2. **Job Description Parsing**: Uses the Gemini API to parse user-uploaded job descriptions and customize resume content accordingly.
-3. **Data Storage**: PostgreSQL stores user details, resumes, and customized data for quick retrieval and updating.
-4. **Resume Download**: After customization, users can download their resumes in PDF format.
+### **Installation**
 
-## **Usage**
-1. **Create an Account / Sign In**  
-   Authenticate via NextAuth to create and access your profile securely.
+1. **Frontend Setup**
+```bash
+cd nextjs-app
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+```
 
-2. **Upload Professional Details**  
-   Fill in your project experiences, past roles, and other career details.
+2. **PDF Service Setup**
+```bash
+cd pdf-service
+python -m venv venv
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-3. **Upload a Job Description**  
-   Input the JD to have Resume-AI parse and generate a new, customized resume.
+## **Key Functionalities**
 
-4. **Download Your Customized Resume**  
-   Once generated, the resume can be downloaded in PDF format or saved for future use.
+### **1. User Authentication**
+- Secure authentication using NextAuth.js
+- Protected routes and API endpoints
+- Session management and user profiles
+
+### **2. Resume Generation**
+- LaTeX-based PDF generation
+- Professional formatting and styling
+- Support for multiple sections:
+  - Personal Information
+  - Education
+  - Experience
+  - Projects
+  - Technical Skills
+
+### **3. Job Description Analysis**
+- AI-powered job requirement parsing
+- Resume matching and scoring
+- Detailed analysis of skills and experience alignment
+
+### **4. PDF Storage and Management**
+- Secure storage in Cloudflare R2
+- Public URL generation for easy access
+- Automatic cleanup of temporary files
+
+### **5. Job Description Management**
+- Save and organize multiple job descriptions
+- Track resume versions for each job
+- Quick access to previous applications
+
+
 
 ## **Contributing**
 Contributions are welcome! Please follow these steps:
@@ -53,4 +127,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 
 ---
 
-With **Resume-AI**, ensure your resume always aligns perfectly with the role youÕre targeting, all while saving time and effort!
+With **Resume-AI**, ensure your resume always aligns perfectly with the role you're targeting, all while saving time and effort!

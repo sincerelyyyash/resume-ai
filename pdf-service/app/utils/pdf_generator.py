@@ -278,6 +278,15 @@ class ResumeGenerator:
 \usepackage{xparse}
 \input{glyphtounicode}
 
+% Adjust margins to use more space
+\geometry{
+    top=0.5in,
+    bottom=0.5in,
+    left=0.5in,
+    right=0.5in,
+    includehead,
+    includefoot
+}
 
 %----------FONT OPTIONS----------
 % sans-serif
@@ -290,19 +299,11 @@ class ResumeGenerator:
 % \usepackage{CormorantGaramond}
 % \usepackage{charter}
 
-
 \pagestyle{fancy}
 \fancyhf{} % clear all header and footer fields
 \fancyfoot{}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
-
-% Adjust margins
-\addtolength{\oddsidemargin}{-0.5in}
-\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1in}
-\addtolength{\topmargin}{-.5in}
-\addtolength{\textheight}{1.0in}
 
 \urlstyle{same}
 
@@ -374,12 +375,13 @@ class ResumeGenerator:
         # Header
         latex_content += fr"""
 %----------HEADING----------
-\begin{{tabular*}}{{\textwidth}}{{l@{{\extracolsep{{\fill}}}}r}}
-    \textbf{{\Huge \scshape {full_name}}} & {phone_number if phone_number else ''} \\
+\begin{{center}}
+    \textbf{{\Huge \scshape {full_name}}} \\
+    \vspace{{2pt}}
     \href{{mailto:{email}}}{{\underline{{{email}}}}} $|$ 
     \href{{https://{linkedin_url}}}{{\underline{{{linkedin_url}}}}} $|$
     \href{{https://{github_url}}}{{\underline{{{github_url}}}}}
-\end{{tabular*}}
+\end{{center}}
 
 """
 
