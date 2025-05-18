@@ -8,6 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { optimizeResume } from '@/lib/resumeOptimiser';
 import { useRouter } from 'next/navigation';
 
+interface Keyword {
+  keyword: string;
+  count?: number;
+  importance?: string;
+}
+
 export default function JobDescriptionForm() {
   const [jobDescription, setJobDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,17 +38,17 @@ export default function JobDescriptionForm() {
       if (!userResponse.ok) {
         throw new Error('Failed to fetch user data');
       }
-      const userData = await userResponse.text();
+      const userData = await userResponse.json();
 
       // Optimize resume
-      const optimizedResume = await optimizeResume(jobDescription, userData);
+      const optimizedResume = await optimizeResume(jobDescription, JSON.stringify(userData));
       
       // Store in localStorage with the correct structure
       localStorage.setItem('optimizedResume', JSON.stringify({
         data: optimizedResume.optimized_resume,
         atsScore: optimizedResume.analysis.ats_score,
-        matchedKeywords: optimizedResume.analysis.matched_keywords.map(k => k.keyword),
-        missingKeywords: optimizedResume.analysis.missing_keywords.map(k => k.keyword),
+        matchedKeywords: optimizedResume.analysis.matched_keywords.map((k: Keyword) => k.keyword),
+        missingKeywords: optimizedResume.analysis.missing_keywords.map((k: Keyword) => k.keyword),
         recommendations: optimizedResume.analysis.recommendations,
         contentAnalysis: optimizedResume.analysis.content_analysis
       }));
@@ -106,7 +112,7 @@ export default function JobDescriptionForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className=" "
+              className="w-full sm:w-auto"
             >
               {isLoading ? 'Generating...' : 'Generate Resume with AI'}
             </Button>

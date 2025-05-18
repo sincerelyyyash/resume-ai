@@ -14,6 +14,8 @@ interface Education {
   field: string;
   start_date: string;
   end_date: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface Props {
@@ -100,9 +102,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === "start_date" || name === "end_date") {
-      // Ensure the date is in YYYY-MM-DD format
-      const dateValue = value ? new Date(value).toISOString().split('T')[0] : value;
-      setFormData((prev) => ({ ...prev, [name]: dateValue }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -129,24 +129,29 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
         institution: formData.institution,
         degree: formData.degree,
         field: formData.field,
-        startDate: formData.start_date,
-        endDate: formData.end_date || null,
+        startDate: new Date(formData.start_date).toISOString(),
+        endDate: formData.end_date ? new Date(formData.end_date).toISOString() : null,
         current: !formData.end_date,
       };
 
       const isEdit = Boolean(editingId);
+      let response;
       if (isEdit) {
-        await axios.put("/api/user/education", { ...educationData, id: editingId });
+        response = await axios.put("/api/user/education", { ...educationData, id: editingId });
       } else {
-        await axios.post("/api/user/education", educationData);
+        response = await axios.post("/api/user/education", educationData);
       }
       
-      onSave(formData as Education, isEdit);
-      resetForm();
-      toast({
-        title: isEdit ? "Education Updated" : "Education Added",
-        description: `${formData.degree} at ${formData.institution} was ${isEdit ? "updated" : "added"} successfully.`,
-      });
+      if (response.data.success) {
+        onSave(response.data.data, isEdit);
+        resetForm();
+        toast({
+          title: isEdit ? "Education Updated" : "Education Added",
+          description: `${formData.degree} at ${formData.institution} was ${isEdit ? "updated" : "added"} successfully.`,
+        });
+      } else {
+        throw new Error(response.data.message || 'Failed to save education');
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -213,7 +218,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
                     </p>
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}
+                    {(edu.startDate || edu.start_date) ? new Date(edu.startDate || edu.start_date || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : ''} - {(edu.endDate || edu.end_date) ? new Date(edu.endDate || edu.end_date || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'Present'}
                   </div>
                 </div>
 

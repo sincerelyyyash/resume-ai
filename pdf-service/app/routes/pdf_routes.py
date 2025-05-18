@@ -2,20 +2,26 @@ from fastapi import APIRouter, HTTPException
 from app.utils.pdf_generator import generate_resume_pdf
 from app.schema.pdf_schema import ResumeRequest
 from app.utils.cloudinary import upload_pdf
-import os   
+import os
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pdf", tags=["PDF Generator"])
-
-
 
 @router.post("/generate")
 async def generate_resume(request: ResumeRequest):
     try:
+        logger.info("Received resume generation request")
+        
         # Convert Pydantic models to dictionaries
         education_entries = [entry.dict() for entry in request.education_entries]
         experience_entries = [entry.dict() for entry in request.experience_entries]
         project_entries = [entry.dict() for entry in request.project_entries]
         
+        logger.info("Generating PDF with data")
         # Generate the PDF
         pdf_path = generate_resume_pdf(
             full_name=request.full_name,
@@ -32,12 +38,23 @@ async def generate_resume(request: ResumeRequest):
             libraries=request.libraries,
             output_filename=request.output_filename
         )
+        
+        logger.info("PDF generated successfully, uploading to Cloudinary")
         # Upload the PDF to Cloudinary
         pdf_url = await upload_pdf(pdf_path)
+        
+        logger.info("Cleaning up local PDF file")
         # Delete the local PDF file
-        os.remove(pdf_path)
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
+        
+        logger.info("Resume generation completed successfully")
         # Return the path to the generated PDF
         return {"status": "success", "pdf_url": pdf_url}
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        logger.error(f"Error generating resume: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate PDF: {str(e)}"
+        ) 

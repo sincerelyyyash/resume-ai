@@ -6,6 +6,7 @@ from typing import List, Dict, Optional, Tuple, Any
 import logging
 import re
 from datetime import datetime
+import json
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +29,58 @@ class ResumeGenerator:
         # Create necessary directories
         os.makedirs(self.base_dir, exist_ok=True)
         os.makedirs(self.pdf_dir, exist_ok=True)
-        
+
+    def _validate_input_data(self, data: Dict[str, Any]) -> None:
+        """
+        Validate the input data for required fields and correct types
+        """
+        required_fields = {
+            'full_name': str,
+            'email': str,
+            'education_entries': list,
+            'experience_entries': list,
+            'project_entries': list
+        }
+
+        # Validate required fields
+        for field, field_type in required_fields.items():
+            if field not in data:
+                raise ValueError(f"Missing required field: {field}")
+            if not isinstance(data[field], field_type):
+                raise ValueError(f"Invalid type for {field}. Expected {field_type.__name__}, got {type(data[field]).__name__}")
+
+        # Set default values for optional fields
+        data.setdefault('linkedin_url', '')
+        data.setdefault('github_url', '')
+        data.setdefault('languages', [])
+        data.setdefault('frameworks', [])
+        data.setdefault('developer_tools', [])
+        data.setdefault('libraries', [])
+
+        # Validate education entries
+        for i, edu in enumerate(data['education_entries']):
+            required_edu_fields = ['institution', 'degree', 'date_range']
+            for field in required_edu_fields:
+                if field not in edu:
+                    raise ValueError(f"Missing required field '{field}' in education entry {i}")
+            edu.setdefault('location', '')
+
+        # Validate experience entries
+        for i, exp in enumerate(data['experience_entries']):
+            required_exp_fields = ['title', 'dates', 'organization', 'responsibilities']
+            for field in required_exp_fields:
+                if field not in exp:
+                    raise ValueError(f"Missing required field '{field}' in experience entry {i}")
+            exp.setdefault('location', '')
+
+        # Validate project entries
+        for i, proj in enumerate(data['project_entries']):
+            required_proj_fields = ['name', 'technologies', 'details']
+            for field in required_proj_fields:
+                if field not in proj:
+                    raise ValueError(f"Missing required field '{field}' in project entry {i}")
+            proj.setdefault('date_range', None)
+
     def _generate_filename(self, base_name: str) -> str:
         """
         Generate a filename with timestamp
@@ -61,7 +113,6 @@ class ResumeGenerator:
     def generate_resume(self,
                         # Personal Information
                         full_name: str,
-                        phone_number: str,
                         email: str,
                         linkedin_url: str,
                         github_url: str,
@@ -81,132 +132,106 @@ class ResumeGenerator:
                         developer_tools: List[str],
                         libraries: List[str],
                         
-                        output_filename: str = "resume.pdf") -> str:
+                        output_filename: str = "resume.pdf",
+                        phone_number: Optional[str] = None) -> str:
         """
         Generate a PDF resume from the provided information
-        
-        Parameters:
-        -----------
-        full_name : str
-            Your full name
-        phone_number : str
-            Your phone number
-        email : str
-            Your email address
-        linkedin_url : str
-            Your LinkedIn URL (without the 'https://' prefix)
-        github_url : str
-            Your GitHub URL (without the 'https://' prefix)
-            
-        education_entries : List[Dict[str, str]]
-            List of education entries, each containing:
-                'institution': Institution name
-                'location': Location
-                'degree': Degree earned
-                'date_range': Date range (e.g., "Aug. 2018 -- May 2021")
-                
-        experience_entries : List[Dict[str, Any]]
-            List of experience entries, each containing:
-                'title': Job title
-                'dates': Employment dates
-                'organization': Organization name
-                'location': Location
-                'responsibilities': List of job responsibilities/achievements
-                
-        project_entries : List[Dict[str, Any]]
-            List of project entries, each containing:
-                'name': Project name
-                'technologies': Technologies used (formatted string)
-                'date_range': Date range for the project
-                'details': List of project details/achievements
-                
-        languages : List[str]
-            List of programming languages
-        frameworks : List[str]
-            List of frameworks
-        developer_tools : List[str]
-            List of developer tools
-        libraries : List[str]
-            List of libraries
-            
-        output_filename : str, optional
-            Name of the output PDF file. Defaults to "resume.pdf"
-            
-        Returns:
-        --------
-        str
-            Path to the generated PDF file
         """
-        # Generate filename with timestamp
-        output_filename = self._generate_filename(output_filename)
-        
-        # Create a temporary directory to store LaTeX files
-        temp_dir = tempfile.mkdtemp()
         try:
-            logger.info("Starting PDF generation process")
+            # Validate input data
+            input_data = {
+                'full_name': full_name,
+                'email': email,
+                'linkedin_url': linkedin_url,
+                'github_url': github_url,
+                'education_entries': education_entries,
+                'experience_entries': experience_entries,
+                'project_entries': project_entries,
+                'languages': languages,
+                'frameworks': frameworks,
+                'developer_tools': developer_tools,
+                'libraries': libraries
+            }
             
-            # Create the LaTeX content
-            latex_content = self._create_latex_content(
-                full_name, phone_number, email, linkedin_url, github_url,
-                education_entries, experience_entries, project_entries,
-                languages, frameworks, developer_tools, libraries
-            )
+            logger.info("Validating input data...")
+            self._validate_input_data(input_data)
+            logger.info("Input data validation successful")
+
+            # Generate filename with timestamp
+            output_filename = self._generate_filename(output_filename)
             
-            # Write LaTeX content to a file
-            tex_path = os.path.join(temp_dir, "resume.tex")
-            with open(tex_path, "w", encoding='utf-8') as tex_file:
-                tex_file.write(latex_content)
-            
-            logger.info("LaTeX file created, starting compilation")
-            
-            # Compile the LaTeX file to PDF with timeout
+            # Create a temporary directory to store LaTeX files
+            temp_dir = tempfile.mkdtemp()
             try:
-                process = subprocess.run(
-                    ["pdflatex", "-interaction=nonstopmode", "-output-directory", temp_dir, tex_path],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    timeout=30  # 30 seconds timeout
+                logger.info("Starting PDF generation process")
+                
+                # Create the LaTeX content
+                latex_content = self._create_latex_content(
+                    full_name, email, linkedin_url, github_url,
+                    education_entries, experience_entries, project_entries,
+                    languages, frameworks, developer_tools, libraries,
+                    phone_number
                 )
                 
-                logger.info("PDF compilation completed")
+                # Write LaTeX content to a file
+                tex_path = os.path.join(temp_dir, "resume.tex")
+                with open(tex_path, "w", encoding='utf-8') as tex_file:
+                    tex_file.write(latex_content)
                 
-                # Copy the PDF to the output directory
-                pdf_path = os.path.join(temp_dir, "resume.pdf")
-                output_path = os.path.join(self.pdf_dir, output_filename)
+                logger.info("LaTeX file created, starting compilation")
                 
-                if not os.path.exists(pdf_path):
-                    raise FileNotFoundError("Generated PDF file not found")
-                
-                # Copy the file instead of reading and writing
-                shutil.copy2(pdf_path, output_path)
-                
-                logger.info(f"PDF successfully generated at: {output_path}")
-                return output_path
-                
-            except subprocess.TimeoutExpired:
-                logger.error("PDF generation timed out after 30 seconds")
-                raise Exception("PDF generation timed out. Please try again.")
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Error compiling LaTeX: {e}")
-                logger.error(f"STDOUT: {e.stdout.decode('utf-8')}")
-                logger.error(f"STDERR: {e.stderr.decode('utf-8')}")
-                raise Exception(f"Error generating PDF: {e.stderr.decode('utf-8')}")
-            except Exception as e:
-                logger.error(f"Unexpected error during PDF generation: {str(e)}")
-                raise Exception(f"Error generating PDF: {str(e)}")
-                
-        finally:
-            # Clean up temporary directory
-            try:
-                shutil.rmtree(temp_dir)
-                logger.info("Temporary files cleaned up")
-            except Exception as e:
-                logger.warning(f"Error cleaning up temporary files: {str(e)}")
-            
+                # Compile the LaTeX file to PDF with timeout
+                try:
+                    process = subprocess.run(
+                        ["pdflatex", "-interaction=nonstopmode", "-output-directory", temp_dir, tex_path],
+                        check=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        timeout=30  # 30 seconds timeout
+                    )
+                    
+                    logger.info("PDF compilation completed")
+                    
+                    # Copy the PDF to the output directory
+                    pdf_path = os.path.join(temp_dir, "resume.pdf")
+                    output_path = os.path.join(self.pdf_dir, output_filename)
+                    
+                    if not os.path.exists(pdf_path):
+                        raise FileNotFoundError("Generated PDF file not found")
+                    
+                    # Copy the file instead of reading and writing
+                    shutil.copy2(pdf_path, output_path)
+                    
+                    logger.info(f"PDF successfully generated at: {output_path}")
+                    return output_path
+                    
+                except subprocess.TimeoutExpired:
+                    logger.error("PDF generation timed out after 30 seconds")
+                    raise Exception("PDF generation timed out. Please try again.")
+                except subprocess.CalledProcessError as e:
+                    logger.error(f"Error compiling LaTeX: {e}")
+                    logger.error(f"STDOUT: {e.stdout.decode('utf-8')}")
+                    logger.error(f"STDERR: {e.stderr.decode('utf-8')}")
+                    raise Exception(f"Error generating PDF: {e.stderr.decode('utf-8')}")
+                except Exception as e:
+                    logger.error(f"Unexpected error during PDF generation: {str(e)}")
+                    raise Exception(f"Error generating PDF: {str(e)}")
+                    
+            finally:
+                # Clean up temporary directory
+                try:
+                    shutil.rmtree(temp_dir)
+                    logger.info("Temporary files cleaned up")
+                except Exception as e:
+                    logger.warning(f"Error cleaning up temporary files: {str(e)}")
+                    
+        except Exception as e:
+            logger.error(f"Error in generate_resume: {str(e)}")
+            logger.error(f"Input data: {json.dumps(input_data, indent=2)}")
+            raise
+
     def _create_latex_content(self,
                               full_name: str,
-                              phone_number: str,
                               email: str,
                               linkedin_url: str,
                               github_url: str,
@@ -216,14 +241,15 @@ class ResumeGenerator:
                               languages: List[str],
                               frameworks: List[str],
                               developer_tools: List[str],
-                              libraries: List[str]) -> str:
+                              libraries: List[str],
+                              phone_number: Optional[str] = None) -> str:
         """Create the LaTeX content for the resume"""
         # Escape all text inputs
         full_name = self._escape_latex(full_name)
-        phone_number = self._escape_latex(phone_number)
+        phone_number = self._escape_latex(phone_number) if phone_number else ''
         email = self._escape_latex(email)
-        linkedin_url = self._escape_latex(linkedin_url)
-        github_url = self._escape_latex(github_url)
+        linkedin_url = self._escape_latex(linkedin_url) if linkedin_url else ''
+        github_url = self._escape_latex(github_url) if github_url else ''
 
         # Preamble
         latex_content = r"""%-------------------------
@@ -349,7 +375,7 @@ class ResumeGenerator:
         latex_content += fr"""
 %----------HEADING----------
 \begin{{tabular*}}{{\textwidth}}{{l@{{\extracolsep{{\fill}}}}r}}
-    \textbf{{\Huge \scshape {full_name}}} & {phone_number} \\
+    \textbf{{\Huge \scshape {full_name}}} & {phone_number if phone_number else ''} \\
     \href{{mailto:{email}}}{{\underline{{{email}}}}} $|$ 
     \href{{https://{linkedin_url}}}{{\underline{{{linkedin_url}}}}} $|$
     \href{{https://{github_url}}}{{\underline{{{github_url}}}}}
@@ -528,8 +554,8 @@ def generate_resume_pdf(
     """
     generator = ResumeGenerator(output_dir=output_dir)
     return generator.generate_resume(
-        full_name, phone_number, email, linkedin_url, github_url,
+        full_name, email, linkedin_url, github_url,
         education_entries, experience_entries, project_entries,
         languages, frameworks, developer_tools, libraries,
-        output_filename
+        output_filename, phone_number
     )

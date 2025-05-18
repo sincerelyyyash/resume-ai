@@ -15,6 +15,8 @@ interface Experience {
   start_date: string;
   end_date?: string;
   technologies?: string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 interface Props {
@@ -124,9 +126,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
     if (name === "technologies") {
       setFormData((prev) => ({ ...prev, technologies: value.split(",").map((t) => t.trim()) }));
     } else if (name === "start_date" || name === "end_date") {
-      // Ensure the date is in YYYY-MM-DD format
-      const dateValue = value ? new Date(value).toISOString().split('T')[0] : value;
-      setFormData((prev) => ({ ...prev, [name]: dateValue }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -153,25 +153,31 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
         title: formData.title,
         company: formData.company,
         description: formData.description,
-        startDate: formData.start_date,
-        endDate: formData.end_date || null,
+        startDate: new Date(formData.start_date).toISOString(),
+        endDate: formData.end_date ? new Date(formData.end_date).toISOString() : null,
         location: formData.location,
         technologies: formData.technologies,
+        current: !formData.end_date,
       };
 
       const isEdit = Boolean(editingId);
+      let response;
       if (isEdit) {
-        await axios.put("/api/user/experiences", { ...experienceData, id: editingId });
+        response = await axios.put("/api/user/experiences", { ...experienceData, id: editingId });
       } else {
-        await axios.post("/api/user/experiences", experienceData);
+        response = await axios.post("/api/user/experiences", experienceData);
       }
       
-      onSave(formData as Experience, isEdit);
-    resetForm();
-      toast({
-        title: isEdit ? "Experience Updated" : "Experience Added",
-        description: `${formData.title} was ${isEdit ? "updated" : "added"} successfully.`,
-      });
+      if (response.data.success) {
+        onSave(response.data.data, isEdit);
+        resetForm();
+        toast({
+          title: isEdit ? "Experience Updated" : "Experience Added",
+          description: `${formData.title} was ${isEdit ? "updated" : "added"} successfully.`,
+        });
+      } else {
+        throw new Error(response.data.message || 'Failed to save experience');
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -221,7 +227,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
               className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
             >
               <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
-                {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : "Present"}
+                {(exp.startDate || exp.start_date) ? new Date(exp.startDate || exp.start_date || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : ''} - {(exp.endDate || exp.end_date) ? new Date(exp.endDate || exp.end_date || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'Present'}
               </div>
 
               {editingId === exp.id ? (
@@ -230,16 +236,16 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
                 <>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{exp.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">{exp.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {exp.technologies?.map((tech) => (
-                        <span
+                      <span
                         key={tech}
                         className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                   <p className="text-gray-600 dark:text-gray-300">
                     {exp.company} - {exp.location}
                   </p>
@@ -249,7 +255,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
                         onClick={() => {
                           if (exp.id) {
                             setEditingId(exp.id);
-                          setFormData(exp);
+                            setFormData(exp);
                           }
                         }}
                         variant="outline"

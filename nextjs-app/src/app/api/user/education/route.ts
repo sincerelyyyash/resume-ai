@@ -17,8 +17,8 @@ export async function POST(req: Request) {
     const { institution, degree, field, startDate, endDate, current } = body;
 
     // Validate startDate
-    const startDateObj = new Date(startDate);
-    if (isNaN(startDateObj.getTime())) {
+    const startDateObj = startDate ? new Date(startDate) : null;
+    if (!startDateObj || isNaN(startDateObj.getTime())) {
       return NextResponse.json(
         { success: false, message: "Invalid start date" },
         { status: 400 }
@@ -104,13 +104,14 @@ export async function PUT(req: Request) {
 
     if (endDate !== undefined) {
       const endDateObj = endDate ? new Date(endDate) : null;
-      if (endDateObj && isNaN(endDateObj.getTime())) {
+      if (endDate && isNaN(endDateObj.getTime())) {
         return NextResponse.json(
           { success: false, message: "Invalid end date" },
           { status: 400 }
         );
       }
       updateData.endDate = endDateObj;
+      updateData.current = !endDate;
     }
 
     const education = await prisma.education.update({

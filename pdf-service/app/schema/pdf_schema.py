@@ -23,7 +23,7 @@ class ProjectEntry(BaseModel):
 class ResumeRequest(BaseModel):
     # Personal Information
     full_name: str
-    phone_number: str
+    phone_number: Optional[str] = None
     email: str
     linkedin_url: str
     github_url: str

@@ -117,6 +117,7 @@ model JobDescription {
   title         String
   description   String
   requirements  String[]
+  pdfUrl        String?
   dateUploaded  DateTime @default(now())
   user          User     @relation(fields: [userId], references: [id])
   userId        String
