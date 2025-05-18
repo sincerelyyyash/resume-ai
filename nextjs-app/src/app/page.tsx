@@ -34,10 +34,10 @@ export default function Home() {
           </section>
 
           {/* Contact Section */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4 text-zinc-800 dark:text-zinc-200">Get in Touch</h2>
+          {/* <section>
+            <h2 className="text-2xl font-bold mb-4 text-zinc-800 dark:text-zinc-200">Touch</h2>
             <CTA />
-          </section>
+          </section> */}
         </div>
       </div>
     </main>

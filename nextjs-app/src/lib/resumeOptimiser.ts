@@ -76,11 +76,19 @@ User Data:
 
 Please analyze and optimize the resume data following these guidelines:
 1. Rephrase experience and project descriptions to align with job requirements
-2. Maintain factual accuracy - do not add or modify information
+2. Maintain factual accuracy — do not invent or alter any information.
 3. Highlight relevant skills and achievements
 4. Calculate ATS score and provide analysis
 5. Identify matched and missing keywords
 6. Provide specific recommendations for improvement
+7. Do not include https:// in urls for linkedin, github and website/portfolio
+8. Do not include any other text or comments in the response
+9. Avoid line breaks or extra spacing between bullet points.
+10. Make sure the content alignment percentages are out of 100% in the analysis section
+11. Do not ask to add GPA in the education section
+12. Make sure the project and experience entries are concise and to the point
+13. There should always be 3 points in the experience and project entries
+14. In Output arrange the experience and project entries in reverse chronological order(most recent first)
 
 CRITICAL INSTRUCTION: You must return ONLY a raw JSON object. Do not include any markdown formatting, code blocks, or additional text. The response must be a single JSON object that can be parsed directly.
 

@@ -8,14 +8,14 @@ const footerLinks = {
   product: [
     { name: 'Features', href: '/#features' },
     { name: 'How It Works', href: '/#how-it-works' },
-    { name: 'Pricing', href: '/pricing' },
+    { name: 'Pricing', href: '/#pricing' },
     { name: 'Testimonials', href: '/#testimonials' },
   ],
   company: [
-    { name: 'About', href: '/about' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Careers', href: '/careers' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'About', href: '/#about' },
+    { name: 'Blog', href: '/#blog' },
+    { name: 'Careers', href: '/#careers' },
+    { name: 'Contact', href: '/#contact' },
   ],
   legal: [
     { name: 'Privacy Policy', href: '/privacy' },
@@ -26,7 +26,7 @@ const footerLinks = {
     { name: 'GitHub', href: 'https://github.com/sincerelyyyash', icon: Github },
     { name: 'LinkedIn', href: 'https://linkedin.com/in/sincerelyyyash', icon: Linkedin },
     { name: 'Twitter', href: 'https://twitter.com/sincerelyyyash', icon: Twitter },
-    { name: 'Email', href: 'mailto:yash@resume-ai.com', icon: Mail },
+    { name: 'Email', href: 'mailto:yashthakur0526@gmail.com', icon: Mail },
   ],
 };
 
@@ -36,14 +36,14 @@ export const Footer = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Main Contact Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div>
+          {/* <div>
             <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Contact Information</h3>
             <div className="space-y-2">
               <p className="text-zinc-600 dark:text-zinc-400">Email: contact@resume-ai.com</p>
               <p className="text-zinc-600 dark:text-zinc-400">Website: www.resume-ai.com</p>
               <p className="text-zinc-600 dark:text-zinc-400">Location: Remote</p>
             </div>
-          </div>
+          </div> */}
 
           <div>
             <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Connect With Us</h3>

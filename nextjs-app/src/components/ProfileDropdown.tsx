@@ -3,7 +3,7 @@
 import * as React from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/lib/auth";
 import {
@@ -34,16 +34,17 @@ export function UserMenu() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="flex flex-col items-center">
-            <DropdownMenuItem onClick={() => router.push("/")}>
+            {/* <DropdownMenuItem onClick={() => router.push("/")}>
               Home
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/user/profile")}>
               Profile
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             {/* <DropdownMenuItem onClick={() => router.push("/settings")}> */}
             {/*   Settings */}
             {/* </DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => signOut()}>
+              <LogOut className="h-4 w-4 mr-2" />
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

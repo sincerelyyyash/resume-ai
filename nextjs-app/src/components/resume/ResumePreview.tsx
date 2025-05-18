@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Experience {
   title: string;
@@ -56,8 +57,11 @@ export default function ResumePreview({
   recommendations,
   contentAnalysis
 }: ResumePreviewProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [pdfData, setPdfData] = useState<{ url: string; filename: string } | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const storedPdfData = localStorage.getItem('resumePdf');
@@ -68,21 +72,28 @@ export default function ResumePreview({
   }, []);
 
   const handleDownload = async () => {
-    if (pdfData?.url) {
-      try {
-        const response = await fetch(pdfData.url);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = pdfData.filename || 'resume.pdf';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } catch (error) {
-        console.error('Error downloading PDF:', error);
-      }
+    if (!pdfData?.url) return;
+
+    try {
+      setIsDownloading(true);
+      setDownloadError(null);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = pdfData.url;
+      link.target = '_blank';
+      link.download = pdfData.filename || 'resume.pdf';
+      
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      setDownloadError('Failed to download PDF. Please try again.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -101,6 +112,18 @@ export default function ResumePreview({
       animate={{ opacity: 1, y: 0 }}
       className="max-w-7xl mx-auto bg-white dark:bg-zinc-900 p-8 rounded-xl"
     >
+      {/* Back to Dashboard Button */}
+      <div className="mb-6">
+        <Button
+          onClick={() => router.push('/dashboard')}
+          variant="ghost"
+          className="flex items-center space-x-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Dashboard</span>
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Analysis */}
         <div className="space-y-8">
@@ -226,19 +249,34 @@ export default function ResumePreview({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <FileText className="h-6 w-6 text-primary" />
-                <h2 className="text-xl font-semibold">Your Resume PDF</h2>
+                <h2 className="text-xl font-semibold">Your Optimized Resume</h2>
               </div>
-              <Button
-                onClick={handleDownload}
-                className="flex items-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download PDF</span>
-              </Button>
+              <div className="flex flex-col items-end gap-2">
+                <Button
+                  onClick={handleDownload}
+                  className="flex items-center space-x-2"
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Downloading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      <span>Download PDF</span>
+                    </>
+                  )}
+                </Button>
+                {downloadError && (
+                  <p className="text-sm text-red-500">{downloadError}</p>
+                )}
+              </div>
             </div>
             <div className="aspect-[3/4] w-full">
               <iframe
-                src={pdfData.url}
+                src={`${pdfData.url}#toolbar=0`}
                 className="w-full h-full rounded-lg border border-zinc-200 dark:border-zinc-700"
                 title="Resume Preview"
               />
