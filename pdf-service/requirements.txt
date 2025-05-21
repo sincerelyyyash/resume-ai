@@ -1,4 +1,4 @@
 fastapi
 uvicorn[standard]
 python-dotenv
-cloudinary
+boto3
