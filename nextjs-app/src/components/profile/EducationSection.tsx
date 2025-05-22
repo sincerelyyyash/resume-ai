@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
@@ -153,6 +153,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
         throw new Error(response.data.message || 'Failed to save education');
       }
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: `Failed to ${editingId ? "update" : "add"} education.`,
@@ -170,6 +171,7 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
         description: "Education was deleted successfully.",
       });
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to delete education.",

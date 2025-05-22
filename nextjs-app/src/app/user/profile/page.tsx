@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
@@ -21,8 +21,24 @@ interface UserData {
   github: string | null;
   portfolio: string | null;
   image: string | null;
-  projects: any[];
-  experiences: any[];
+  projects: {
+    id: string;
+    title: string;
+    description: string;
+    technologies: string[];
+    url: string;
+    startDate: string;
+    endDate: string;
+  }[];
+  experiences: {
+    id: string;
+    title: string;
+    company: string;
+    location: string;
+    start_date: string;
+    end_date: string;
+    description: string;
+  }[];
   education: {
     id: string;
     institution: string;
@@ -33,7 +49,13 @@ interface UserData {
     description?: string;
     gpa?: string;
   }[];
-  skills: any[];
+  skills: {
+    id: string;
+    name: string;
+    level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
+    category: string;
+    yearsOfExperience: number;
+  }[];
   certifications: {
     id: string;
     title: string;
@@ -51,15 +73,15 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     if (!isAuthenticated || !user?.id) {
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const res = await axios.get("/api/user/get-user");
-      
+  
       if (res.data?.success && res.data.data) {
         setUserData(res.data.data);
       } else {
@@ -79,11 +101,11 @@ export default function Profile() {
     } finally {
       setIsLoading(false);
     }
-  };
-
+  }, [isAuthenticated, user?.id, toast]);
+  
   useEffect(() => {
     fetchUserData();
-  }, [isAuthenticated, user?.id, toast]);
+  }, [fetchUserData]);
 
   if (authLoading || isLoading) {
     return (

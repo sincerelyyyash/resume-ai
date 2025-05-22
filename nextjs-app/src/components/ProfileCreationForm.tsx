@@ -58,7 +58,7 @@ export function MultiStepForm() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -76,7 +76,7 @@ export function MultiStepForm() {
     }
 
     setLoading(true);
-    setError(null);
+    // setError(null);
 
     try {
       const payload = {
@@ -101,7 +101,7 @@ export function MultiStepForm() {
         ? err.response?.data?.message || "An unexpected error occurred"
         : "An unexpected error occurred";
 
-      setError(message);
+      // setError(message);
 
       toast({
         title: "Submission Failed",
@@ -136,14 +136,14 @@ export function MultiStepForm() {
     );
   }
 
-  const validateUrl = (url: string): string => {
-    try {
-      new URL(url);
-      return url;
-    } catch {
-      return "";
-    }
-  };
+  // const validateUrl = (url: string): string => {
+  //   try {
+  //     new URL(url);
+  //     return url;
+  //   } catch {
+  //     return "";
+  //   }
+  // };
 
   const addNewEntry = (section: "projects" | "educations" | "experiences" | "skills") => {
     const newEntry =

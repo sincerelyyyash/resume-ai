@@ -179,6 +179,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
         throw new Error(response.data.message || 'Failed to save experience');
       }
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: `Failed to ${editingId ? "update" : "add"} experience.`,
@@ -196,6 +197,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
         description: "Experience was deleted successfully.",
       });
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to delete experience.",

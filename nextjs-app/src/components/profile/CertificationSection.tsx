@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
@@ -155,11 +155,11 @@ const CertificationSection: React.FC<Props> = ({ certifications, showEdit, showA
       } else {
         throw new Error(response.data?.error || "Failed to save certification");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Save error:', error);
       toast({
         title: "Error",
-        description: error.response?.data?.error || `Failed to ${editingId ? "update" : "add"} certification.`,
+        description: `Failed to ${editingId ? "update" : "add"} certification.`,
         variant: "destructive",
       });
     }
@@ -178,11 +178,11 @@ const CertificationSection: React.FC<Props> = ({ certifications, showEdit, showA
       } else {
         throw new Error(response.data?.error || "Failed to delete certification");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Delete error:', error);
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to delete certification.",
+        description: "Failed to delete certification.",
         variant: "destructive",
       });
     }

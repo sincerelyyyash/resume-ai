@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Edit2 } from "lucide-react";
@@ -161,6 +161,7 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
       await onSave();
     resetForm();
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to save skill. Please try again.",
@@ -178,6 +179,7 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
       });
       await onDelete();
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to delete skill. Please try again.",

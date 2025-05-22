@@ -2,8 +2,7 @@
 import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 
 export interface SkillFormData {
   name: string;
@@ -20,7 +19,7 @@ interface SkillFormProps {
   onDataChange: (data: SkillFormData) => void;
 }
 
-export default function SkillForm({ iteration, data, onNext, onPrevious, onDataChange }: SkillFormProps) {
+export default function SkillForm({ iteration, data, onDataChange }: SkillFormProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === "yearsOfExperience" && isNaN(Number(value)) && value !== "") {

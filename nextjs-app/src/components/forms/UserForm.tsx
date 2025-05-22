@@ -2,8 +2,7 @@
 import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 
 export interface UserFormData {
   name: string;
@@ -22,7 +21,7 @@ interface UserFormProps {
   onDataChange: (data: UserFormData) => void;
 }
 
-export default function UserForm({ data, onNext, onPrevious, onDataChange }: UserFormProps) {
+export default function UserForm({ data, onDataChange }: UserFormProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onDataChange({ ...data, [name]: value });

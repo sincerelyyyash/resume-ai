@@ -29,7 +29,7 @@ export const Features = () => {
   return (
     <div className="space-y-6">
       <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-      Resume-AI is a platform that uses artificial intelligence to craft tailored resumes for every job opportunity. By aligning your experience with each job description, we help you stand out and maximize your chances in today's competitive job market.
+      Resume-AI is a platform that uses artificial intelligence to craft tailored resumes for every job opportunity. By aligning your experience with each job description, we help you stand out and maximize your chances in today&apos;s competitive job market.
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

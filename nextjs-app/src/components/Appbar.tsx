@@ -19,13 +19,12 @@ import { usePathname } from "next/navigation";
 
 export default function Appbar() {
   const pathname = usePathname();
+  const { isAuthenticated, isLoading } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (pathname === "/") {
     return null;
   }
-
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = isAuthenticated
     ? [

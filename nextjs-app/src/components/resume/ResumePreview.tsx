@@ -50,7 +50,7 @@ interface ResumePreviewProps {
 }
 
 export default function ResumePreview({ 
-  data, 
+  // data, 
   atsScore = 0, 
   matchedKeywords = [], 
   missingKeywords = [],

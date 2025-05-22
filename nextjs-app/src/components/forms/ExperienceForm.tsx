@@ -2,7 +2,6 @@
 import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { TextArea } from "../ui/text-area";
 
 export interface ExperienceFormData {
@@ -22,7 +21,7 @@ interface ExperienceFormProps {
   onDataChange: (data: ExperienceFormData) => void;
 }
 
-export default function ExperienceForm({ iteration, data, onNext, onPrevious, onDataChange }: ExperienceFormProps) {
+export default function ExperienceForm({ iteration, data, onDataChange }: ExperienceFormProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     onDataChange({ ...data, [name]: value });

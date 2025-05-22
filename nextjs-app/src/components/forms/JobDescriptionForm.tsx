@@ -80,11 +80,11 @@ export default function JobDescriptionForm() {
 
       // Navigate to preview
       router.push('/resume-preview');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate resume",
+        description: error instanceof Error ? error.message : "Failed to generate resume",
         variant: "destructive",
       });
     } finally {

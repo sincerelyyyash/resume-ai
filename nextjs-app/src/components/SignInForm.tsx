@@ -169,7 +169,7 @@ export function SignInForm() {
 
       <div className="flex justify-center mt-4">
         <p className="text-neutral-700 dark:text-neutral-300">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <button
             onClick={() => router.push("/signup")}
             className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"

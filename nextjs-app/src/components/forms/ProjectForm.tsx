@@ -2,9 +2,8 @@
 import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { TextArea } from "../ui/text-area";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 
 export interface ProjectFormData {
   name: string;
@@ -23,7 +22,7 @@ interface ProjectFormProps {
   onDataChange: (data: ProjectFormData) => void;
 }
 
-export default function ProjectForm({ iteration, data, onNext, onPrevious, onDataChange }: ProjectFormProps) {
+export default function ProjectForm({ iteration, data, onDataChange }: ProjectFormProps) {
   const adviceMessages = [
     "Adding projects showcases your practical skills.",
     "Projects demonstrate your problem-solving abilities.",

@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, FileText, X } from "lucide-react";
+import { Copy, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobDescriptionDialogProps {

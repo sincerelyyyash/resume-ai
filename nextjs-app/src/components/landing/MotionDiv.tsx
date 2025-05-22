@@ -1,37 +1,20 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 import { ReactNode } from 'react';
 
-interface MotionDivProps {
+interface MotionDivProps extends HTMLMotionProps<'div'> {
   children: ReactNode;
-  className?: string;
-  initial?: any;
-  animate?: any;
-  whileInView?: any;
-  transition?: any;
-  viewport?: any;
 }
 
 export const MotionDiv = ({
   children,
   className,
-  initial,
-  animate,
-  whileInView,
-  transition,
-  viewport,
+  ...motionProps
 }: MotionDivProps) => {
   return (
-    <motion.div
-      className={className}
-      initial={initial}
-      animate={animate}
-      whileInView={whileInView}
-      transition={transition}
-      viewport={viewport}
-    >
+    <motion.div className={className} {...motionProps}>
       {children}
     </motion.div>
   );
-}; 
+};

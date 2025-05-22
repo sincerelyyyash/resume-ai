@@ -2,7 +2,6 @@
 import React, { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import MotionDiv from "../motion-div";
 
 export interface EducationFormData {
@@ -20,7 +19,7 @@ interface EducationFormProps {
   onDataChange: (data: EducationFormData) => void;
 }
 
-export default function EducationForm({ iteration, data, onNext, onPrevious, onDataChange }: EducationFormProps) {
+export default function EducationForm({ iteration, data, onDataChange }: EducationFormProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onDataChange({ ...data, [name]: value });

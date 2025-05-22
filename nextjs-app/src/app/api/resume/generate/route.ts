@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { prisma } from '@/lib/prisma';
 import { optimizeResume } from '@/lib/resumeOptimiser';
 
@@ -23,20 +23,20 @@ export async function POST(req: Request) {
       email: optimizedData.optimized_resume.email || userData.email || '',
       linkedin_url: optimizedData.optimized_resume.linkedin_url || userData.linkedin || '',
       github_url: optimizedData.optimized_resume.github_url || userData.github || '',
-      education_entries: optimizedData.optimized_resume.education_entries.map((edu: any) => ({
+      education_entries: optimizedData.optimized_resume.education_entries.map((edu: { institution: string; location: string; degree: string; date_range: string }) => ({
         institution: edu.institution || '',
         location: edu.location || '',
         degree: edu.degree || '',
         date_range: edu.date_range || ''
       })),
-      experience_entries: optimizedData.optimized_resume.experience_entries.map((exp: any) => ({
+      experience_entries: optimizedData.optimized_resume.experience_entries.map((exp: { title: string; organization: string; location: string; dates: string; responsibilities: string[] }) => ({
         title: exp.title || '',
         organization: exp.organization || '',
         location: exp.location || '',
         dates: exp.dates || '',
         responsibilities: exp.responsibilities || []
       })),
-      project_entries: optimizedData.optimized_resume.project_entries.map((proj: any) => ({
+      project_entries: optimizedData.optimized_resume.project_entries.map((proj: { name: string; technologies: string; date_range: string; details: string[] }) => ({
         name: proj.name || '',
         technologies: proj.technologies || '',
         date_range: proj.date_range || undefined,
@@ -113,10 +113,10 @@ export async function POST(req: Request) {
         analysis: optimizedData.analysis
       }
     });
-  } catch (error: any) {
-    console.error('Error generating PDF:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to generate PDF' },
+    } catch (error: unknown) {
+      console.error('Error generating PDF:', error);
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Failed to generate PDF' },
       { status: 500 }
     );
   }

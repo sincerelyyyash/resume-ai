@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import MotionDiv from "../motion-div";
+import { MotionDiv } from "../landing/MotionDiv";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface Project {
   id?: string;
@@ -199,6 +199,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
       await onSave();
     resetForm();
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to save project. Please try again.",
@@ -216,6 +217,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
       });
       await onDelete();
     } catch (error) {
+      console.error('Delete error:', error);
       toast({
         title: "Error",
         description: "Failed to delete project. Please try again.",

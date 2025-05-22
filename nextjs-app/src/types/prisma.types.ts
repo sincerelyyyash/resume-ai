@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
 
-export type Project = Prisma.ProjectGetPayload<{}>;
-export type Experience = Prisma.ExperienceGetPayload<{}>;
-export type Skill = Prisma.SkillGetPayload<{}>;
-export type Education = Prisma.EducationGetPayload<{}>;
+export type Project = Prisma.ProjectGetPayload<never>;
+export type Experience = Prisma.ExperienceGetPayload<never>;
+export type Skill = Prisma.SkillGetPayload<never>;
+export type Education = Prisma.EducationGetPayload<never>;
 export type User = Prisma.UserGetPayload<{
   include: {
     projects: true;
@@ -68,4 +68,4 @@ export interface UserResponse {
       dateUploaded: Date;
     }>;
   };
-} 
+}

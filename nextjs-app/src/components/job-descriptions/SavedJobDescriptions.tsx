@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { useAuth } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import JobDescriptionDialog from './JobDescriptionDialog';
 
 interface JobDescription {
@@ -24,7 +24,7 @@ interface SavedJobDescriptionsProps {
 }
 
 export default function SavedJobDescriptions({ showAll = false }: SavedJobDescriptionsProps) {
-  const router = useRouter();
+  // const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,13 +45,12 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setJobDescriptions(sortedDescriptions);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching job descriptions:", error);
   
         toast({
           title: "Error",
           description:
-            error?.response?.data?.message ||
             "Failed to load job descriptions. Please try again later.",
           variant: "destructive",
         });

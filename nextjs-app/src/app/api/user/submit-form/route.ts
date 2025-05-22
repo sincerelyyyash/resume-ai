@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ZodError } from "zod";
 import { formSchema } from "@/types/form.schema";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -79,25 +79,25 @@ export async function POST(req: Request) {
         
         // Create new records
         prisma.project.createMany({
-          data: projects.map((project: any) => ({
+          data: projects.map((project: { title: string; description: string; technologies: string[]; url: string; startDate: string; endDate: string }) => ({
             ...project,
             userId,
           })),
         }),
         prisma.education.createMany({
-          data: educations.map((education: any) => ({
+          data: educations.map((education: { institution: string; degree: string; field: string; startDate: string; endDate: string }) => ({
             ...education,
             userId,
           })),
         }),
         prisma.experience.createMany({
-          data: experiences.map((experience: any) => ({
+          data: experiences.map((experience: { title: string; company: string; description: string; location: string; startDate: string; endDate: string }) => ({
             ...experience,
             userId,
           })),
         }),
         prisma.skill.createMany({
-          data: skills.map((skill: any) => ({
+          data: skills.map((skill: { name: string; level: string; category: string }) => ({
             ...skill,
             userId,
           })),

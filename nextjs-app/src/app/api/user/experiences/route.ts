@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
@@ -83,7 +83,15 @@ export async function PUT(req: Request) {
       );
     }
 
-    const updateData: any = {};
+    const updateData: {
+      title?: string;
+      company?: string;
+      description?: string;
+      location?: string;
+      current?: boolean;
+      startDate?: Date;
+      endDate?: Date | null;
+    } = {};
 
     if (title !== undefined) updateData.title = title;
     if (company !== undefined) updateData.company = company;
@@ -105,7 +113,7 @@ export async function PUT(req: Request) {
 
     if (endDate !== undefined) {
       const endDateObj = endDate ? new Date(endDate) : null;
-      if (endDate && isNaN(endDateObj.getTime())) {
+      if (endDate && isNaN(endDateObj!.getTime())) {
         return NextResponse.json(
           { success: false, message: "Invalid end date" },
           { status: 400 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import MotionDiv from "../motion-div";
-import { Linkedin, Github, Globe, User, Edit2, Save, X } from "lucide-react";
+import { MotionDiv } from "../landing/MotionDiv";
+import { Linkedin, Github, Globe, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +53,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
         description: "Your profile has been updated successfully.",
       });
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to update profile.",

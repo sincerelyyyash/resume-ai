@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2 } from "lucide-react";
 
@@ -37,7 +36,7 @@ const ResumeUpload = () => {
         throw new Error("Failed to process resume");
       }
 
-      const data = await response.json();
+      // const data = await response.json();
       toast({
         title: "Success",
         description: "Resume processed successfully",
@@ -46,6 +45,7 @@ const ResumeUpload = () => {
       // Refresh the page to show updated data
       window.location.reload();
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to process resume. Please try again.",

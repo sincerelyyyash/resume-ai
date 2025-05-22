@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { MotionDiv } from "./MotionDiv";
 import { Cover } from "@/components/ui/cover";

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { User, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/lib/auth";
@@ -14,8 +14,8 @@ import {
 } from "./ui/dropdown-menu";
 
 export function UserMenu() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  // const router = useRouter();
 
   if (isLoading) {
     return (

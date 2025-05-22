@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { basicInfoSchema } from "@/types/basicInfo.schema";
@@ -99,7 +99,14 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { name, bio, linkedin, github, portfolio, image } = body;
 
-    const updateData: any = {};
+    const updateData: {
+      name?: string;
+      bio?: string;
+      linkedin?: string;
+      github?: string;
+      portfolio?: string;
+      image?: string;
+    } = {};
 
     if (name !== undefined) updateData.name = name;
     if (bio !== undefined) updateData.bio = bio;

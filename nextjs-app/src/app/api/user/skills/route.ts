@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { prisma } from "@/lib/prisma";
+import { SkillLevel } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
@@ -59,7 +60,12 @@ export async function PUT(req: Request) {
       );
     }
 
-    const updateData: any = {};
+    const updateData: {
+      name?: string;
+      category?: string;
+      level?: SkillLevel;
+      yearsOfExperience?: number;
+    } = {};
 
     if (name !== undefined) updateData.name = name;
     if (category !== undefined) updateData.category = category;
