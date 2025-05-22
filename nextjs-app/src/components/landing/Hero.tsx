@@ -55,14 +55,14 @@ export const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <Cover>
             <h1 className="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
               Resume-AI
             </h1>
-          </Cover>
+            <Cover>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-4">
             Create job-specific resumes that stand out, powered by AI.
-          </p>
+            </p>
+          </Cover>
         </MotionDiv>
       </div>
 
