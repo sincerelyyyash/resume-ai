@@ -3,44 +3,44 @@ from typing import List, Optional
 
 class EducationEntry(BaseModel):
     institution: str
-    location: str
     degree: str
     date_range: str
+    location: Optional[str] = None
 
 class ExperienceEntry(BaseModel):
     title: str
     dates: str
     organization: str
-    location: str
     responsibilities: List[str]
+    location: Optional[str] = None
 
 class ProjectEntry(BaseModel):
     name: str
     technologies: str
-    date_range: Optional[str] = None
     details: List[str]
+    date_range: Optional[str] = None
 
 class ResumeRequest(BaseModel):
     # Personal Information
     full_name: str
-    phone_number: Optional[str] = None
     email: str
-    linkedin_url: str
-    github_url: str
+    phone_number: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
     
     # Education
-    education_entries: List[EducationEntry]
+    education_entries: Optional[List[EducationEntry]] = None
     
     # Experience
-    experience_entries: List[ExperienceEntry]
+    experience_entries: Optional[List[ExperienceEntry]] = None
     
     # Projects
-    project_entries: List[ProjectEntry]
+    project_entries: Optional[List[ProjectEntry]] = None
     
     # Technical Skills
-    languages: List[str]
-    frameworks: List[str]
-    developer_tools: List[str]
-    libraries: List[str]
+    languages: Optional[List[str]] = None
+    frameworks: Optional[List[str]] = None
+    developer_tools: Optional[List[str]] = None
+    libraries: Optional[List[str]] = None
     
     output_filename: Optional[str] = "resume.pdf"

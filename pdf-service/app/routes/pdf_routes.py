@@ -16,10 +16,16 @@ async def generate_resume(request: ResumeRequest):
     try:
         logger.info("Received resume generation request")
         
-        # Convert Pydantic models to dictionaries
-        education_entries = [entry.dict() for entry in request.education_entries]
-        experience_entries = [entry.dict() for entry in request.experience_entries]
-        project_entries = [entry.dict() for entry in request.project_entries]
+        # Convert Pydantic models to dictionaries, handling None values
+        education_entries = [entry.dict() for entry in request.education_entries] if request.education_entries else []
+        experience_entries = [entry.dict() for entry in request.experience_entries] if request.experience_entries else []
+        project_entries = [entry.dict() for entry in request.project_entries] if request.project_entries else []
+        
+        # Handle optional technical skills
+        languages = request.languages or []
+        frameworks = request.frameworks or []
+        developer_tools = request.developer_tools or []
+        libraries = request.libraries or []
         
         logger.info("Generating PDF with data")
         # Generate the PDF
@@ -32,10 +38,10 @@ async def generate_resume(request: ResumeRequest):
             education_entries=education_entries,
             experience_entries=experience_entries,
             project_entries=project_entries,
-            languages=request.languages,
-            frameworks=request.frameworks,
-            developer_tools=request.developer_tools,
-            libraries=request.libraries,
+            languages=languages,
+            frameworks=frameworks,
+            developer_tools=developer_tools,
+            libraries=libraries,
             output_filename=request.output_filename
         )
         
