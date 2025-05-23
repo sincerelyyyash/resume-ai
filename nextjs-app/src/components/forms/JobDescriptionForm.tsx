@@ -40,6 +40,20 @@ export default function JobDescriptionForm() {
       }
       const userData = await userResponse.json();
 
+      // Check if profile is complete
+      const requiredFields = ['bio', 'portfolio', 'linkedin', 'github'];
+      const missingFields = requiredFields.filter(field => !userData[field]);
+      
+      if (missingFields.length > 0) {
+        toast({
+          title: "Incomplete Profile",
+          description: "Please complete your profile before generating a resume.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       // Optimize resume
       const optimizedResume = await optimizeResume(jobDescription, JSON.stringify(userData));
       

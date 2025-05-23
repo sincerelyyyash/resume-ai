@@ -41,10 +41,18 @@ export async function GET() {
 
     const completionStatus = {
       basicInfo: Boolean(user.name && user.email),
-      projects: user.projects.length > 0,
-      experiences: user.experiences.length > 0,
-      skills: user.skills.length > 0,
-      education: user.education.length > 0,
+      projects: user.projects.some(project => 
+        Boolean(project.title && project.description)
+      ),
+      experiences: user.experiences.some(exp => 
+        Boolean(exp.company && exp.title && exp.startDate)
+      ),
+      skills: user.skills.some(skill => 
+        Boolean(skill.name && skill.level)
+      ),
+      education: user.education.some(edu => 
+        Boolean(edu.institution && edu.degree && edu.startDate)
+      ),
     };
 
     const totalSteps = 5;
@@ -59,7 +67,10 @@ export async function GET() {
           status: completionStatus,
           completionPercentage,
           completedSteps,
-          totalSteps
+          totalSteps,
+          missingFields: Object.entries(completionStatus)
+            .filter(([_, value]) => !value)
+            .map(([key]) => key)
         }
       },
       { status: 200 }
