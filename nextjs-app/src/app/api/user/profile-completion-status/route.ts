@@ -69,7 +69,7 @@ export async function GET() {
           completedSteps,
           totalSteps,
           missingFields: Object.entries(completionStatus)
-            .filter(([_, value]) => !value)
+            .filter(([, value]) => !value)
             .map(([key]) => key)
         }
       },

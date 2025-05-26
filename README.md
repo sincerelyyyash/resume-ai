@@ -9,6 +9,18 @@
 - **One-Click Download**: Download updated resumes after customization for immediate use.
 - **Job Description Management**: Save and manage multiple job descriptions with their corresponding resumes.
 - **AI-Powered Analysis**: Get detailed analysis of your resume's match with job requirements.
+- **ATS-Optimized Resumes**: Ensure your resumes are formatted to easily pass through Applicant Tracking Systems.
+- **Smart Resume Insights**: Receive actionable AI suggestions to refine and strengthen your resume.
+- **Saved Job Descriptions**: View and manage all your saved job descriptions in one place with easy access to their corresponding resumes.
+- **Resume History**: Track and access all versions of your resumes generated for different job applications.
+- **Comprehensive Profile Management**: 
+  - Projects with technologies and achievements
+  - Work experience with detailed descriptions
+  - Education history with degrees and fields
+  - Skills categorized by type and proficiency
+  - Certifications with issue dates and credentials
+- **Real-time Form Validation**: Immediate feedback on required fields and data format.
+- **Secure Authentication**: Protected routes and API endpoints with NextAuth.js.
 
 ## **Tech Stack**
 ### **Frontend**
@@ -86,6 +98,7 @@ uvicorn app.main:app --reload
 - Secure authentication using NextAuth.js
 - Protected routes and API endpoints
 - Session management and user profiles
+- Profile completion tracking
 
 ### **2. Resume Generation**
 - LaTeX-based PDF generation
@@ -96,23 +109,44 @@ uvicorn app.main:app --reload
   - Experience
   - Projects
   - Technical Skills
+  - Certifications
+- ATS-friendly formatting
+- Customizable templates
 
 ### **3. Job Description Analysis**
 - AI-powered job requirement parsing
 - Resume matching and scoring
 - Detailed analysis of skills and experience alignment
+- Smart suggestions for improvement
+- Keyword optimization
 
 ### **4. PDF Storage and Management**
 - Secure storage in Cloudflare R2
 - Public URL generation for easy access
 - Automatic cleanup of temporary files
+- Version control for different job applications
 
 ### **5. Job Description Management**
 - Save and organize multiple job descriptions
 - Track resume versions for each job
 - Quick access to previous applications
+- Job application status tracking
+- View all saved job descriptions in a centralized dashboard
+- Compare different versions of resumes for the same job
+- Easy navigation between job descriptions and their corresponding resumes
+- Filter and search through saved job descriptions
 
-
+### **6. Profile Management**
+- Multi-step profile creation wizard
+- Real-time form validation
+- Bulk data import/export
+- Resume upload and processing
+- Comprehensive section management:
+  - Projects with technologies
+  - Work experience with locations
+  - Education with fields of study
+  - Skills with proficiency levels
+  - Certifications with credentials
 
 ## **Contributing**
 Contributions are welcome! Please follow these steps:
