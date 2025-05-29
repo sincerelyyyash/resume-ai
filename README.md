@@ -20,7 +20,12 @@
   - Skills categorized by type and proficiency
   - Certifications with issue dates and credentials
 - **Real-time Form Validation**: Immediate feedback on required fields and data format.
-- **Secure Authentication**: Protected routes and API endpoints with NextAuth.js.
+- **Secure Authentication**: 
+  - Protected routes and API endpoints with NextAuth.js
+  - Client and server-side authentication hooks
+  - Session management with secure cookies
+  - Role-based access control
+  - Automatic redirect for unauthenticated users
 
 ## **Tech Stack**
 ### **Frontend**
@@ -30,7 +35,11 @@
   - Shadcn/ui for component library
   - Aceternity UI for animations
 - **State Management**: React Context + Hooks
-- **Authentication**: NextAuth.js
+- **Authentication**: 
+  - NextAuth.js with secure session handling
+  - Custom authentication hooks for client components
+  - Server-side authentication utilities
+  - Protected API routes with middleware
 
 ### **Backend Services**
 - **PDF Generation Service**: FastAPI-based microservice
@@ -51,6 +60,7 @@ resume-ai/
 │   ├── src/
 │   │   ├── app/               # Next.js app router pages
 │   │   ├── components/        # React components
+│   │   ├── hooks/            # Custom React hooks
 │   │   ├── lib/              # Utility functions
 │   │   └── types/            # TypeScript types
 │   └── prisma/               # Database schema and migrations
@@ -99,6 +109,10 @@ uvicorn app.main:app --reload
 - Protected routes and API endpoints
 - Session management and user profiles
 - Profile completion tracking
+- Client-side authentication hooks
+- Server-side authentication utilities
+- Automatic redirect for unauthenticated users
+- Role-based access control
 
 ### **2. Resume Generation**
 - LaTeX-based PDF generation
