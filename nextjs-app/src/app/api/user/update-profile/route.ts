@@ -1,63 +1,43 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { profileUpdateSchema } from "@/types/profile.schema";
+import { apiSecurity } from "@/middleware/api-security";
 
-import { ZodError } from "zod";
-import { profileSchema } from "@/types/profile.schema";
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Apply security measures
+    const securityResponse = await apiSecurity(req, profileUpdateSchema);
+    if (securityResponse) return securityResponse;
 
+    // Get authenticated user
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json(
         {
           success: false,
           message: "Authentication required",
-          details: "You must be logged in to update profile"
+          details: "You must be logged in to update profile",
         },
         { status: 401 }
       );
     }
 
+    // Parse and validate request body
     const body = await req.json();
+    const { name, bio, portfolio, linkedin, github, image } = body;
 
-    try {
-      profileSchema.parse(body);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Validation failed",
-            details: error.errors.map((err) => ({
-              field: err.path.join('.'),
-              message: err.message
-            }))
-          },
-          { status: 400 }
-        );
-      }
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Validation error",
-          details: "An unexpected validation error occurred"
-        },
-        { status: 400 }
-      );
-    }
-
+    // Update user profile
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: body.name,
-        bio: body.bio,
-        portfolio: body.portfolio,
-        linkedin: body.linkedin,
-        github: body.github,
-        image: body.image,
+        name,
+        bio,
+        portfolio,
+        linkedin,
+        github,
+        image,
       },
     });
 
@@ -72,7 +52,7 @@ export async function POST(req: Request) {
           linkedin: user.linkedin,
           github: user.github,
           image: user.image,
-        }
+        },
       },
       { status: 200 }
     );
@@ -81,8 +61,8 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Server error",
-        details: "An unexpected error occurred while updating profile"
+        message: "Failed to update profile",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

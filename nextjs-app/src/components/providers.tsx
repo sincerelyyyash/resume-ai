@@ -2,6 +2,7 @@
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "./theme-provider";
 import React from 'react';
+import { PostHogProvider } from "./PostHogProvider";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -16,9 +17,10 @@ export const Providers = ({ children }: ProvidersProps) => {
       disableTransitionOnChange
     >
       <SessionProvider>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </SessionProvider>
     </ThemeProvider>
   );
 };
-

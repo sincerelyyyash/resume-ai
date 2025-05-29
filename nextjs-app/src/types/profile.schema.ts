@@ -1,30 +1,31 @@
 import { z } from "zod";
 
-export const profileSchema = z.object({
-  name: z.string()
-    .min(2, "Name must be at least 2 characters long")
-    .max(50, "Name must be less than 50 characters long")
-    .optional(),
-  
-  bio: z.string()
-    .max(500, "Bio must be less than 500 characters long")
-    .optional(),
-  
-  portfolio: z.string()
-    .url("Portfolio must be a valid URL")
-    .optional(),
-  
-  linkedin: z.string()
-    .url("LinkedIn must be a valid URL")
-    .optional(),
-  
-  github: z.string()
-    .url("GitHub must be a valid URL")
-    .optional(),
-  
-  image: z.string()
-    .url("Image must be a valid URL")
-    .optional(),
+// Basic Info Schema
+export const basicInfoSchema = z.object({
+  name: z.string().min(2).max(100),
+  bio: z.string().max(500).optional(),
+  portfolio: z.string().url().optional(),
+  linkedin: z.string().url().optional(),
+  github: z.string().url().optional(),
 });
 
-export type ProfileSchema = z.infer<typeof profileSchema>; 
+// Profile Update Schema
+export const profileUpdateSchema = z.object({
+  name: z.string().min(2).max(100),
+  bio: z.string().max(500).optional(),
+  portfolio: z.string().url().optional(),
+  linkedin: z.string().url().optional(),
+  github: z.string().url().optional(),
+  image: z.string().url().optional(),
+});
+
+// Certification Schema
+export const certificationSchema = z.object({
+  title: z.string().min(2).max(100),
+  issuer: z.string().min(2).max(100),
+  issueDate: z.string().datetime(),
+  expiryDate: z.string().datetime().optional(),
+  credentialUrl: z.string().url().optional(),
+});
+
+export type ProfileSchema = z.infer<typeof profileUpdateSchema>; 

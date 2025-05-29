@@ -378,109 +378,88 @@ class ResumeGenerator:
 \begin{{center}}
     \textbf{{\Huge \scshape {full_name}}} \\
     \vspace{{2pt}}
-"""
-        # Add contact information only if available
-        contact_info = []
-        if email:
-            contact_info.append(fr"\href{{mailto:{email}}}{{\underline{{{email}}}}}")
-        if linkedin_url:
-            contact_info.append(fr"\href{{https://{linkedin_url}}}{{\underline{{{linkedin_url}}}}}")
-        if github_url:
-            contact_info.append(fr"\href{{https://{github_url}}}{{\underline{{{github_url}}}}}")
-        if phone_number:
-            contact_info.append(fr"{phone_number}")
-            
-        latex_content += " $|$ ".join(contact_info) + r"""
-\end{center}
+    \href{{mailto:{email}}}{{\underline{{{email}}}}} $|$ 
+    \href{{https://{linkedin_url}}}{{\underline{{{linkedin_url}}}}} $|$
+    \href{{https://{github_url}}}{{\underline{{{github_url}}}}}
+\end{{center}}
 
 """
 
-        # Education section - only if there are entries
-        if education_entries:
-            latex_content += r"""
+        # Education section
+        latex_content += r"""
 %-----------EDUCATION-----------
 \section{Education}
   \begin{resumeSubHeadingListStart}
 """
-            for edu in education_entries:
-                latex_content += fr"""    \resumeSubheading
-      {{{self._escape_latex(edu['institution'])}}}{{{self._escape_latex(edu.get('location', ''))}}}
+        for edu in education_entries:
+            latex_content += fr"""    \resumeSubheading
+      {{{self._escape_latex(edu['institution'])}}}{{{self._escape_latex(edu['location'])}}}
       {{{self._escape_latex(edu['degree'])}}}{{{self._escape_latex(edu['date_range'])}}}
 """
-            latex_content += r"""  \end{resumeSubHeadingListStart}
+        latex_content += r"""  \end{resumeSubHeadingListStart}
 
 """
 
-        # Experience section - only if there are entries
-        if experience_entries:
-            latex_content += r"""
+        # Experience section
+        latex_content += r"""
 %-----------EXPERIENCE-----------
 \section{Experience}
   \begin{resumeSubHeadingListStart}
 """
-            for exp in experience_entries:
-                latex_content += fr"""
+        for exp in experience_entries:
+            latex_content += fr"""
     \resumeSubheading
       {{{self._escape_latex(exp['title'])}}}{{{self._escape_latex(exp['dates'])}}}
-      {{{self._escape_latex(exp['organization'])}}}{{{self._escape_latex(exp.get('location', ''))}}}
+      {{{self._escape_latex(exp['organization'])}}}{{{self._escape_latex(exp['location'])}}}
       \begin{{resumeItemListStart}}
 """
-                for resp in exp['responsibilities']:
-                    latex_content += fr"""        \resumeItem{{{self._escape_latex(resp)}}}
+            for resp in exp['responsibilities']:
+                latex_content += fr"""        \resumeItem{{{self._escape_latex(resp)}}}
 """
-                latex_content += r"""      \end{resumeItemListStart}
+            latex_content += r"""      \end{resumeItemListStart}
 """
-            latex_content += r"""
+        latex_content += r"""
   \end{resumeSubHeadingListStart}
 
 """
 
-        # Projects section - only if there are entries
-        if project_entries:
-            latex_content += r"""
+        # Projects section
+        latex_content += r"""
 %-----------PROJECTS-----------
 \section{Projects}
     \begin{resumeSubHeadingListStart}
 """
-            for proj in project_entries:
-                latex_content += fr"""      \resumeProjectHeading
+        for proj in project_entries:
+            latex_content += fr"""      \resumeProjectHeading
           {{\textbf{{{self._escape_latex(proj['name'])}}} $|$ \emph{{{self._escape_latex(proj['technologies'])}}}}}{{{"" if 'date_range' not in proj else self._escape_latex(proj['date_range'])}}}
           \begin{{resumeItemListStart}}
 """
-                for detail in proj['details']:
-                    latex_content += fr"""            \resumeItem{{{self._escape_latex(detail)}}}
+            for detail in proj['details']:
+                latex_content += fr"""            \resumeItem{{{self._escape_latex(detail)}}}
 """
-                latex_content += r"""          \end{resumeItemListStart}
+            latex_content += r"""          \end{resumeItemListStart}
 """
-            latex_content += r"""    \end{resumeSubHeadingListStart}
+        latex_content += r"""    \end{resumeSubHeadingListStart}
 
 """
 
-        # Technical Skills section - only if there are any skills
-        if any([languages, frameworks, developer_tools, libraries]):
-            latex_content += r"""
+        # Technical Skills section
+        languages_str = ', '.join(self._escape_latex(lang) for lang in languages)
+        frameworks_str = ', '.join(self._escape_latex(fw) for fw in frameworks)
+        developer_tools_str = ', '.join(self._escape_latex(tool) for tool in developer_tools)
+        libraries_str = ', '.join(self._escape_latex(lib) for lib in libraries)
+        
+        latex_content += fr"""
 %-----------PROGRAMMING SKILLS-----------
-\section{Technical Skills}
- \begin{itemize}[leftmargin=0.15in, label={{}}]
+\section{{Technical Skills}}
+ \begin{{itemize}}[leftmargin=0.15in, label={{}}]
     \small{{\item{{
-"""
-            skills_sections = []
-            if languages:
-                languages_str = ', '.join(self._escape_latex(lang) for lang in languages)
-                skills_sections.append(fr"\textbf{{Languages}}{{: {languages_str}}}")
-            if frameworks:
-                frameworks_str = ', '.join(self._escape_latex(fw) for fw in frameworks)
-                skills_sections.append(fr"\textbf{{Frameworks}}{{: {frameworks_str}}}")
-            if developer_tools:
-                developer_tools_str = ', '.join(self._escape_latex(tool) for tool in developer_tools)
-                skills_sections.append(fr"\textbf{{Developer Tools}}{{: {developer_tools_str}}}")
-            if libraries:
-                libraries_str = ', '.join(self._escape_latex(lib) for lib in libraries)
-                skills_sections.append(fr"\textbf{{Libraries}}{{: {libraries_str}}}")
-                
-            latex_content += " \\\n     ".join(skills_sections) + r"""
+     \textbf{{Languages}}{{: {languages_str}}} \\
+     \textbf{{Frameworks}}{{: {frameworks_str}}} \\
+     \textbf{{Developer Tools}}{{: {developer_tools_str}}} \\
+     \textbf{{Libraries}}{{: {libraries_str}}}
     }}}}
- \end{itemize}
+ \end{{itemize}}
 
 """
 

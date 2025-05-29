@@ -66,7 +66,7 @@ interface OptimizedResume {
   };
 }
 
-const RESUME_OPTIMIZATION_PROMPT = `You are an expert resume writer and ATS optimization specialist. Your task is to optimize the provided resume data to match the job description while maintaining truthfulness and accuracy.
+const RESUME_OPTIMIZATION_PROMPT = `You are Resume-AI, an expert resume writer and ATS optimization specialist. Your task is to optimize the provided resume data to match the job description while maintaining truthfulness and accuracy.
 
 Job Description:
 {jobDescription}
@@ -89,6 +89,7 @@ Please analyze and optimize the resume data following these guidelines:
 12. Make sure the project and experience entries are concise and to the point
 13. There should always be 3 points in the experience and project entries
 14. In Output arrange the experience and project entries in reverse chronological order(most recent first)
+15. If the total of number of experience and project entries is more than 5, then out of all the entries, select the most relevant 5 and remove the rest from the output.
 
 CRITICAL INSTRUCTION: You must return ONLY a raw JSON object. Do not include any markdown formatting, code blocks, or additional text. The response must be a single JSON object that can be parsed directly.
 

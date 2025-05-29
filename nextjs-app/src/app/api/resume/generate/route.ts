@@ -3,20 +3,33 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { prisma } from '@/lib/prisma';
 import { optimizeResume } from '@/lib/resumeOptimiser';
+import { resumeGenerationSchema } from '@/types/resume.schema';
+import { apiSecurity } from '@/middleware/api-security';
+import type { NextRequest } from 'next/server';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // Apply security measures
+    const securityResponse = await apiSecurity(req, resumeGenerationSchema);
+    if (securityResponse) return securityResponse;
+
+    // Get authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
-    const { jobDescription, userData } = await req.json();
+    // Parse and validate request body
+    const body = await req.json();
+    const { jobDescription, userData } = body;
 
-    // First optimize the resume using LLM
+    // Optimize resume using LLM
     const optimizedData = await optimizeResume(jobDescription, JSON.stringify(userData));
 
-    // Format the data for the PDF service using the optimized data
+    // Format the data for the PDF service
     const formattedData = {
       full_name: optimizedData.optimized_resume.full_name || userData.name || '',
       phone_number: optimizedData.optimized_resume.phone_number || userData.phone || null,
@@ -113,10 +126,14 @@ export async function POST(req: Request) {
         analysis: optimizedData.analysis
       }
     });
-    } catch (error: unknown) {
-      console.error('Error generating PDF:', error);
-      return NextResponse.json(
-        { error: error instanceof Error ? error.message : 'Failed to generate PDF' },
+  } catch (error: unknown) {
+    console.error('Error generating PDF:', error);
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to generate PDF',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
