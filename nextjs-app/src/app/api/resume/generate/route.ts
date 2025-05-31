@@ -2,15 +2,58 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 import { prisma } from '@/lib/prisma';
-import { optimizeResume } from '@/lib/resumeOptimiser';
-import { resumeGenerationSchema } from '@/types/resume.schema';
-import { apiSecurity } from '@/middleware/api-security';
 import type { NextRequest } from 'next/server';
+
+// Define interfaces for the data structures
+interface EducationEntry {
+  institution: string;
+  location: string;
+  degree: string;
+  date_range: string;
+}
+
+interface ExperienceEntry {
+  title: string;
+  organization: string;
+  location: string;
+  dates: string;
+  responsibilities: string[];
+}
+
+interface ProjectEntry {
+  name: string;
+  technologies: string;
+  date_range?: string;
+  details: string[];
+}
+
+interface SkillCategory {
+  category_name: string;
+  skills: string[];
+}
+
+interface UserData {
+  full_name: string;
+  phone_number?: string;
+  email: string;
+  linkedin_url?: string;
+  github_url?: string;
+  website_url?: string;
+  education_entries: EducationEntry[];
+  experience_entries: ExperienceEntry[];
+  project_entries: ProjectEntry[];
+  skill_categories: SkillCategory[];
+}
+
+interface RequestBody {
+  jobDescription: string;
+  userData: UserData;
+}
 
 export async function POST(req: NextRequest) {
   try {
     // Parse and validate request body
-    const body = await req.json();
+    const body = await req.json() as RequestBody;
     console.log('Received request body:', JSON.stringify(body, null, 2));
 
     const { jobDescription, userData } = body;
@@ -32,23 +75,23 @@ export async function POST(req: NextRequest) {
       linkedin_url: userData.linkedin_url || '',
       github_url: userData.github_url || '',
       website_url: userData.website_url || '',
-      education_entries: userData.education_entries.map((edu: any) => ({
+      education_entries: userData.education_entries.map((edu: EducationEntry) => ({
         institution: edu.institution || '',
         location: edu.location || '',
         degree: edu.degree || '',
         date_range: edu.date_range || ''
       })),
-      experience_entries: userData.experience_entries.map((exp: any) => ({
+      experience_entries: userData.experience_entries.map((exp: ExperienceEntry) => ({
         title: exp.title || '',
         organization: exp.organization || '',
         location: exp.location || '',
         dates: exp.dates || '',
         responsibilities: exp.responsibilities || []
       })),
-      project_entries: userData.project_entries.map((proj: any) => ({
+      project_entries: userData.project_entries.map((proj: ProjectEntry) => ({
         name: proj.name || '',
         technologies: proj.technologies || '',
-        date_range: proj.date_range || undefined,
+        date_range: proj.date_range,
         details: proj.details || []
       })),
       skill_categories: userData.skill_categories || [],

@@ -63,6 +63,7 @@ export default function FeedbackPage() {
         email: "",
       });
     } catch (error) {
+      console.error("Error submitting feedback:", error);
       toast({
         title: "Failed to submit feedback",
         description: "Please try again.",

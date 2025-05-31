@@ -10,7 +10,7 @@ import UserProfileHeader from "@/components/profile/UserProfileHeader";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import EducationSection from "@/components/profile/EducationSection";
-import CertificationSection from "@/components/profile/CertificationSection";
+// import CertificationSection from "@/components/profile/CertificationSection";
 
 interface UserData {
   id: string;

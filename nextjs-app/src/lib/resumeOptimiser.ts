@@ -88,9 +88,13 @@ Please analyze and optimize the resume data following these guidelines:
 10. Make sure the content alignment percentages are out of 100% in the analysis section
 11. Do not ask to add GPA in the education section
 12. Make sure the project and experience entries are concise and to the point
-13. There should always be 3 points in the experience and project entries
+13. Each experience and project entry should have 2-3 bullet points
 14. In Output arrange the experience and project entries in reverse chronological order(most recent first)
-15. If the total number of experience and project entries is more than 5, prioritize keeping all relevant experience entries and only remove project entries if necessary to reach a total of 5 entries. If the total is 5 or less, return all entries regardless of relevance. When removing entries, prioritize keeping the most recent and relevant ones.
+15. Entry Management Rules:
+    - If the total number of experience and project entries is 5 or less, keep ALL entries
+    - If the total is more than 5, prioritize keeping all experience entries and only remove project entries if necessary
+    - When removing entries, prioritize keeping the most recent and relevant ones
+    - Never remove entries if the total is 5 or less
 16. For skills section, create up to 4 relevant categories based on the skills provided and job requirements. Group similar skills together under meaningful category names.
 17. If no skills are provided in the user data, analyze the job description and create appropriate skill categories with relevant skills.
 

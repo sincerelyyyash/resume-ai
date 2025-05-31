@@ -31,7 +31,7 @@ const ProjectForm: React.FC<{
   onSave: () => void;
   onCancel: () => void;
   setFormData: React.Dispatch<React.SetStateAction<Partial<Project>>>;
-}> = ({ data, onChange, onSave, onCancel, setFormData }) => {
+}> = ({ data, onChange, onSave, onCancel }) => {
   const [showDatePicker, setShowDatePicker] = useState({
     start: false,
     end: false
