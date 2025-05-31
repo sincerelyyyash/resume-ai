@@ -9,9 +9,11 @@ import type { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    // Apply security measures
-    const securityResponse = await apiSecurity(req, resumeGenerationSchema);
-    if (securityResponse) return securityResponse;
+    // Parse and validate request body
+    const body = await req.json();
+    console.log('Received request body:', JSON.stringify(body, null, 2));
+
+    const { jobDescription, userData } = body;
 
     // Get authenticated user
     const session = await getServerSession(authOptions);
@@ -22,44 +24,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse and validate request body
-    const body = await req.json();
-    const { jobDescription, userData } = body;
-
-    // Optimize resume using LLM
-    const optimizedData = await optimizeResume(jobDescription, JSON.stringify(userData));
-
     // Format the data for the PDF service
     const formattedData = {
-      full_name: optimizedData.optimized_resume.full_name || userData.name || '',
-      phone_number: optimizedData.optimized_resume.phone_number || userData.phone || null,
-      email: optimizedData.optimized_resume.email || userData.email || '',
-      linkedin_url: optimizedData.optimized_resume.linkedin_url || userData.linkedin || '',
-      github_url: optimizedData.optimized_resume.github_url || userData.github || '',
-      education_entries: optimizedData.optimized_resume.education_entries.map((edu: { institution: string; location: string; degree: string; date_range: string }) => ({
+      full_name: userData.full_name || '',
+      phone_number: userData.phone_number || null,
+      email: userData.email || '',
+      linkedin_url: userData.linkedin_url || '',
+      github_url: userData.github_url || '',
+      website_url: userData.website_url || '',
+      education_entries: userData.education_entries.map((edu: any) => ({
         institution: edu.institution || '',
         location: edu.location || '',
         degree: edu.degree || '',
         date_range: edu.date_range || ''
       })),
-      experience_entries: optimizedData.optimized_resume.experience_entries.map((exp: { title: string; organization: string; location: string; dates: string; responsibilities: string[] }) => ({
+      experience_entries: userData.experience_entries.map((exp: any) => ({
         title: exp.title || '',
         organization: exp.organization || '',
         location: exp.location || '',
         dates: exp.dates || '',
         responsibilities: exp.responsibilities || []
       })),
-      project_entries: optimizedData.optimized_resume.project_entries.map((proj: { name: string; technologies: string; date_range: string; details: string[] }) => ({
+      project_entries: userData.project_entries.map((proj: any) => ({
         name: proj.name || '',
         technologies: proj.technologies || '',
         date_range: proj.date_range || undefined,
         details: proj.details || []
       })),
-      languages: optimizedData.optimized_resume.languages || [],
-      frameworks: optimizedData.optimized_resume.frameworks || [],
-      developer_tools: optimizedData.optimized_resume.developer_tools || [],
-      libraries: optimizedData.optimized_resume.libraries || [],
-      output_filename: `${(optimizedData.optimized_resume.full_name || userData.name || 'resume').toLowerCase().replace(/\s+/g, '-')}-resume.pdf`
+      skill_categories: userData.skill_categories || [],
+      output_filename: `${(userData.full_name || 'resume').toLowerCase().replace(/\s+/g, '-')}-resume.pdf`
     };
 
     // Validate required fields
@@ -67,8 +60,7 @@ export async function POST(req: NextRequest) {
       console.error('Missing required fields:', {
         full_name: formattedData.full_name,
         email: formattedData.email,
-        original_data: userData,
-        optimized_data: optimizedData
+        original_data: userData
       });
       throw new Error('Name and email are required fields');
     }
@@ -122,8 +114,7 @@ export async function POST(req: NextRequest) {
           filename: formattedData.output_filename,
           url: pdfData.pdf_url
         },
-        jobDescriptionId: savedJobDescription.id,
-        analysis: optimizedData.analysis
+        jobDescriptionId: savedJobDescription.id
       }
     });
   } catch (error: unknown) {

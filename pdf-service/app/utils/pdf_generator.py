@@ -430,18 +430,20 @@ class ResumeGenerator:
 """
 
         # Technical Skills section
-        latex_content += r"""
+        if skill_categories:
+            latex_content += r"""
 %-----------TECHNICAL SKILLS-----------
 \section{Technical Skills}
- \begin{itemize}[leftmargin=0.15in, label={}]
+ \begin{itemize}[leftmargin=0.15in, label={}, nosep]
 """
-        for category in skill_categories:
-            skills_str = ', '.join(self._escape_latex(skill) for skill in category['skills'])
-            latex_content += fr"""    \small{{\item{{
+            for category in skill_categories:
+                if category['skills']:  # Only add category if it has skills
+                    skills_str = ', '.join(self._escape_latex(skill) for skill in category['skills'])
+                    latex_content += fr"""    \small{{\item{{
      \textbf{{{self._escape_latex(category['category_name'])}}}{{: {skills_str}}}
     }}}}
 """
-        latex_content += r""" \end{itemize}
+            latex_content += r""" \end{itemize}
 
 """
 
