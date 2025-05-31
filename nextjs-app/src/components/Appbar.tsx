@@ -72,13 +72,13 @@ export default function Appbar() {
             </div>
             
             <div className="flex items-center gap-4">
-              {!isAuthenticated && (
+              {!isAuthenticated && pathname !== "/signin" && pathname !== "/signup" && (
                 <>
-                  <Link href="/signup">
+                  {/* <Link href="/signup">
                     <Button variant="outline" size="sm" className="border-zinc-200 dark:border-zinc-800">
                       Sign Up
                     </Button>
-                  </Link>
+                  </Link> */}
                   <Link href="/signin">
                     <Button size="sm">
                       Sign In

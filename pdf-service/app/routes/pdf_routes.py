@@ -20,12 +20,7 @@ async def generate_resume(request: ResumeRequest):
         education_entries = [entry.dict() for entry in request.education_entries] if request.education_entries else []
         experience_entries = [entry.dict() for entry in request.experience_entries] if request.experience_entries else []
         project_entries = [entry.dict() for entry in request.project_entries] if request.project_entries else []
-        
-        # Handle optional technical skills
-        languages = request.languages or []
-        frameworks = request.frameworks or []
-        developer_tools = request.developer_tools or []
-        libraries = request.libraries or []
+        skill_categories = [category.dict() for category in request.skill_categories] if request.skill_categories else []
         
         logger.info("Generating PDF with data")
         # Generate the PDF
@@ -35,13 +30,11 @@ async def generate_resume(request: ResumeRequest):
             email=request.email,
             linkedin_url=request.linkedin_url,
             github_url=request.github_url,
+            website_url=request.website_url,
             education_entries=education_entries,
             experience_entries=experience_entries,
             project_entries=project_entries,
-            languages=languages,
-            frameworks=frameworks,
-            developer_tools=developer_tools,
-            libraries=libraries,
+            skill_categories=skill_categories,
             output_filename=request.output_filename
         )
         

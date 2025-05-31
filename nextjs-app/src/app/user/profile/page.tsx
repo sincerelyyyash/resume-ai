@@ -179,13 +179,13 @@ export default function Profile() {
         onDelete={fetchUserData}
       />
 
-      <CertificationSection
+      {/* <CertificationSection
         certifications={userData?.certifications || []}
         showEdit={true}
         showAddNew={true}
         onSave={fetchUserData}
         onDelete={fetchUserData}
-      />
+      /> */}
     </div>
   );
 }

@@ -32,31 +32,40 @@ const ProjectForm: React.FC<{
   onCancel: () => void;
   setFormData: React.Dispatch<React.SetStateAction<Partial<Project>>>;
 }> = ({ data, onChange, onSave, onCancel, setFormData }) => {
+  const [showDatePicker, setShowDatePicker] = useState({
+    start: false,
+    end: false
+  });
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
+  };
+
   return (
     <div className="space-y-4 p-6 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-zinc-800">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Project Title
-          </label>
       <input
         name="title"
-            placeholder="e.g., E-commerce Website"
+        placeholder="Project Title"
         value={data.title || ""}
         onChange={onChange}
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
       />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Technologies
-          </label>
+      <textarea
+        name="description"
+        placeholder="Project Description"
+        value={data.description || ""}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200 min-h-[100px]"
+      />
       <input
         name="technologies"
-            placeholder="e.g., React, Node.js, MongoDB"
-            value={data.technologies?.join(", ") || ""}
-            onChange={(e) => {
-              const technologies = e.target.value.split(",").map(tech => tech.trim());
+        placeholder="Technologies (comma separated)"
+        value={Array.isArray(data.technologies) ? data.technologies.join(", ") : ""}
+        onChange={(e) =>
           onChange({
             ...e,
             target: {
@@ -64,65 +73,67 @@ const ProjectForm: React.FC<{
               name: "technologies",
               value: e.target.value,
             },
-              });
-              setFormData(prev => ({
-                ...prev,
-                technologies: technologies
-              }));
-            }}
+          })
+        }
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
       />
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Description
-        </label>
-        <textarea
-          name="description"
-          placeholder="Project description..."
-          value={data.description || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200 min-h-[100px]"
-        />
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Start Date
           </label>
-          <input
-            name="startDate"
-            type="date"
-            value={data.startDate || ""}
-            onChange={onChange}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-          />
+          {showDatePicker.start ? (
+            <input
+              name="startDate"
+              type="date"
+              value={data.startDate || ""}
+              onChange={onChange}
+              onBlur={() => setShowDatePicker(prev => ({ ...prev, start: false }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+            />
+          ) : (
+            <div
+              onClick={() => setShowDatePicker(prev => ({ ...prev, start: true }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white cursor-pointer hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200"
+            >
+              {formatDate(data.startDate)}
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             End Date
           </label>
-        <input
-            name="endDate"
-          type="date"
-            value={data.endDate || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
-      </div>
+          {showDatePicker.end ? (
+            <input
+              name="endDate"
+              type="date"
+              value={data.endDate || ""}
+              onChange={onChange}
+              onBlur={() => setShowDatePicker(prev => ({ ...prev, end: false }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+            />
+          ) : (
+            <div
+              onClick={() => setShowDatePicker(prev => ({ ...prev, end: true }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white cursor-pointer hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200"
+            >
+              {formatDate(data.endDate) || 'Present'}
+            </div>
+          )}
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Project URL
         </label>
-      <input
+        <input
           name="url"
           placeholder="https://example.com"
           value={data.url || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+          onChange={onChange}
+          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+        />
       </div>
       <div className="flex space-x-3 pt-4">
         <Button 
@@ -319,7 +330,7 @@ const ProjectSection: React.FC<Props> = ({ projects, showEdit, showAddNew, onSav
         )}
 
         {showAddNew && addingNew && (
-          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+          <div className="bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700">
             <ProjectForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} setFormData={setFormData} />
           </div>
         )}

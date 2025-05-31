@@ -4,7 +4,7 @@ import { MotionDiv } from "./MotionDiv";
 const steps = [
   {
     icon: <Upload className="w-5 h-5" />,
-    title: "Upload Your Resume",
+    title: "Add Your Resume Data",
     description: "Start by adding your current resume and personal details. Keep your profile updated for the best AI-driven results.",
   },
   {

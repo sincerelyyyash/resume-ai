@@ -6,6 +6,7 @@ import MotionDiv from "../motion-div";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+
 interface Experience {
   id?: string;
   company: string;
@@ -33,6 +34,19 @@ const ExperienceForm: React.FC<{
   onSave: () => void;
   onCancel: () => void;
 }> = ({ data, onChange, onSave, onCancel }) => {
+  const [showDatePicker, setShowDatePicker] = useState({
+    start: false,
+    end: false
+  });
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
+  };
+
   return (
     <div className="space-y-4 p-6 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-zinc-800">
       <input
@@ -56,7 +70,7 @@ const ExperienceForm: React.FC<{
         onChange={onChange}
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200 min-h-[100px]"
       />
-      <input
+      {/* <input
         name="technologies"
         placeholder="Technologies (comma separated)"
         value={Array.isArray(data.technologies) ? data.technologies.join(", ") : ""}
@@ -71,7 +85,7 @@ const ExperienceForm: React.FC<{
           })
         }
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+      /> */}
       <input
         name="location"
         placeholder="Location"
@@ -80,20 +94,50 @@ const ExperienceForm: React.FC<{
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
       />
       <div className="grid grid-cols-2 gap-4">
-        <input
-          name="start_date"
-          type="date"
-          value={data.start_date || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
-        <input
-          name="end_date"
-          type="date"
-          value={data.end_date || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Start Date
+          </label>
+          {showDatePicker.start ? (
+            <input
+              name="start_date"
+              type="date"
+              value={data.start_date || ""}
+              onChange={onChange}
+              onBlur={() => setShowDatePicker(prev => ({ ...prev, start: false }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+            />
+          ) : (
+            <div
+              onClick={() => setShowDatePicker(prev => ({ ...prev, start: true }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white cursor-pointer hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200"
+            >
+              {formatDate(data.start_date)}
+            </div>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            End Date
+          </label>
+          {showDatePicker.end ? (
+            <input
+              name="end_date"
+              type="date"
+              value={data.end_date || ""}
+              onChange={onChange}
+              onBlur={() => setShowDatePicker(prev => ({ ...prev, end: false }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+            />
+          ) : (
+            <div
+              onClick={() => setShowDatePicker(prev => ({ ...prev, end: true }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white cursor-pointer hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200"
+            >
+              {formatDate(data.end_date) || 'Present'}
+            </div>
+          )}
+        </div>
       </div>
       <div className="flex space-x-3 pt-4">
         <Button 
@@ -120,6 +164,14 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
   const [formData, setFormData] = useState<Partial<Experience>>({});
   const { toast } = useToast();
 
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
@@ -136,6 +188,19 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
     setEditingId(null);
     setFormData({});
     setAddingNew(false);
+  };
+
+  const handleEdit = (exp: Experience) => {
+    if (exp.id) {
+      setEditingId(exp.id);
+      // Normalize the data structure for editing
+      setFormData({
+        ...exp,
+        start_date: exp.start_date || exp.startDate || '',
+        end_date: exp.end_date || exp.endDate || '',
+        technologies: exp.technologies || []
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -156,7 +221,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
         startDate: new Date(formData.start_date).toISOString(),
         endDate: formData.end_date ? new Date(formData.end_date).toISOString() : null,
         location: formData.location,
-        technologies: formData.technologies,
+        technologies: formData.technologies || [],
         current: !formData.end_date,
       };
 
@@ -216,7 +281,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
             className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
           >
             <Plus className="h-4 w-4" />
-            Add Experience
+            Add Exp.
           </Button>
         )}
       </div>
@@ -229,7 +294,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
               className="relative p-6 bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700"
             >
               <div className="absolute top-6 right-6 text-sm text-gray-500 dark:text-gray-400">
-                {(exp.startDate || exp.start_date) ? new Date(exp.startDate || exp.start_date || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : ''} - {(exp.endDate || exp.end_date) ? new Date(exp.endDate || exp.end_date || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'Present'}
+                {formatDate(exp.start_date || exp.startDate)} - {formatDate(exp.end_date || exp.endDate) || 'Present'}
               </div>
 
               {editingId === exp.id ? (
@@ -238,7 +303,7 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
                 <>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{exp.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">{exp.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  {/* <div className="flex flex-wrap gap-2 mb-4">
                     {exp.technologies?.map((tech) => (
                       <span
                         key={tech}
@@ -247,19 +312,14 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
                         {tech}
                       </span>
                     ))}
-                  </div>
+                  </div> */}
                   <p className="text-gray-600 dark:text-gray-300">
                     {exp.company} - {exp.location}
                   </p>
                   {showEdit && (
                     <div className="absolute bottom-6 right-6 flex space-x-3">
                       <Button
-                        onClick={() => {
-                          if (exp.id) {
-                            setEditingId(exp.id);
-                            setFormData(exp);
-                          }
-                        }}
+                        onClick={() => handleEdit(exp)}
                         variant="outline"
                         className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg text-sm"
                       >
@@ -285,7 +345,9 @@ const ExperienceSection: React.FC<Props> = ({ experiences, showEdit, showAddNew,
         )}
 
         {showAddNew && addingNew && (
-          <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+          <div className="bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700">
+            <ExperienceForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+          </div>
         )}
       </div>
     </MotionDiv>

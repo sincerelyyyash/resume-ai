@@ -48,7 +48,7 @@ export async function GET() {
         Boolean(exp.company && exp.title && exp.startDate)
       ),
       skills: user.skills.some(skill => 
-        Boolean(skill.name && skill.level)
+        Boolean(skill.name && skill.category)
       ),
       education: user.education.some(edu => 
         Boolean(edu.institution && edu.degree && edu.startDate)
@@ -59,6 +59,12 @@ export async function GET() {
     const completedSteps = Object.values(completionStatus).filter(Boolean).length;
     const completionPercentage = (completedSteps / totalSteps) * 100;
 
+    const hasMinimumRequiredFields = Boolean(
+      user.name && 
+      user.email && 
+      user.skills.length > 0
+    );
+
     return NextResponse.json(
       {
         success: true,
@@ -68,6 +74,7 @@ export async function GET() {
           completionPercentage,
           completedSteps,
           totalSteps,
+          hasMinimumRequiredFields,
           missingFields: Object.entries(completionStatus)
             .filter(([, value]) => !value)
             .map(([key]) => key)

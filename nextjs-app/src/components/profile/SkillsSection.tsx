@@ -31,33 +31,38 @@ const SkillForm: React.FC<{
 }> = ({ data, onChange, onSave, onCancel }) => {
   return (
     <div className="space-y-4 p-6 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-zinc-800">
+      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+           Tip: Add all your relevant skills together. This helps create a more comprehensive profile and increases your chances of matching with relevant job opportunities.
+        </p>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Skill Name
           </label>
-      <input
-        name="name"
+          <input
+            name="name"
             placeholder="e.g., React, Python"
-        value={data.name || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+            value={data.name || ""}
+            onChange={onChange}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Category
           </label>
-      <input
-        name="category"
+          <input
+            name="category"
             placeholder="e.g., Frontend, Backend"
-        value={data.category || ""}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+            value={data.category || ""}
+            onChange={onChange}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          {/* <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Skill Level
           </label>
       <select
@@ -76,15 +81,15 @@ const SkillForm: React.FC<{
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Years of Experience
-          </label>
-      <input
+          </label> */}
+      {/* <input
         name="yearsOfExperience"
         type="number"
             placeholder="e.g., 2"
         value={data.yearsOfExperience || ""}
         onChange={onChange}
         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-      />
+      /> */}
         </div>
       </div>
       <div className="flex space-x-3 pt-4">
@@ -124,7 +129,7 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.category || !formData.level) {
+    if (!formData.name || !formData.category) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -134,32 +139,31 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
     }
 
     try {
+      const skillData = {
+        name: formData.name,
+        category: formData.category,
+        level: "Intermediate",
+        yearsOfExperience: 1,
+      };
+
       if (editingId) {
         await axios.put(`/api/user/skills`, {
           id: editingId,
-          name: formData.name,
-          category: formData.category,
-          level: formData.level,
-          yearsOfExperience: formData.yearsOfExperience,
+          ...skillData,
         });
         toast({
           title: "Success",
           description: "Skill updated successfully.",
         });
       } else {
-        await axios.post(`/api/user/skills`, {
-          name: formData.name,
-          category: formData.category,
-          level: formData.level,
-          yearsOfExperience: formData.yearsOfExperience,
-        });
+        await axios.post(`/api/user/skills`, skillData);
         toast({
           title: "Success",
           description: "Skill added successfully.",
         });
       }
       await onSave();
-    resetForm();
+      resetForm();
     } catch (error) {
       console.error('Save error:', error);
       toast({
@@ -244,14 +248,14 @@ const SkillsSection: React.FC<Props> = ({ skills, showEdit, showAddNew, onSave, 
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                  {/* <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                     <span className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 rounded-full">
                       {skill.level}
                     </span>
                     <span className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 rounded-full">
                       {skill.yearsOfExperience} years
                     </span>
-                  </div>
+                  </div> */}
                 </>
               )}
             </div>

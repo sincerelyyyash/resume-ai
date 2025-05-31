@@ -32,6 +32,19 @@ const EducationForm: React.FC<{
   onSave: () => void;
   onCancel: () => void;
 }> = ({ data, onChange, onSave, onCancel }) => {
+  const [showDatePicker, setShowDatePicker] = useState({
+    start: false,
+    end: false
+  });
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
+  };
+
   return (
     <div className="space-y-4 p-6 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-zinc-800">
       <input
@@ -59,20 +72,50 @@ const EducationForm: React.FC<{
       </div>
       
       <div className="grid grid-cols-2 gap-4">
-        <input
-          name="start_date"
-          type="date"
-          value={data.start_date || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
-        <input
-          name="end_date"
-          type="date"
-          value={data.end_date || ""}
-          onChange={onChange}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Start Date
+          </label>
+          {showDatePicker.start ? (
+            <input
+              name="start_date"
+              type="date"
+              value={data.start_date || ""}
+              onChange={onChange}
+              onBlur={() => setShowDatePicker(prev => ({ ...prev, start: false }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+            />
+          ) : (
+            <div
+              onClick={() => setShowDatePicker(prev => ({ ...prev, start: true }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white cursor-pointer hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200"
+            >
+              {formatDate(data.start_date)}
+            </div>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            End Date
+          </label>
+          {showDatePicker.end ? (
+            <input
+              name="end_date"
+              type="date"
+              value={data.end_date || ""}
+              onChange={onChange}
+              onBlur={() => setShowDatePicker(prev => ({ ...prev, end: false }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all duration-200"
+            />
+          ) : (
+            <div
+              onClick={() => setShowDatePicker(prev => ({ ...prev, end: true }))}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-gray-900 dark:text-white cursor-pointer hover:border-gray-300 dark:hover:border-zinc-700 transition-all duration-200"
+            >
+              {formatDate(data.end_date) || 'Present'}
+            </div>
+          )}
+        </div>
       </div>
       <div className="flex space-x-3 pt-4">
         <Button 
@@ -190,14 +233,16 @@ const EducationSection: React.FC<Props> = ({ education, showEdit, showAddNew, on
             className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-6 py-2.5 rounded-lg font-medium"
           >
             <Plus className="h-4 w-4" />
-            Add Education
+            Add Edu.
           </Button>
         )}
       </div>
 
       <div className="space-y-6">
         {addingNew && (
+          <div className="bg-gradient-to-r from-zinc-800/20 to-zinc-700/20 shadow-lg shadow-zinc-600 hover:shadow-blue-500 rounded-2xl border border-zinc-700">
           <EducationForm data={formData} onChange={handleChange} onSave={handleSave} onCancel={resetForm} />
+          </div>
         )}
 
         {education && education.length > 0 ? (

@@ -75,7 +75,7 @@ export const Hero = () => {
           className="space-y-2"
         >
           <div className="mt-4 flex flex-col justify-end gap-4">
-            <Link href="/signup">
+            <Link href="/signin">
               <Button size="sm">
                 Get Started
                 <ArrowRight className="ml-2 h-4 w-4" />

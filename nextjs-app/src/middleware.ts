@@ -15,6 +15,11 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!token;
   const path = request.nextUrl.pathname;
 
+  // If user is authenticated and trying to access auth pages
+  if (isAuthenticated && (path === '/signin' || path === '/signup')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
   // If user is authenticated and trying to access the home page
   if (isAuthenticated && path === '/') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
@@ -28,6 +33,8 @@ export const config = {
   matcher: [
     '/api/:path*',
     '/',
+    '/signin',
+    '/signup',
     '/dashboard/:path*',
     '/user/:path*',
     '/resume/:path*'

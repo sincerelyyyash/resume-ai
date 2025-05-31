@@ -13,14 +13,14 @@ const footerLinks = {
   ],
   company: [
     { name: 'About', href: '/#about' },
-    { name: 'Blog', href: '/#blog' },
-    { name: 'Careers', href: '/#careers' },
-    { name: 'Contact', href: '/#contact' },
+    // { name: 'Blog', href: '/#blog' },
+    // { name: 'Careers', href: '/#careers' },
+    // { name: 'Contact', href: '/#contact' },
   ],
   legal: [
     { name: 'Privacy Policy', href: '/privacy' },
     { name: 'Terms of Service', href: '/terms' },
-    { name: 'Cookie Policy', href: '/cookies' },
+    // { name: 'Cookie Policy', href: '/cookies' },
   ],
   social: [
     { name: 'GitHub', href: 'https://github.com/sincerelyyyash', icon: Github },

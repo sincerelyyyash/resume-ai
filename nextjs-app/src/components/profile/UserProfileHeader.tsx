@@ -121,11 +121,9 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             className="w-full mt-4 text-lg text-neutral-600 dark:text-neutral-300 italic bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white min-h-[24px]"
           />
         ) : (
-          formData.bio && (
-            <p className="text-lg text-neutral-600 dark:text-neutral-300 italic mt-1">
-              {formData.bio}
-            </p>
-          )
+          <p className="text-lg text-neutral-600 dark:text-neutral-300 italic mt-1">
+            {formData.bio || "No bio added yet. Click edit to add your bio."}
+          </p>
         )}
 
         <p className="text-neutral-500 dark:text-neutral-400 mt-1">{formData.email}</p>
@@ -157,36 +155,48 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             </>
           ) : (
             <>
-              {formData.linkedin && (
-                <a
-                  href={formData.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-1 text-sm font-medium rounded-full bg-black text-white dark:bg-white dark:text-black transition shadow hover:opacity-90"
-                >
-                  <Linkedin className="h-6 w-6" />
-                </a>
-              )}
-              {formData.github && (
-                <a
-                  href={formData.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-1 text-sm font-medium rounded-full bg-black text-white dark:bg-white dark:text-black transition shadow hover:opacity-90"
-                >
-                  <Github className="h-6 w-6" />
-                </a>
-              )}
-              {formData.portfolio && (
-                <a
-                  href={formData.portfolio}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-1 text-sm font-medium rounded-full bg-black text-white dark:bg-white dark:text-black transition shadow hover:opacity-90"
-                >
-                  <Globe className="h-6 w-6" />
-                </a>
-              )}
+              <a
+                href={formData.linkedin || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-4 py-1 text-sm font-medium rounded-full transition shadow hover:opacity-90 flex items-center gap-2 ${
+                  formData.linkedin 
+                    ? "bg-black text-white dark:bg-white dark:text-black" 
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                }`}
+                onClick={(e) => !formData.linkedin && e.preventDefault()}
+              >
+                <Linkedin className="h-6 w-6" />
+                {!formData.linkedin && <span className="text-xs">Add LinkedIn</span>}
+              </a>
+              <a
+                href={formData.github || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-4 py-1 text-sm font-medium rounded-full transition shadow hover:opacity-90 flex items-center gap-2 ${
+                  formData.github 
+                    ? "bg-black text-white dark:bg-white dark:text-black" 
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                }`}
+                onClick={(e) => !formData.github && e.preventDefault()}
+              >
+                <Github className="h-6 w-6" />
+                {!formData.github && <span className="text-xs">Add GitHub</span>}
+              </a>
+              <a
+                href={formData.portfolio || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-4 py-1 text-sm font-medium rounded-full transition shadow hover:opacity-90 flex items-center gap-2 ${
+                  formData.portfolio 
+                    ? "bg-black text-white dark:bg-white dark:text-black" 
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                }`}
+                onClick={(e) => !formData.portfolio && e.preventDefault()}
+              >
+                <Globe className="h-6 w-6" />
+                {!formData.portfolio && <span className="text-xs">Add Portfolio</span>}
+              </a>
             </>
           )}
         </div>

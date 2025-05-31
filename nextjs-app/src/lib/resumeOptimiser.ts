@@ -21,6 +21,7 @@ interface OptimizedResume {
     email: string;
     linkedin_url: string;
     github_url: string;
+    website_url?: string;
     education_entries: Array<{
       institution: string;
       location: string;
@@ -40,10 +41,10 @@ interface OptimizedResume {
       date_range: string;
       details: string[];
     }>;
-    languages: string[];
-    frameworks: string[];
-    developer_tools: string[];
-    libraries: string[];
+    skill_categories: Array<{
+      category_name: string;
+      skills: string[];
+    }>;
     output_filename: string;
   };
   analysis: {
@@ -90,6 +91,7 @@ Please analyze and optimize the resume data following these guidelines:
 13. There should always be 3 points in the experience and project entries
 14. In Output arrange the experience and project entries in reverse chronological order(most recent first)
 15. If the total of number of experience and project entries is more than 5, then out of all the entries, select the most relevant 5 and remove the rest from the output.
+16. For skills section, create up to 4 relevant categories based on the skills provided and job requirements. Group similar skills together under meaningful category names.
 
 CRITICAL INSTRUCTION: You must return ONLY a raw JSON object. Do not include any markdown formatting, code blocks, or additional text. The response must be a single JSON object that can be parsed directly.
 
@@ -101,6 +103,7 @@ The response must follow this exact structure:
     "email": "string",
     "linkedin_url": "string",
     "github_url": "string",
+    "website_url": "string",
     "education_entries": [
       {{
         "institution": "string",
@@ -126,10 +129,12 @@ The response must follow this exact structure:
         "details": ["string"]
       }}
     ],
-    "languages": ["string"],
-    "frameworks": ["string"],
-    "developer_tools": ["string"],
-    "libraries": ["string"],
+    "skill_categories": [
+      {{
+        "category_name": "string",
+        "skills": ["string"]
+      }}
+    ],
     "output_filename": "string"
   }},
   "analysis": {{

@@ -65,14 +65,15 @@ export function SignInForm() {
       if (!userId) {
         toast({
           title: "Session Error",
-          description: "Could not retrieve user ID from session.",
+          description: "Could not retrieve account details.",
           variant: "destructive",
         });
         return;
       }
 
       const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
-
+      console.log("Profile completion response:", profileResponse);
+      
       if (!profileResponse?.success) {
         toast({
           title: "Profile Status Error",
@@ -82,16 +83,20 @@ export function SignInForm() {
         return;
       }
 
-      const completionPercentage = profileResponse.data?.data?.completionPercentage || 0;
+      const completionPercentage = profileResponse.data.completionPercentage || 0;
+      const hasMinimumRequiredFields = profileResponse.data.hasMinimumRequiredFields || false;
+      
+      console.log("Completion percentage:", completionPercentage);
+      console.log("Has minimum required fields:", hasMinimumRequiredFields);
 
-      if (completionPercentage < 10) {
+      if (!hasMinimumRequiredFields) {
         toast({
           title: "Incomplete Profile",
-          description: "Please complete your profile to proceed.",
-      });
-        router.push("/user/create-profile");
+          description: "Please complete your basic profile information and add at least one skill to proceed.",
+        });
+        router.push("/user/profile");
       } else {
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (err) {
       console.error("Profile status check error:", err);
@@ -107,7 +112,7 @@ export function SignInForm() {
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-zinc-900">
-      <form className="my-8" onSubmit={handleSubmit}>
+      {/* <form className="my-8" onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-4 mb-4">
           <Label htmlFor="email">Email Address</Label>
           <Input
@@ -139,9 +144,9 @@ export function SignInForm() {
         >
           {loading ? "Signing in..." : "Sign in"}
         </Button>
-      </form>
+      </form> */}
 
-      <div className="relative my-6">
+      {/* <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
         </div>
@@ -150,24 +155,28 @@ export function SignInForm() {
             or
           </span>
         </div>
-      </div>
+      </div> */}
 
-      <div className="flex flex-col space-y-3 mt-4">
-        <Button
-          className="w-full bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-        >
-          <FcGoogle size={20} /> Sign in with Google
-        </Button>
-        <Button
-          className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-md h-10 font-medium flex items-center justify-center gap-2"
-          onClick={() => signIn("github", { callbackUrl: "/" })}
-        >
-          <FaGithub size={20} /> Sign in with GitHub
-        </Button>
-      </div>
+<div className="flex flex-col items-center space-y-3 mt-4">
+  <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+    Use your social account to sign in
+  </p>
+  <Button
+    className="w-full bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-md h-10 font-medium flex items-center justify-center gap-2"
+    onClick={() => signIn("google", { callbackUrl: "/" })}
+  >
+    <FcGoogle size={20} /> Sign in with Google
+  </Button>
+  <Button
+    className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-md h-10 font-medium flex items-center justify-center gap-2"
+    onClick={() => signIn("github", { callbackUrl: "/" })}
+  >
+    <FaGithub size={20} /> Sign in with GitHub
+  </Button>
+</div>
 
-      <div className="flex justify-center mt-4">
+
+      {/* <div className="flex justify-center mt-4">
         <p className="text-neutral-700 dark:text-neutral-300">
           Don&apos;t have an account?{" "}
           <button
@@ -178,7 +187,7 @@ export function SignInForm() {
           </button>{" "}
           here
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }

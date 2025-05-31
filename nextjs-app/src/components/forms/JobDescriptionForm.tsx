@@ -7,6 +7,29 @@ import MotionDiv from "@/components/motion-div";
 import { useToast } from "@/hooks/use-toast";
 import { optimizeResume } from '@/lib/resumeOptimiser';
 import { useRouter } from 'next/navigation';
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+import { IconSquareRoundedX } from "@tabler/icons-react";
+
+const loadingStates = [
+  {
+    text: "Analyzing job description...",
+  },
+  {
+    text: "Optimizing your profile...",
+  },
+  {
+    text: "Enhancing content alignment...",
+  },
+  {
+    text: "Generating ATS-friendly content...",
+  },
+  {
+    text: "Creating your resume PDF...",
+  },
+  {
+    text: "Finalizing your resume...",
+  },
+];
 
 interface Keyword {
   keyword: string;
@@ -101,7 +124,6 @@ export default function JobDescriptionForm() {
         description: error instanceof Error ? error.message : "Failed to generate resume",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -133,6 +155,17 @@ export default function JobDescriptionForm() {
           </div>
         </form>
       </div>
+
+      <MultiStepLoader loadingStates={loadingStates} loading={isLoading} duration={2000} />
+
+      {isLoading && (
+        <button
+          className="fixed top-4 right-4 text-black dark:text-white z-[120]"
+          onClick={() => setIsLoading(false)}
+        >
+          <IconSquareRoundedX className="h-10 w-10" />
+        </button>
+      )}
     </MotionDiv>
   );
 }

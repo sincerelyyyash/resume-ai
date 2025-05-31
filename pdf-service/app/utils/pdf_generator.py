@@ -116,24 +116,13 @@ class ResumeGenerator:
                         email: str,
                         linkedin_url: str,
                         github_url: str,
-                        
-                        # Education
                         education_entries: List[Dict[str, str]],
-                        
-                        # Experience
                         experience_entries: List[Dict[str, Any]],
-                        
-                        # Projects
                         project_entries: List[Dict[str, Any]],
-                        
-                        # Technical Skills
-                        languages: List[str],
-                        frameworks: List[str],
-                        developer_tools: List[str],
-                        libraries: List[str],
-                        
+                        skill_categories: List[Dict[str, Any]],
                         output_filename: str = "resume.pdf",
-                        phone_number: Optional[str] = None) -> str:
+                        phone_number: Optional[str] = None,
+                        website_url: Optional[str] = None) -> str:
         """
         Generate a PDF resume from the provided information
         """
@@ -144,13 +133,11 @@ class ResumeGenerator:
                 'email': email,
                 'linkedin_url': linkedin_url,
                 'github_url': github_url,
+                'website_url': website_url,
                 'education_entries': education_entries,
                 'experience_entries': experience_entries,
                 'project_entries': project_entries,
-                'languages': languages,
-                'frameworks': frameworks,
-                'developer_tools': developer_tools,
-                'libraries': libraries
+                'skill_categories': skill_categories
             }
             
             logger.info("Validating input data...")
@@ -169,8 +156,7 @@ class ResumeGenerator:
                 latex_content = self._create_latex_content(
                     full_name, email, linkedin_url, github_url,
                     education_entries, experience_entries, project_entries,
-                    languages, frameworks, developer_tools, libraries,
-                    phone_number
+                    skill_categories, phone_number, website_url
                 )
                 
                 # Write LaTeX content to a file
@@ -238,11 +224,9 @@ class ResumeGenerator:
                               education_entries: List[Dict[str, str]],
                               experience_entries: List[Dict[str, Any]],
                               project_entries: List[Dict[str, Any]],
-                              languages: List[str],
-                              frameworks: List[str],
-                              developer_tools: List[str],
-                              libraries: List[str],
-                              phone_number: Optional[str] = None) -> str:
+                              skill_categories: List[Dict[str, Any]],
+                              phone_number: Optional[str] = None,
+                              website_url: Optional[str] = None) -> str:
         """Create the LaTeX content for the resume"""
         # Escape all text inputs
         full_name = self._escape_latex(full_name)
@@ -250,6 +234,7 @@ class ResumeGenerator:
         email = self._escape_latex(email)
         linkedin_url = self._escape_latex(linkedin_url) if linkedin_url else ''
         github_url = self._escape_latex(github_url) if github_url else ''
+        website_url = self._escape_latex(website_url) if website_url else ''
 
         # Preamble
         latex_content = r"""%-------------------------
@@ -373,15 +358,16 @@ class ResumeGenerator:
 """
 
         # Header
-        latex_content += fr"""
+        website_part = f" $|$ \\href{{https://{website_url}}}{{\\underline{{{website_url}}}}}" if website_url else ""
+        latex_content += f"""
 %----------HEADING----------
-\begin{{center}}
-    \textbf{{\Huge \scshape {full_name}}} \\
-    \vspace{{2pt}}
-    \href{{mailto:{email}}}{{\underline{{{email}}}}} $|$ 
-    \href{{https://{linkedin_url}}}{{\underline{{{linkedin_url}}}}} $|$
-    \href{{https://{github_url}}}{{\underline{{{github_url}}}}}
-\end{{center}}
+\\begin{{center}}
+    \\textbf{{\\Huge \\scshape {full_name}}} \\\\
+    \\vspace{{2pt}}
+    \\href{{mailto:{email}}}{{\\underline{{{email}}}}} $|$ 
+    \\href{{https://{linkedin_url}}}{{\\underline{{{linkedin_url}}}}} $|$
+    \\href{{https://{github_url}}}{{\\underline{{{github_url}}}}}{website_part}
+\\end{{center}}
 
 """
 
@@ -444,22 +430,18 @@ class ResumeGenerator:
 """
 
         # Technical Skills section
-        languages_str = ', '.join(self._escape_latex(lang) for lang in languages)
-        frameworks_str = ', '.join(self._escape_latex(fw) for fw in frameworks)
-        developer_tools_str = ', '.join(self._escape_latex(tool) for tool in developer_tools)
-        libraries_str = ', '.join(self._escape_latex(lib) for lib in libraries)
-        
-        latex_content += fr"""
-%-----------PROGRAMMING SKILLS-----------
-\section{{Technical Skills}}
- \begin{{itemize}}[leftmargin=0.15in, label={{}}]
-    \small{{\item{{
-     \textbf{{Languages}}{{: {languages_str}}} \\
-     \textbf{{Frameworks}}{{: {frameworks_str}}} \\
-     \textbf{{Developer Tools}}{{: {developer_tools_str}}} \\
-     \textbf{{Libraries}}{{: {libraries_str}}}
+        latex_content += r"""
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+"""
+        for category in skill_categories:
+            skills_str = ', '.join(self._escape_latex(skill) for skill in category['skills'])
+            latex_content += fr"""    \small{{\item{{
+     \textbf{{{self._escape_latex(category['category_name'])}}}{{: {skills_str}}}
     }}}}
- \end{{itemize}}
+"""
+        latex_content += r""" \end{itemize}
 
 """
 
@@ -478,24 +460,13 @@ def generate_resume_pdf(
     email: str,
     linkedin_url: str,
     github_url: str,
-    
-    # Education
     education_entries: List[Dict[str, str]],
-    
-    # Experience
     experience_entries: List[Dict[str, Any]],
-    
-    # Projects
     project_entries: List[Dict[str, Any]],
-    
-    # Technical Skills
-    languages: List[str],
-    frameworks: List[str],
-    developer_tools: List[str],
-    libraries: List[str],
-    
+    skill_categories: List[Dict[str, Any]],
     output_filename: str = "resume.pdf",
-    output_dir: str = None
+    output_dir: str = None,
+    website_url: Optional[str] = None
 ) -> str:
     """
     Generate a PDF resume from the provided information
@@ -512,7 +483,6 @@ def generate_resume_pdf(
         Your LinkedIn URL (without the 'https://' prefix)
     github_url : str
         Your GitHub URL (without the 'https://' prefix)
-        
     education_entries : List[Dict[str, str]]
         List of education entries, each containing:
             'institution': Institution name
@@ -535,19 +505,17 @@ def generate_resume_pdf(
             'date_range': Date range for the project (optional)
             'details': List of project details/achievements
             
-    languages : List[str]
-        List of programming languages
-    frameworks : List[str]
-        List of frameworks
-    developer_tools : List[str]
-        List of developer tools
-    libraries : List[str]
-        List of libraries
-        
+    skill_categories : List[Dict[str, Any]]
+        List of skill categories, each containing:
+            'category_name': Name of the skill category
+            'skills': List of skills in that category
+            
     output_filename : str, optional
         Name of the output PDF file. Defaults to "resume.pdf"
     output_dir : str, optional
         Directory to save the output PDF. Defaults to current directory.
+    website_url : str, optional
+        Your website/portfolio URL (without the 'https://' prefix)
         
     Returns:
     --------
@@ -558,6 +526,5 @@ def generate_resume_pdf(
     return generator.generate_resume(
         full_name, email, linkedin_url, github_url,
         education_entries, experience_entries, project_entries,
-        languages, frameworks, developer_tools, libraries,
-        output_filename, phone_number
+        skill_categories, output_filename, phone_number, website_url
     )
