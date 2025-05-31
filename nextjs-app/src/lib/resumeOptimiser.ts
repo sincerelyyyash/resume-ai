@@ -88,7 +88,7 @@ Please analyze and optimize the resume data following these guidelines:
 10. Make sure the content alignment percentages are out of 100% in the analysis section
 11. Do not ask to add GPA in the education section
 12. Make sure the project and experience entries are concise and to the point
-13. Each experience and project entry should have 2-3 bullet points
+13. Each experience and project entry should have exactly 3 bullet points, focusing on quantifiable achievements, technical impact, and business outcomes
 14. In Output arrange the experience and project entries in reverse chronological order(most recent first)
 15. Entry Management Rules:
     - If the total number of experience and project entries is 5 or less, keep ALL entries
