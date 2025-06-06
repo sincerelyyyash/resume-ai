@@ -97,6 +97,7 @@ Please analyze and optimize the resume data following these guidelines:
     - Never remove entries if the total is 5 or less
 16. For skills section, create up to 4 relevant categories based on the skills provided and job requirements. Group similar skills together under meaningful category names.
 17. If no skills are provided in the user data, analyze the job description and create appropriate skill categories with relevant skills.
+18. Format all dates consistently as "Month, Year" (e.g., "January, 2024") throughout the resume, including experience, projects, and education sections.
 
 CRITICAL INSTRUCTION: You must return ONLY a raw JSON object. Do not include any markdown formatting, code blocks, or additional text. The response must be a single JSON object that can be parsed directly.
 
