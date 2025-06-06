@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextArea } from "@/components/ui/text-area";
 import { Button } from "@/components/ui/button";
 import MotionDiv from "@/components/motion-div";
@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { optimizeResume } from '@/lib/resumeOptimiser';
 import { useRouter } from 'next/navigation';
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
-import { IconSquareRoundedX } from "@tabler/icons-react";
+import axios from 'axios';
 
 const loadingStates = [
   {
@@ -42,6 +42,64 @@ export default function JobDescriptionForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+
+
+    useEffect(() => {
+      const fetchProfileStatus = async () => {
+
+    try {
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+      const userId = sessionData?.user?.id;
+
+      if (!userId) {
+        toast({
+          title: "Session Error",
+          description: "Could not retrieve account details.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
+      console.log("Profile completion response:", profileResponse);
+      
+      if (!profileResponse?.success) {
+        toast({
+          title: "Profile Status Error",
+          description: "Could not check profile completion status.",
+          variant: "destructive",
+        });
+        
+        return;
+      }
+
+      const completionPercentage = profileResponse.data.completionPercentage || -1;
+      const hasMinimumRequiredFields = profileResponse.data.hasMinimumRequiredFields || false;
+      console.log("Completion percentage:", completionPercentage);
+      console.log("Has minimum required fields:", hasMinimumRequiredFields);
+
+      if (!hasMinimumRequiredFields) {
+        toast({
+          title: "Incomplete Profile",
+          description: "Please complete your basic profile information and add at least one skill to proceed.",
+        });
+        router.push("/user/profile");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Profile status check error:", err);
+      toast({
+        title: "Error",
+        description: "An error occurred while checking profile status.",
+        variant: "destructive",
+      });
+    } 
+  }
+  fetchProfileStatus();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,14 +203,6 @@ export default function JobDescriptionForm() {
 
       <MultiStepLoader loadingStates={loadingStates} loading={isLoading} duration={2000} />
 
-      {isLoading && (
-        <button
-          className="fixed top-4 right-4 text-black dark:text-white z-[120]"
-          onClick={() => setIsLoading(false)}
-        >
-          <IconSquareRoundedX className="h-10 w-10" />
-        </button>
-      )}
     </MotionDiv>
   );
 }
