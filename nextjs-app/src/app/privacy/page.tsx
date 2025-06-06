@@ -1,4 +1,3 @@
-
 import { Metadata } from "next";
 import MotionDiv from "@/components/motion-div";
 
@@ -25,7 +24,7 @@ const PrivacyPolicy = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Introduction</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Welcome to Resume AI ("we," "us," or "our"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, share, and protect your personal information when you use our website, resume-ai.in, and its related services (collectively, the "Service").
+              Welcome to Resume AI (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, share, and protect your personal information when you use our website, resume-ai.in, and its related services (collectively, the &quot;Service&quot;).
             </p>
             <p className="text-zinc-600 dark:text-zinc-400 mt-4">
               By using our Service, you agree to the collection and use of information in accordance with this policy.
@@ -138,7 +137,7 @@ const PrivacyPolicy = () => {
                 <strong>Deletion:</strong> You can delete your account and all associated resume data directly from your account settings. When you delete your account, your data is permanently removed from our production systems.
               </li>
               <li>
-                <strong>Object to Processing:</strong> You have the right to object to our processing of your personal data, such as for marketing purposes. You can opt-out of marketing communications by using the "unsubscribe" link in our emails.
+                <strong>Object to Processing:</strong> You have the right to object to our processing of your personal data, such as for marketing purposes. You can opt-out of marketing communications by using the &quot;unsubscribe&quot; link in our emails.
               </li>
               <li>
                 <strong>Cookies:</strong> You can manage your cookie preferences through your browser settings.
@@ -147,16 +146,16 @@ const PrivacyPolicy = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-200 mb-4">7. Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-200 mb-4">7. Children&apos;s Privacy</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Our Service is not intended for use by anyone under the age of 16 ("Children"). We do not knowingly collect personally identifiable information from children under 16. If you are a parent or guardian and you are aware that your Child has provided us with Personal Information, please contact us.
+              Our Service is not intended for use by anyone under the age of 16 (&quot;Children&quot;). We do not knowingly collect personally identifiable information from children under 16. If you are a parent or guardian and you are aware that your Child has provided us with Personal Information, please contact us.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-200 mb-4">8. Changes to This Privacy Policy</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Effective Date" at the top. We may also notify you via email or through a prominent notice on our Service.
+              We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Effective Date&quot; at the top. We may also notify you via email or through a prominent notice on our Service.
             </p>
           </section>
 

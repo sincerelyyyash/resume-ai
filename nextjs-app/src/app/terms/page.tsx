@@ -17,7 +17,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">1. Acceptance of Terms</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Welcome to Resume AI ("we," "us," or "our"). These Terms of Service ("Terms") govern your access to and use of our website, `resume-ai.in`, and all related tools, features, and services (collectively, the "Service").
+              Welcome to Resume AI (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). These Terms of Service (&quot;Terms&quot;) govern your access to and use of our website, `resume-ai.in`, and all related tools, features, and services (collectively, the &quot;Service&quot;).
             </p>
             <p className="text-zinc-600 dark:text-zinc-400 mt-4">
               By creating an account, accessing, or using our Service, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you may not access or use the Service.
@@ -53,7 +53,7 @@ export default function TermsPage() {
             <div className="space-y-4 text-zinc-600 dark:text-zinc-400">
               <div>
                 <h3 className="font-medium text-zinc-900 dark:text-zinc-100">Your Ownership:</h3>
-                <p>You retain full ownership of the personal and professional information you provide to the Service ("User Content"). You also retain full ownership and copyright of the final resume documents you create using the Service.</p>
+                <p>You retain full ownership of the personal and professional information you provide to the Service (&quot;User Content&quot;). You also retain full ownership and copyright of the final resume documents you create using the Service.</p>
               </div>
               <div>
                 <h3 className="font-medium text-zinc-900 dark:text-zinc-100">Our License to Your Content:</h3>
@@ -67,7 +67,7 @@ export default function TermsPage() {
             <div className="space-y-4 text-zinc-600 dark:text-zinc-400">
               <div>
                 <h3 className="font-medium text-zinc-900 dark:text-zinc-100">Paid Services:</h3>
-                <p>Certain features of the Service may be subject to payments now or in the future ("Paid Services").</p>
+                <p>Certain features of the Service may be subject to payments now or in the future (&quot;Paid Services&quot;).</p>
               </div>
               <div>
                 <h3 className="font-medium text-zinc-900 dark:text-zinc-100">Billing:</h3>
@@ -106,7 +106,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">8. Disclaimer of Warranties</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              The Service is provided on an "AS IS" and "AS AVAILABLE" basis. We expressly disclaim all warranties of any kind, whether express or implied, including, but not limited to, the implied warranties of merchantability, fitness for a particular purpose, and non-infringement. We make no warranty that the Service will meet your requirements, be uninterrupted, timely, secure, or error-free.
+              The Service is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis. We expressly disclaim all warranties of any kind, whether express or implied, including, but not limited to, the implied warranties of merchantability, fitness for a particular purpose, and non-infringement. We make no warranty that the Service will meet your requirements, be uninterrupted, timely, secure, or error-free.
             </p>
           </section>
 
@@ -123,7 +123,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">10. Indemnification</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              You agree to defend, indemnify, and hold harmless Resume AI and its licensee and licensors, and their employees, contractors, agents, officers, and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees), resulting from or arising out of your use and access of the Service, or a breach of these Terms.
+              You agree to defend, indemnify, and hold harmless Resume AI and its licensee and licensors, and their employees, contractors, agents, officers, and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney&apos;s fees), resulting from or arising out of your use and access of the Service, or a breach of these Terms.
             </p>
           </section>
 
@@ -137,7 +137,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">12. Changes to Terms</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our Service after any revisions become effective, you agree to be bound by the revised terms.
+              We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days&apos; notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our Service after any revisions become effective, you agree to be bound by the revised terms.
             </p>
           </section>
 

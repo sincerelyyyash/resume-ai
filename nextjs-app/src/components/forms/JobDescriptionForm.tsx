@@ -43,63 +43,60 @@ export default function JobDescriptionForm() {
   const { toast } = useToast();
   const router = useRouter();
 
+  useEffect(() => {
+    const fetchProfileStatus = async () => {
+      try {
+        const sessionRes = await fetch("/api/auth/session");
+        const sessionData = await sessionRes.json();
+        const userId = sessionData?.user?.id;
 
+        if (!userId) {
+          toast({
+            title: "Session Error",
+            description: "Could not retrieve account details.",
+            variant: "destructive",
+          });
+          return;
+        }
 
-    useEffect(() => {
-      const fetchProfileStatus = async () => {
-
-    try {
-      const sessionRes = await fetch("/api/auth/session");
-      const sessionData = await sessionRes.json();
-      const userId = sessionData?.user?.id;
-
-      if (!userId) {
-        toast({
-          title: "Session Error",
-          description: "Could not retrieve account details.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
-      console.log("Profile completion response:", profileResponse);
-      
-      if (!profileResponse?.success) {
-        toast({
-          title: "Profile Status Error",
-          description: "Could not check profile completion status.",
-          variant: "destructive",
-        });
+        const { data: profileResponse } = await axios.get("/api/user/profile-completion-status");
+        console.log("Profile completion response:", profileResponse);
         
-        return;
-      }
+        if (!profileResponse?.success) {
+          toast({
+            title: "Profile Status Error",
+            description: "Could not check profile completion status.",
+            variant: "destructive",
+          });
+          
+          return;
+        }
 
-      const completionPercentage = profileResponse.data.completionPercentage || -1;
-      const hasMinimumRequiredFields = profileResponse.data.hasMinimumRequiredFields || false;
-      console.log("Completion percentage:", completionPercentage);
-      console.log("Has minimum required fields:", hasMinimumRequiredFields);
+        const completionPercentage = profileResponse.data.completionPercentage || -1;
+        const hasMinimumRequiredFields = profileResponse.data.hasMinimumRequiredFields || false;
+        console.log("Completion percentage:", completionPercentage);
+        console.log("Has minimum required fields:", hasMinimumRequiredFields);
 
-      if (!hasMinimumRequiredFields) {
+        if (!hasMinimumRequiredFields) {
+          toast({
+            title: "Incomplete Profile",
+            description: "Please complete your basic profile information and add at least one skill to proceed.",
+          });
+          router.push("/user/profile");
+        } else {
+          router.push("/dashboard");
+        }
+      } catch (err) {
+        console.error("Profile status check error:", err);
         toast({
-          title: "Incomplete Profile",
-          description: "Please complete your basic profile information and add at least one skill to proceed.",
+          title: "Error",
+          description: "An error occurred while checking profile status.",
+          variant: "destructive",
         });
-        router.push("/user/profile");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      console.error("Profile status check error:", err);
-      toast({
-        title: "Error",
-        description: "An error occurred while checking profile status.",
-        variant: "destructive",
-      });
-    } 
-  }
-  fetchProfileStatus();
-  }, []);
+      } 
+    }
+    fetchProfileStatus();
+  }, [router, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
