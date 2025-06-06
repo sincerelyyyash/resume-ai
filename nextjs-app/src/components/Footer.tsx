@@ -5,18 +5,18 @@ import Link from 'next/link';
 import { Github, Linkedin, Twitter, Mail } from 'lucide-react';
 
 const footerLinks = {
-  product: [
-    { name: 'Features', href: '/#features' },
-    { name: 'How It Works', href: '/#how-it-works' },
-    { name: 'Pricing', href: '/#pricing' },
-    { name: 'Testimonials', href: '/#testimonials' },
-  ],
-  company: [
-    { name: 'About', href: '/#about' },
+  // product: [
+    // { name: 'Features', href: '/' },
+    // { name: 'How It Works', href: '/' },
+    // { name: 'Pricing', href: '/#pricing' },
+    // { name: 'Testimonials', href: '/' },
+  // ],
+  // company: [
+    // { name: 'About', href: '/#about' },
     // { name: 'Blog', href: '/#blog' },
     // { name: 'Careers', href: '/#careers' },
     // { name: 'Contact', href: '/#contact' },
-  ],
+  // ],
   legal: [
     { name: 'Privacy Policy', href: '/privacy' },
     { name: 'Terms of Service', href: '/terms' },
@@ -46,7 +46,7 @@ export const Footer = () => {
           </div> */}
 
           <div>
-            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Connect With Us</h3>
+            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Connect With Me</h3>
             <div className="grid grid-cols-2 gap-4">
               {footerLinks.social.map((link) => {
                 const Icon = link.icon;
@@ -69,7 +69,7 @@ export const Footer = () => {
 
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
+          {/* <div>
             <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-3">Product</h3>
             <ul className="space-y-2">
               {footerLinks.product.map((link) => (
@@ -85,7 +85,7 @@ export const Footer = () => {
             </ul>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-3">Company</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
@@ -99,7 +99,7 @@ export const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
 
           <div>
             <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-3">Legal</h3>
