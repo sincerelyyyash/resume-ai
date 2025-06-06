@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { useAuth } from '@/lib/auth';
-// import { useRouter } from 'next/navigation';
 import JobDescriptionDialog from './JobDescriptionDialog';
 
 interface JobDescription {
@@ -23,8 +22,43 @@ interface SavedJobDescriptionsProps {
   showAll?: boolean;
 }
 
-export default function SavedJobDescriptions({ showAll = false }: SavedJobDescriptionsProps) {
-  // const router = useRouter();
+const JobDescriptionCardSkeleton = () => (
+  <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 animate-pulse">
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4">
+        <div className="h-6 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="h-8 w-8 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+      </div>
+      <div className="space-y-2 mb-4">
+        <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="h-4 w-5/6 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+      </div>
+      <div className="mt-auto space-y-3">
+        <div className="h-10 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="h-4 w-1/3 bg-zinc-200 dark:bg-zinc-800 rounded self-end" />
+      </div>
+    </div>
+  </div>
+);
+
+const SavedJobDescriptionsSkeleton = () => (
+  <div className="py-8">
+    <div className="flex items-center justify-between mb-6 animate-pulse">
+      <div className="h-8 w-64 bg-zinc-200 dark:bg-zinc-800 rounded" />
+      <div className="h-10 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <JobDescriptionCardSkeleton key={i} />
+      ))}
+    </div>
+  </div>
+);
+
+export default function SavedJobDescriptions({
+  showAll = false,
+}: SavedJobDescriptionsProps) {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,21 +67,25 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
 
   useEffect(() => {
     const fetchJobDescriptions = async () => {
-      if (!isAuthenticated || !user?.id) return;
-  
-      setIsLoading(true); 
-  
+      if (!isAuthenticated || !user?.id) {
+        setIsLoading(false); // Ensure loading is false if not authenticated
+        return;
+      }
+
+      setIsLoading(true);
+
       try {
         const response = await axios.get("/api/user/get-user");
         const userData = response.data?.data || {};
         // Sort job descriptions by createdAt in descending order (newest first)
-        const sortedDescriptions = (userData.jobDescriptions || []).sort((a: JobDescription, b: JobDescription) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        const sortedDescriptions = (userData.jobDescriptions || []).sort(
+          (a: JobDescription, b: JobDescription) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
         setJobDescriptions(sortedDescriptions);
       } catch (error: unknown) {
         console.error("Error fetching job descriptions:", error);
-  
+
         toast({
           title: "Error",
           description:
@@ -55,10 +93,10 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
           variant: "destructive",
         });
       } finally {
-        setIsLoading(false); 
+        setIsLoading(false);
       }
     };
-  
+
     fetchJobDescriptions();
   }, [isAuthenticated, user?.id, toast]);
 
@@ -78,17 +116,9 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
     setSelectedJob(job);
   };
 
-  if (authLoading) {
-    return (
-      <div className="py-8">
-        <h2 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
-          My Saved Job Descriptions
-        </h2>
-        <div className="text-center py-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
-          <div className="h-6 w-48 animate-pulse bg-zinc-200 dark:bg-zinc-800 rounded mx-auto" />
-        </div>
-      </div>
-    );
+  // Combine authLoading and local isLoading for the skeleton display
+  if (authLoading || isLoading) {
+    return <SavedJobDescriptionsSkeleton />;
   }
 
   if (!isAuthenticated) {
@@ -98,25 +128,8 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
           Login to view your saved job descriptions
         </h2>
         <Link href="/signin">
-          <Button>
-            Sign In
-          </Button>
+          <Button>Sign In</Button>
         </Link>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="py-8">
-        <h2 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
-          My Saved Job Descriptions
-        </h2>
-        <div className="text-center py-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
-          <p className="text-lg text-neutral-600 dark:text-neutral-400">
-            Loading your job descriptions...
-          </p>
-        </div>
       </div>
     );
   }
@@ -132,14 +145,17 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
             You have no job descriptions saved yet.
           </p>
           <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-2">
-            Start by entering a job description above to generate your optimized resume.
+            Start by entering a job description above to generate your optimized
+            resume.
           </p>
         </div>
       </div>
     );
   }
 
-  const displayedJobs = showAll ? jobDescriptions : jobDescriptions.slice(0, 6);
+  const displayedJobs = showAll
+    ? jobDescriptions
+    : jobDescriptions.slice(0, 6);
   const hasMoreJobs = !showAll && jobDescriptions.length > 6;
 
   return (
@@ -217,4 +233,4 @@ export default function SavedJobDescriptions({ showAll = false }: SavedJobDescri
       />
     </div>
   );
-} 
+}

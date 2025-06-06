@@ -67,6 +67,88 @@ interface UserData {
   }[];
 }
 
+const ProfileHeaderSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-6 border rounded-lg">
+      <div className="h-24 w-24 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+      <div className="flex-1 space-y-3">
+        <div className="h-8 w-64 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="h-4 w-48 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="h-4 w-80 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        <div className="flex gap-4 mt-4">
+          <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        </div>
+      </div>
+      <div className="h-10 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
+    </div>
+  </div>
+);
+
+const SectionSkeleton = ({ title }: { title: string }) => (
+  <div className="animate-pulse space-y-4">
+    <div className="flex items-center justify-between">
+      <h2 className="text-2xl font-bold">{title}</h2>
+      <div className="h-10 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
+    </div>
+    <div className="grid gap-4">
+      {[...Array(2)].map((_, i) => (
+        <div
+          key={i}
+          className="p-4 border rounded-lg space-y-3 bg-zinc-50 dark:bg-zinc-900"
+        >
+          <div className="flex justify-between items-start">
+            <div className="space-y-2 flex-1">
+              <div className="h-6 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded" />
+              <div className="h-4 w-1/2 bg-zinc-200 dark:bg-zinc-800 rounded" />
+            </div>
+            <div className="h-8 w-16 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+            <div className="h-4 w-5/6 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const SkillsSkeleton = () => (
+  <div className="animate-pulse space-y-4">
+    <div className="flex items-center justify-between">
+      <h2 className="text-2xl font-bold">Skills</h2>
+      <div className="h-10 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="p-4 border rounded-lg space-y-3 bg-zinc-50 dark:bg-zinc-900"
+        >
+          <div className="flex justify-between items-center">
+            <div className="h-5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
+            <div className="h-4 w-16 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          </div>
+          <div className="h-2 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+          <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const ProfileSkeleton = () => (
+  <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl w-full">
+    <ProfileHeaderSkeleton />
+    <SectionSkeleton title="Projects" />
+    <SectionSkeleton title="Experience" />
+    <SectionSkeleton title="Education" />
+    <SkillsSkeleton />
+  </div>
+);
+
 export default function Profile() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -78,10 +160,10 @@ export default function Profile() {
       setIsLoading(false);
       return;
     }
-  
+
     try {
       const res = await axios.get("/api/user/get-user");
-  
+
       if (res.data?.success && res.data.data) {
         setUserData(res.data.data);
       } else {
@@ -102,27 +184,13 @@ export default function Profile() {
       setIsLoading(false);
     }
   }, [isAuthenticated, user?.id, toast]);
-  
+
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
 
   if (authLoading || isLoading) {
-    return (
-      <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl">
-        <div className="animate-pulse space-y-4">
-          <div className="h-32 w-32 rounded-full bg-zinc-200 dark:bg-zinc-800" />
-          <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-800 rounded" />
-          <div className="h-4 w-64 bg-zinc-200 dark:bg-zinc-800 rounded" />
-        </div>
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="animate-pulse space-y-4">
-            <div className="h-8 w-32 bg-zinc-200 dark:bg-zinc-800 rounded" />
-            <div className="h-24 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
-          </div>
-        ))}
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (!isAuthenticated) {
@@ -141,10 +209,7 @@ export default function Profile() {
   return (
     <div className="flex flex-col mt-10 space-y-10 pb-20 max-w-6xl">
       {userData && (
-        <UserProfileHeader
-          userData={userData}
-          onSave={fetchUserData}
-        />
+        <UserProfileHeader userData={userData} onSave={fetchUserData} />
       )}
 
       <ProjectSection
@@ -189,4 +254,3 @@ export default function Profile() {
     </div>
   );
 }
-

@@ -1,7 +1,14 @@
+import { Metadata } from "next";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Testimonials } from "@/components/landing/Testimonials";
+
+export const metadata: Metadata = {
+  title: 'Resume AI - AI-Powered Resume Builder',
+  description: 'Create professional resumes with AI assistance. Get personalized suggestions and optimize your resume for better job opportunities.',
+  keywords: 'resume builder, AI resume, professional resume, job application, career tools',
+};
 
 export default function Home() {
   return (

@@ -174,6 +174,26 @@ export function SignInForm() {
         >
           <FaGithub size={20} /> Sign in with GitHub
         </Button>
+        <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+          By signing in, you agree to our{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            Privacy Policy
+          </a>{" "}
+          and{" "}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            Terms of Service
+          </a>
+        </p>
       </div>
 
       {/* <div className="flex justify-center mt-4">
