@@ -162,9 +162,14 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 className={`px-4 py-1 text-sm font-medium rounded-full transition shadow hover:opacity-90 flex items-center gap-2 ${
                   formData.linkedin 
                     ? "bg-black text-white dark:bg-white dark:text-black" 
-                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-pointer"
                 }`}
-                onClick={(e) => !formData.linkedin && e.preventDefault()}
+                onClick={(e) => {
+                  if (!formData.linkedin) {
+                    e.preventDefault();
+                    setIsEditing(true);
+                  }
+                }}
               >
                 <Linkedin className="h-6 w-6" />
                 {!formData.linkedin && <span className="text-xs">Add LinkedIn</span>}
@@ -176,9 +181,14 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 className={`px-4 py-1 text-sm font-medium rounded-full transition shadow hover:opacity-90 flex items-center gap-2 ${
                   formData.github 
                     ? "bg-black text-white dark:bg-white dark:text-black" 
-                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-pointer"
                 }`}
-                onClick={(e) => !formData.github && e.preventDefault()}
+                onClick={(e) => {
+                  if (!formData.github) {
+                    e.preventDefault();
+                    setIsEditing(true);
+                  }
+                }}
               >
                 <Github className="h-6 w-6" />
                 {!formData.github && <span className="text-xs">Add GitHub</span>}
@@ -190,9 +200,14 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 className={`px-4 py-1 text-sm font-medium rounded-full transition shadow hover:opacity-90 flex items-center gap-2 ${
                   formData.portfolio 
                     ? "bg-black text-white dark:bg-white dark:text-black" 
-                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-pointer"
                 }`}
-                onClick={(e) => !formData.portfolio && e.preventDefault()}
+                onClick={(e) => {
+                  if (!formData.portfolio) {
+                    e.preventDefault();
+                    setIsEditing(true);
+                  }
+                }}
               >
                 <Globe className="h-6 w-6" />
                 {!formData.portfolio && <span className="text-xs">Add Portfolio</span>}
