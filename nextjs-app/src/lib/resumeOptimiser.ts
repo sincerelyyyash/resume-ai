@@ -7,7 +7,7 @@ import { LLMChain } from 'langchain/chains';
 const apiKey = process.env.GOOGLE_API_KEY;
 
 const llm = new ChatGoogleGenerativeAI({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.0-flash",
   temperature: 0.7,
   maxOutputTokens: 2048,
   apiKey: apiKey,
