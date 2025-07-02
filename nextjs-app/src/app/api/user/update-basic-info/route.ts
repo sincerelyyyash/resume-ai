@@ -6,6 +6,9 @@ import { ZodError } from "zod";
 import { basicInfoSchema } from "@/types/basicInfo.schema";
 
 export async function POST(req: Request) {
+  const startTime = Date.now();
+  let userId: string | undefined;
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -20,6 +23,7 @@ export async function POST(req: Request) {
       );
     }
 
+    userId = session.user.id;
     const body = await req.json();
 
     try {
@@ -48,15 +52,31 @@ export async function POST(req: Request) {
       );
     }
 
+    // Optimize data transformation
+    const updateData: {
+      name?: string;
+      bio?: string | null;
+      portfolio?: string | null;
+      linkedin?: string | null;
+      github?: string | null;
+    } = {};
+
+    if (body.name !== undefined) updateData.name = body.name?.trim() || "";
+    if (body.bio !== undefined) updateData.bio = body.bio?.trim() || null;
+    if (body.portfolio !== undefined) updateData.portfolio = body.portfolio?.trim() || null;
+    if (body.linkedin !== undefined) updateData.linkedin = body.linkedin?.trim() || null;
+    if (body.github !== undefined) updateData.github = body.github?.trim() || null;
+
     const user = await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        name: body.name,
-        bio: body.bio,
-        portfolio: body.portfolio,
-        linkedin: body.linkedin,
-        github: body.github,
-      },
+      where: { id: userId },
+      data: updateData,
+    });
+
+    const processingTime = Date.now() - startTime;
+    console.log(`Basic info updated successfully for user ${userId}:`, {
+      processingTime: `${processingTime}ms`,
+      timestamp: new Date().toISOString(),
+      fieldsUpdated: Object.keys(updateData)
     });
 
     return NextResponse.json(
@@ -74,7 +94,17 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating basic info:", error);
+    const processingTime = Date.now() - startTime;
+    console.error(`Failed to update basic info for user ${userId || 'unknown'}:`, {
+      error: error instanceof Error ? {
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      } : String(error),
+      processingTime: `${processingTime}ms`,
+      timestamp: new Date().toISOString(),
+      userId: userId || 'unknown'
+    });
+
     return NextResponse.json(
       {
         success: false,

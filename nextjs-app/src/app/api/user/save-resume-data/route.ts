@@ -6,6 +6,64 @@ import { apiSecurity } from "@/middleware/api-security";
 import { prisma } from "@/lib/prisma";
 import { ZodError } from "zod";
 
+// Types for database operations
+type TransformedUserData = {
+  name?: string;
+  bio?: string;
+  portfolio?: string;
+  linkedin?: string;
+  github?: string;
+};
+
+type TransformedProjectData = {
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate: Date | null;
+  url: string | null;
+  technologies: string[];
+  userId: string;
+};
+
+type TransformedExperienceData = {
+  title: string;
+  company: string;
+  description: string;
+  startDate: Date;
+  endDate: Date | null;
+  current: boolean;
+  location: string | null;
+  userId: string;
+};
+
+type TransformedEducationData = {
+  institution: string;
+  degree: string;
+  field: string;
+  startDate: Date;
+  endDate: Date | null;
+  current: boolean;
+  userId: string;
+};
+
+type TransformedSkillData = {
+  name: string;
+  category: string;
+  level: "Beginner" | "Intermediate" | "Expert";
+  yearsOfExperience: number;
+  userId: string;
+};
+
+type TransformedCertificationData = {
+  title: string;
+  issuer: string;
+  description: string | null;
+  issueDate: Date;
+  expiryDate: Date | null;
+  credentialUrl: string | null;
+  userId: string;
+};
+
 type SanitizedUserData = {
   name?: string;
   bio?: string;
@@ -303,7 +361,7 @@ export async function POST(req: NextRequest) {
       }, { status: 404 });
     }
 
-    // Process data in a single transaction for data consistency
+    // Process data in optimized transaction with extended timeout
     const result = await prisma.$transaction(async (tx) => {
       const counters = {
         userUpdates: 0,
@@ -314,7 +372,17 @@ export async function POST(req: NextRequest) {
         certifications: 0
       };
 
-      // Update user basic info if provided
+      // Prepare all data transformations before database operations
+      const transformedData = {
+        user: null as TransformedUserData | null,
+        projects: [] as TransformedProjectData[],
+        experiences: [] as TransformedExperienceData[],
+        education: [] as TransformedEducationData[],
+        skills: [] as TransformedSkillData[],
+        certifications: [] as TransformedCertificationData[]
+      };
+
+      // Transform user data
       if (body.user && Object.keys(body.user).length > 0) {
         const updateData: {
           name?: string;
@@ -324,33 +392,20 @@ export async function POST(req: NextRequest) {
           github?: string;
         } = {};
 
-         if (body.user.name?.trim()) updateData.name = body.user.name.trim();
-          if (body.user.bio !== undefined) updateData.bio = body.user.bio?.trim() || "";
-          if (body.user.portfolio !== undefined) updateData.portfolio = body.user.portfolio?.trim() || "";
-          if (body.user.linkedin !== undefined) updateData.linkedin = body.user.linkedin?.trim() || "";
-          if (body.user.github !== undefined) updateData.github = body.user.github?.trim() || "";
+        if (body.user.name?.trim()) updateData.name = body.user.name.trim();
+        if (body.user.bio !== undefined) updateData.bio = body.user.bio?.trim() || "";
+        if (body.user.portfolio !== undefined) updateData.portfolio = body.user.portfolio?.trim() || "";
+        if (body.user.linkedin !== undefined) updateData.linkedin = body.user.linkedin?.trim() || "";
+        if (body.user.github !== undefined) updateData.github = body.user.github?.trim() || "";
 
         if (Object.keys(updateData).length > 0) {
-          await tx.user.update({
-            where: { id: userId },
-            data: updateData,
-          });
-          counters.userUpdates = 1;
+          transformedData.user = updateData;
         }
       }
 
-      // Clear existing data to replace with new parsed data
-      await Promise.all([
-        tx.project.deleteMany({ where: { userId } }),
-        tx.experience.deleteMany({ where: { userId } }),
-        tx.education.deleteMany({ where: { userId } }),
-        tx.skill.deleteMany({ where: { userId } }),
-        tx.certification.deleteMany({ where: { userId } })
-      ]);
-
-      // Create projects
+      // Transform projects data
       if (body.projects && Array.isArray(body.projects) && body.projects.length > 0) {
-        const projectsData = body.projects.map((project: ResumeData['projects'][0]) => ({
+        transformedData.projects = body.projects.map((project: ResumeData['projects'][0]) => ({
           title: project.title.trim(),
           description: project.description.trim(),
           startDate: new Date(project.startDate),
@@ -359,17 +414,11 @@ export async function POST(req: NextRequest) {
           technologies: project.technologies || [],
           userId: userId!,
         }));
-
-        await tx.project.createMany({
-          data: projectsData,
-          skipDuplicates: false,
-        });
-        counters.projects = projectsData.length;
       }
 
-      // Create experiences
+      // Transform experiences data
       if (body.experiences && Array.isArray(body.experiences) && body.experiences.length > 0) {
-        const experiencesData = body.experiences.map((experience: ResumeData['experiences'][0]) => ({
+        transformedData.experiences = body.experiences.map((experience: ResumeData['experiences'][0]) => ({
           title: experience.title.trim(),
           company: experience.company.trim(),
           description: experience.description.trim(),
@@ -379,19 +428,13 @@ export async function POST(req: NextRequest) {
           location: experience.location?.trim() || null,
           userId: userId!,
         }));
-
-        await tx.experience.createMany({
-          data: experiencesData,
-          skipDuplicates: false,
-        });
-        counters.experiences = experiencesData.length;
       }
 
-      // Create education
+      // Transform education data
       if (body.education && Array.isArray(body.education) && body.education.length > 0) {
         console.log('Creating education entries:', body.education);
         
-        const educationData = body.education.map((education: ResumeData['education'][0]) => ({
+        transformedData.education = body.education.map((education: ResumeData['education'][0]) => ({
           institution: education.institution.trim(),
           degree: education.degree.trim(),
           field: education.field.trim(),
@@ -401,42 +444,23 @@ export async function POST(req: NextRequest) {
           userId: userId!,
         }));
 
-        console.log('Education data prepared for database:', educationData);
-
-        await tx.education.createMany({
-          data: educationData,
-          skipDuplicates: false,
-        });
-        counters.education = educationData.length;
-        console.log(`Successfully created ${educationData.length} education entries`);
-      } else {
-        console.log('No education data to create:', {
-          hasEducation: !!body.education,
-          isArray: Array.isArray(body.education),
-          length: body.education?.length || 0
-        });
+        console.log('Education data prepared for database:', transformedData.education);
       }
 
-      // Create skills (already categorized by AI)
+      // Transform skills data
       if (body.skills && Array.isArray(body.skills) && body.skills.length > 0) {
-        const skillsData = body.skills.map((skill: ResumeData['skills'][0]) => ({
+        transformedData.skills = body.skills.map((skill: ResumeData['skills'][0]) => ({
           name: skill.name.trim(),
           category: skill.category.trim(),
           level: skill.level || "Intermediate",
           yearsOfExperience: skill.yearsOfExperience || 0,
           userId: userId!,
         }));
-
-        await tx.skill.createMany({
-          data: skillsData,
-          skipDuplicates: false,
-        });
-        counters.skills = skillsData.length;
       }
 
-      // Create certifications
+      // Transform certifications data
       if (body.certifications && Array.isArray(body.certifications) && body.certifications.length > 0) {
-        const certificationsData = body.certifications.map((certification: ResumeData['certifications'][0]) => ({
+        transformedData.certifications = body.certifications.map((certification: ResumeData['certifications'][0]) => ({
           title: certification.title.trim(),
           issuer: certification.issuer.trim(),
           description: certification.description?.trim() || null,
@@ -445,15 +469,90 @@ export async function POST(req: NextRequest) {
           credentialUrl: certification.credentialUrl?.trim() || null,
           userId: userId!,
         }));
-
-        await tx.certification.createMany({
-          data: certificationsData,
-          skipDuplicates: false,
-        });
-        counters.certifications = certificationsData.length;
       }
 
+      // Execute database operations in optimized batches
+      const operations = [];
+
+      // Update user if needed
+      if (transformedData.user) {
+        operations.push(
+          tx.user.update({
+            where: { id: userId },
+            data: transformedData.user,
+          }).then(() => { counters.userUpdates = 1; })
+        );
+      }
+
+      // Clear existing data in parallel
+      operations.push(
+        tx.project.deleteMany({ where: { userId } }),
+        tx.experience.deleteMany({ where: { userId } }),
+        tx.education.deleteMany({ where: { userId } }),
+        tx.skill.deleteMany({ where: { userId } }),
+        tx.certification.deleteMany({ where: { userId } })
+      );
+
+      // Wait for user update and deletions to complete
+      await Promise.all(operations);
+
+      // Create new data in parallel batches
+      const createOperations = [];
+
+      if (transformedData.projects.length > 0) {
+        createOperations.push(
+          tx.project.createMany({
+            data: transformedData.projects,
+            skipDuplicates: false,
+          }).then(() => { counters.projects = transformedData.projects.length; })
+        );
+      }
+
+      if (transformedData.experiences.length > 0) {
+        createOperations.push(
+          tx.experience.createMany({
+            data: transformedData.experiences,
+            skipDuplicates: false,
+          }).then(() => { counters.experiences = transformedData.experiences.length; })
+        );
+      }
+
+      if (transformedData.education.length > 0) {
+        createOperations.push(
+          tx.education.createMany({
+            data: transformedData.education,
+            skipDuplicates: false,
+          }).then(() => { 
+            counters.education = transformedData.education.length;
+            console.log(`Successfully created ${transformedData.education.length} education entries`);
+          })
+        );
+      }
+
+      if (transformedData.skills.length > 0) {
+        createOperations.push(
+          tx.skill.createMany({
+            data: transformedData.skills,
+            skipDuplicates: false,
+          }).then(() => { counters.skills = transformedData.skills.length; })
+        );
+      }
+
+      if (transformedData.certifications.length > 0) {
+        createOperations.push(
+          tx.certification.createMany({
+            data: transformedData.certifications,
+            skipDuplicates: false,
+          }).then(() => { counters.certifications = transformedData.certifications.length; })
+        );
+      }
+
+      // Execute all create operations in parallel
+      await Promise.all(createOperations);
+
       return counters;
+    }, {
+      timeout: 20000, // 20 seconds timeout for this specific transaction
     });
 
     // Log successful operation

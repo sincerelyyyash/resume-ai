@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MotionDiv } from "../landing/MotionDiv";
-import { Linkedin, Github, Globe, Edit2, Save, X, Upload } from "lucide-react";
+import { Linkedin, Github, Globe, Edit2, Save, X, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ResumeUpload from "./ResumeUpload";
 import axios from "axios";
@@ -33,6 +33,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   const [formData, setFormData] = useState<UserData>(userData);
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -40,7 +41,11 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   };
 
   const handleSave = async () => {
+    if (isSaving) return; // Prevent multiple simultaneous saves
+
     try {
+      setIsSaving(true);
+      
       await axios.post("/api/user/update-basic-info", {
         name: formData.name,
         bio: formData.bio,
@@ -49,6 +54,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
         portfolio: formData.portfolio,
       });
 
+      // Only call onSave if the API call was successful
       await onSave();
       setIsEditing(false);
       toast({
@@ -59,15 +65,28 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
       console.error('Save error:', error);
       toast({
         title: "Error",
-        description: "Failed to update profile.",
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
+    if (isSaving) return; // Prevent cancel during save
     setFormData(userData);
     setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    if (isSaving) return; // Prevent edit during save
+    setIsEditing(true);
+  };
+
+  const handleUploadClick = () => {
+    if (isSaving) return; // Prevent upload during save
+    setShowUploadModal(true);
   };
 
   return (
@@ -79,12 +98,21 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             <>
               <Button
                 onClick={handleSave}
+                disabled={isSaving}
                 className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg"
               >
-                <Save className="h-5 w-5" />
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <Save className="h-5 w-5" />
+                )}
               </Button>
               <Button
                 onClick={handleCancel}
+                disabled={isSaving}
                 variant="outline"
                 className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-4 py-2 rounded-lg"
               >
@@ -94,7 +122,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           ) : (
             <>
               <Button
-                onClick={() => setShowUploadModal(true)}
+                onClick={handleUploadClick}
+                disabled={isSaving}
                 variant="outline"
                 className="border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors duration-200 px-3 py-2 rounded-lg flex items-center gap-2"
               >
@@ -102,7 +131,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 <span className="text-sm">Upload Resume</span>
               </Button>
               <Button
-                onClick={() => setIsEditing(true)}
+                onClick={handleEdit}
+                disabled={isSaving}
                 className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 px-4 py-2 rounded-lg"
               >
                 <Edit2 className="h-5 w-5" />
@@ -117,7 +147,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="text-3xl font-bold text-gray-900 dark:text-neutral-100 bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white"
+              disabled={isSaving}
+              className="text-3xl font-bold text-gray-900 dark:text-neutral-100 bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white disabled:opacity-50"
             />
           ) : (
             <h1 className="text-3xl font-bold text-gray-900 dark:text-neutral-100">
@@ -130,8 +161,9 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
               name="bio"
               value={formData.bio || ""}
               onChange={handleChange}
+              disabled={isSaving}
               placeholder="Add a bio"
-              className="w-full mt-4 text-lg text-neutral-600 dark:text-neutral-300 italic bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white min-h-[24px]"
+              className="w-full mt-4 text-lg text-neutral-600 dark:text-neutral-300 italic bg-transparent border-b border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white min-h-[24px] disabled:opacity-50"
             />
           ) : (
             <p className="text-lg text-neutral-600 dark:text-neutral-300 italic mt-1">
@@ -148,22 +180,25 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                   name="linkedin"
                   value={formData.linkedin || ""}
                   onChange={handleChange}
+                  disabled={isSaving}
                   placeholder="LinkedIn URL"
-                  className="px-4 py-1 text-sm font-medium rounded-full bg-transparent border border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white"
+                  className="px-4 py-1 text-sm font-medium rounded-full bg-transparent border border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white disabled:opacity-50"
                 />
                 <input
                   name="github"
                   value={formData.github || ""}
                   onChange={handleChange}
+                  disabled={isSaving}
                   placeholder="GitHub URL"
-                  className="px-4 py-1 text-sm font-medium rounded-full bg-transparent border border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white"
+                  className="px-4 py-1 text-sm font-medium rounded-full bg-transparent border border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white disabled:opacity-50"
                 />
                 <input
                   name="portfolio"
                   value={formData.portfolio || ""}
                   onChange={handleChange}
+                  disabled={isSaving}
                   placeholder="Portfolio URL"
-                  className="px-4 py-1 text-sm font-medium rounded-full bg-transparent border border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white"
+                  className="px-4 py-1 text-sm font-medium rounded-full bg-transparent border border-gray-300 dark:border-zinc-700 focus:outline-none focus:border-black dark:focus:border-white disabled:opacity-50"
                 />
               </>
             ) : (
@@ -178,7 +213,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                       : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-pointer"
                   }`}
                   onClick={(e) => {
-                    if (!formData.linkedin) {
+                    if (!formData.linkedin && !isSaving) {
                       e.preventDefault();
                       setIsEditing(true);
                     }
@@ -197,7 +232,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                       : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-pointer"
                   }`}
                   onClick={(e) => {
-                    if (!formData.github) {
+                    if (!formData.github && !isSaving) {
                       e.preventDefault();
                       setIsEditing(true);
                     }
@@ -216,7 +251,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                       : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 cursor-pointer"
                   }`}
                   onClick={(e) => {
-                    if (!formData.portfolio) {
+                    if (!formData.portfolio && !isSaving) {
                       e.preventDefault();
                       setIsEditing(true);
                     }

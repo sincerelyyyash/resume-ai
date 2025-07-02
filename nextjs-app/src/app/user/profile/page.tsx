@@ -153,15 +153,17 @@ export default function Profile() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
 
   const fetchUserData = useCallback(async () => {
-    if (!isAuthenticated || !user?.id) {
-      setIsLoading(false);
+    if (!isAuthenticated || !user?.id || isFetching) {
+      if (!isFetching) setIsLoading(false);
       return;
     }
 
     try {
+      setIsFetching(true);
       const res = await axios.get("/api/user/get-user");
 
       if (res.data?.success && res.data.data) {
@@ -182,8 +184,9 @@ export default function Profile() {
       console.error("Failed to fetch user data:", err);
     } finally {
       setIsLoading(false);
+      setIsFetching(false);
     }
-  }, [isAuthenticated, user?.id, toast]);
+  }, [isAuthenticated, user?.id, toast, isFetching]);
 
   useEffect(() => {
     fetchUserData();
