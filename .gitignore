@@ -45,3 +45,4 @@ __pycache__/
 .next/
 node_modules
 generated_pdfs/
+venv/
