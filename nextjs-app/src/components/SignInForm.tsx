@@ -174,6 +174,12 @@ export function SignInForm() {
         >
           <FaGithub size={20} /> Sign in with GitHub
         </Button>
+        {/* <Button
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 font-medium flex items-center justify-center gap-2"
+          onClick={() => signIn("linkedin", { callbackUrl: "/" })}
+        >
+          <FaLinkedin size={20} /> Sign in with LinkedIn
+        </Button> */}
         <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
           By signing in, you agree to our{" "}
           <a
