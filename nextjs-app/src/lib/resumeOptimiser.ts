@@ -183,101 +183,56 @@ export const optimizeResume = async (jobDescription: string, userData: string): 
       userData,
     });
 
-    // More robust JSON cleaning and parsing
-    let cleanedResponse = response.text;
-    
-    // Remove markdown code blocks if present
-    cleanedResponse = cleanedResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-    
-    // Find the first complete JSON object
-    const firstBraceIndex = cleanedResponse.indexOf('{');
-    const lastBraceIndex = cleanedResponse.lastIndexOf('}');
-    
-    if (firstBraceIndex === -1 || lastBraceIndex === -1 || firstBraceIndex >= lastBraceIndex) {
-      throw new Error('No valid JSON object found in response');
-    }
-    
-    // Extract the JSON portion
-    cleanedResponse = cleanedResponse.substring(firstBraceIndex, lastBraceIndex + 1);
-    
-    // Additional cleaning for common issues
-    cleanedResponse = cleanedResponse
-      .replace(/,\s*}/g, '}')  // Remove trailing commas before closing braces
-      .replace(/,\s*]/g, ']')  // Remove trailing commas before closing brackets
+    // Step 1: Clean the response
+    const cleanedResponse = response.text
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .replace(/^[^{]*/, '')
+      .replace(/[^}\]]*$/, '') // Remove after last } or ]
       .trim();
 
-    // Validate that we have a complete JSON structure
-    let braceCount = 0;
-    let inString = false;
-    let escapeNext = false;
-    
-    for (let i = 0; i < cleanedResponse.length; i++) {
-      const char = cleanedResponse[i];
-      
-      if (escapeNext) {
-        escapeNext = false;
-        continue;
-      }
-      
-      if (char === '\\') {
-        escapeNext = true;
-        continue;
-      }
-      
-      if (char === '"' && !escapeNext) {
-        inString = !inString;
-        continue;
-      }
-      
-      if (!inString) {
-        if (char === '{') {
-          braceCount++;
-        } else if (char === '}') {
-          braceCount--;
-          // If we've closed all braces, we have a complete object
-          if (braceCount === 0) {
-            cleanedResponse = cleanedResponse.substring(0, i + 1);
-            break;
-          }
-        }
-      }
-    }
-
-    // Parse the response
-    let optimizedResume: OptimizedResume;
+    // Step 2: Try to parse as JSON
     try {
-      optimizedResume = JSON.parse(cleanedResponse);
-    } catch (parseError) {
-      console.error('JSON parsing failed. Response length:', cleanedResponse.length);
-      console.error('First 500 chars:', cleanedResponse.substring(0, 500));
-      console.error('Last 500 chars:', cleanedResponse.substring(Math.max(0, cleanedResponse.length - 500)));
-      throw new Error(`JSON parsing failed: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+      return JSON.parse(cleanedResponse);
+    } catch {
+      // Step 3: Truncate at last valid closing brace/bracket
+      const lastCurly = cleanedResponse.lastIndexOf('}');
+      const lastSquare = cleanedResponse.lastIndexOf(']');
+      const lastValid = Math.max(lastCurly, lastSquare);
+      if (lastValid > 0) {
+        let truncated = cleanedResponse.substring(0, lastValid + 1);
+        // Step 3b: Try to close open structures
+        const openCurly = (truncated.match(/{/g) || []).length;
+        let closeCurly = (truncated.match(/}/g) || []).length;
+        const openSquare = (truncated.match(/\[/g) || []).length;
+        let closeSquare = (truncated.match(/\]/g) || []).length;
+        while (openCurly > closeCurly) {
+          truncated += '}';
+          closeCurly++;
+        }
+        while (openSquare > closeSquare) {
+          truncated += ']';
+          closeSquare++;
+        }
+        try {
+          return JSON.parse(truncated);
+        } catch {
+          // Step 4: Log and show user-friendly error
+          console.error('JSON parsing failed after repair. Response length:', cleanedResponse.length);
+          console.error('First 500 chars:', cleanedResponse.substring(0, 500));
+          console.error('Last 500 chars:', cleanedResponse.substring(Math.max(0, cleanedResponse.length - 500)));
+          throw new Error('Resume optimization failed: AI response was incomplete or malformed. Please try again.');
+        }
+      } else {
+        // Step 4: Log and show user-friendly error
+        console.error('JSON parsing failed. Response length:', cleanedResponse.length);
+        console.error('First 500 chars:', cleanedResponse.substring(0, 500));
+        console.error('Last 500 chars:', cleanedResponse.substring(Math.max(0, cleanedResponse.length - 500)));
+        throw new Error('Resume optimization failed: AI response was incomplete or malformed. Please try again.');
+      }
     }
-
-    // Validate required structure
-    if (!optimizedResume.optimized_resume || !optimizedResume.analysis) {
-      throw new Error('Invalid response structure: missing required fields');
-    }
-
-    // Ensure skill_categories is always an array
-    if (!optimizedResume.optimized_resume.skill_categories) {
-      optimizedResume.optimized_resume.skill_categories = [];
-    }
-
-    // Ensure all required arrays exist
-    if (!optimizedResume.optimized_resume.education_entries) {
-      optimizedResume.optimized_resume.education_entries = [];
-    }
-    if (!optimizedResume.optimized_resume.experience_entries) {
-      optimizedResume.optimized_resume.experience_entries = [];
-    }
-    if (!optimizedResume.optimized_resume.project_entries) {
-      optimizedResume.optimized_resume.project_entries = [];
-    }
-
-    return optimizedResume;
   } catch (error) {
     console.error('Error optimizing resume:', error);
-    throw new Error(`Failed to optimize resume: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error('Failed to optimize resume');
   }
 }; 
