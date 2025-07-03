@@ -118,8 +118,26 @@ export default function JobDescriptionForm() {
       }
       const userData = await userResponse.json();
 
-      // Optimize resume
-      const optimizedResume = await optimizeResume(jobDescription, JSON.stringify(userData));
+      // Optimize resume with better error handling
+      let optimizedResume;
+      try {
+        optimizedResume = await optimizeResume(jobDescription, JSON.stringify(userData));
+      } catch (resumeError) {
+        console.error('Resume optimization error:', resumeError);
+        
+        // Provide specific error messages based on the error type
+        if (resumeError instanceof Error) {
+          if (resumeError.message.includes('JSON parsing failed')) {
+            throw new Error('AI service returned invalid data. Please try again in a moment.');
+          } else if (resumeError.message.includes('No valid JSON object found')) {
+            throw new Error('AI service response was incomplete. Please try again.');
+          } else if (resumeError.message.includes('Invalid response structure')) {
+            throw new Error('AI service returned unexpected format. Please try again.');
+          }
+        }
+        
+        throw new Error('Failed to optimize resume. Please try again or contact support if the issue persists.');
+      }
       
       // Store in localStorage with the correct structure
       localStorage.setItem('optimizedResume', JSON.stringify({

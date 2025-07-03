@@ -183,25 +183,101 @@ export const optimizeResume = async (jobDescription: string, userData: string): 
       userData,
     });
 
-    // Clean the response text to ensure it's valid JSON
-    const cleanedResponse = response.text
-      .replace(/```json\n?/g, '') // Remove JSON code block markers
-      .replace(/```\n?/g, '')     // Remove any remaining code block markers
-      .replace(/^[^{]*/, '')      // Remove any text before the first {
-      .replace(/[^}]*$/, '')      // Remove any text after the last }
-      .trim();                    // Remove any extra whitespace
+    // More robust JSON cleaning and parsing
+    let cleanedResponse = response.text;
+    
+    // Remove markdown code blocks if present
+    cleanedResponse = cleanedResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+    
+    // Find the first complete JSON object
+    const firstBraceIndex = cleanedResponse.indexOf('{');
+    const lastBraceIndex = cleanedResponse.lastIndexOf('}');
+    
+    if (firstBraceIndex === -1 || lastBraceIndex === -1 || firstBraceIndex >= lastBraceIndex) {
+      throw new Error('No valid JSON object found in response');
+    }
+    
+    // Extract the JSON portion
+    cleanedResponse = cleanedResponse.substring(firstBraceIndex, lastBraceIndex + 1);
+    
+    // Additional cleaning for common issues
+    cleanedResponse = cleanedResponse
+      .replace(/,\s*}/g, '}')  // Remove trailing commas before closing braces
+      .replace(/,\s*]/g, ']')  // Remove trailing commas before closing brackets
+      .trim();
+
+    // Validate that we have a complete JSON structure
+    let braceCount = 0;
+    let inString = false;
+    let escapeNext = false;
+    
+    for (let i = 0; i < cleanedResponse.length; i++) {
+      const char = cleanedResponse[i];
+      
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      
+      if (char === '\\') {
+        escapeNext = true;
+        continue;
+      }
+      
+      if (char === '"' && !escapeNext) {
+        inString = !inString;
+        continue;
+      }
+      
+      if (!inString) {
+        if (char === '{') {
+          braceCount++;
+        } else if (char === '}') {
+          braceCount--;
+          // If we've closed all braces, we have a complete object
+          if (braceCount === 0) {
+            cleanedResponse = cleanedResponse.substring(0, i + 1);
+            break;
+          }
+        }
+      }
+    }
 
     // Parse the response
-    const optimizedResume: OptimizedResume = JSON.parse(cleanedResponse);
+    let optimizedResume: OptimizedResume;
+    try {
+      optimizedResume = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('JSON parsing failed. Response length:', cleanedResponse.length);
+      console.error('First 500 chars:', cleanedResponse.substring(0, 500));
+      console.error('Last 500 chars:', cleanedResponse.substring(Math.max(0, cleanedResponse.length - 500)));
+      throw new Error(`JSON parsing failed: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+    }
+
+    // Validate required structure
+    if (!optimizedResume.optimized_resume || !optimizedResume.analysis) {
+      throw new Error('Invalid response structure: missing required fields');
+    }
 
     // Ensure skill_categories is always an array
     if (!optimizedResume.optimized_resume.skill_categories) {
       optimizedResume.optimized_resume.skill_categories = [];
     }
 
+    // Ensure all required arrays exist
+    if (!optimizedResume.optimized_resume.education_entries) {
+      optimizedResume.optimized_resume.education_entries = [];
+    }
+    if (!optimizedResume.optimized_resume.experience_entries) {
+      optimizedResume.optimized_resume.experience_entries = [];
+    }
+    if (!optimizedResume.optimized_resume.project_entries) {
+      optimizedResume.optimized_resume.project_entries = [];
+    }
+
     return optimizedResume;
   } catch (error) {
     console.error('Error optimizing resume:', error);
-    throw new Error('Failed to optimize resume');
+    throw new Error(`Failed to optimize resume: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }; 
